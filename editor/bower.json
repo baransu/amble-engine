@@ -1,0 +1,22 @@
+{
+  "name": "polymer",
+  "homepage": "https://github.com/Baransu/jsengine",
+  "authors": [
+    "Tomasz Cichocinski <sajgonek123@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~1.1.5",
+    "google-map": "GoogleWebComponents/google-map#~1.1.4"
+  }
+}

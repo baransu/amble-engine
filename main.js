@@ -6,6 +6,6 @@ app.on('ready', function(){
         width: 1280,
         height: 720
     });
-    mainWindow.loadUrl('file://' + __dirname + '/index.html');
+    mainWindow.loadUrl('file://' + __dirname + '/editor/index.html');
     mainWindow.toggleDevTools();
 });
