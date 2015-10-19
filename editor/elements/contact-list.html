@@ -1,0 +1,72 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="contact-list">
+
+	<style>
+
+	li img {
+		width: 50px;
+		height: auto;
+		margin-right: 10px;
+	}
+
+	h6 {
+		margin: 0px 10px 0px 0px;
+	}
+
+	li {
+		display: flex;
+	}
+
+	</style>
+
+	<template>
+		<div class="row center-align">
+			<ul class="col m4 l4 s4">
+				<li class="card-panel">
+					<div class="row">
+						<img class="responsive-img circle col m4 s4 l4" src="https://randomuser.me/api/portraits/men/55.jpg">
+						<h6 class="center-align col m4 s4 l4">Tomek</h6>
+						<h6 class="center-align col m4 s4 l4">tomek@ample.com</h6>
+					</div>					
+				</li>
+				<li class="card-panel">
+					<img class="responsive-img circle" src="https://randomuser.me/api/portraits/men/58.jpg">
+					<h6>Bodwar</h6>
+					<h6>bodwar@ample.com</h6>
+				</li>
+				<li class="card-panel">
+					<img class="responsive-img circle" src="https://randomuser.me/api/portraits/men/66.jpg">
+					<h6>Arthas</h6>
+					<h6>arthas@ample.com</h6>
+				</li>
+			</ul>
+		</div>
+		
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'contact-list',
+		properties: {
+			firstName: String,
+			lastName: {
+				type: String,
+				value: 'Cichocinski'
+			},
+			fullName: {
+				type: String,
+				computed: 'computeFullName(firstName, lastName)'
+			}
+		},
+		computeFullName: function(firstName, lastName) {
+			return firstName + ' ' + lastName;
+		}
+
+
+	});
+
+</script>
