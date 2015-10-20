@@ -22,6 +22,41 @@
 //   };
 // }
 
+// if (!Array.prototype.filter) {
+//   Array.prototype.filter = function(fun/*, thisArg*/) {
+//     'use strict';
+//
+//     if (this === void 0 || this === null) {
+//       throw new TypeError();
+//     }
+//
+//     var t = Object(this);
+//     var len = t.length >>> 0;
+//     if (typeof fun !== 'function') {
+//       throw new TypeError();
+//     }
+//
+//     var res = [];
+//     var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+//     for (var i = 0; i < len; i++) {
+//       if (i in t) {
+//         var val = t[i];
+//
+//         // NOTE: Technically this should Object.defineProperty at
+//         //       the next index, as push can be affected by
+//         //       properties on Object.prototype and Array.prototype.
+//         //       But that method's new, and collisions should be
+//         //       rare, so use the more-compatible alternative.
+//         if (fun.call(thisArg, val, i, t)) {
+//           res.push(val);
+//         }
+//       }
+//     }
+//
+//     return res;
+//   };
+// }
+
 var Flow = require('./js/flow.js');
 
 Flow.component({
@@ -32,12 +67,10 @@ Flow.component({
     ],
     output: [
         {type: Number, name:'output'},
-        {type: Object, name:'branch'}
     ],
-    body: function(val1, val2, output, branch) {
+    body: function(val1, val2, output) {
         var sum = val1 + val2;
         output(sum);
-        branch(sum);
     }
 });
 
@@ -71,39 +104,36 @@ Flow.component({
 });
 
 Flow.network({
+    name: "start",
     //list of all components
     processes:[
-        //branch1
-        {name: "add1", component: "add"},
-        {name: "add2", component: "add"},
-        {name: "add3", component: "add"},
+        {name: "add", component: "add"},
+        {name: "multiply1", component: "multiply"},
+        {name: "multiply2", component: "multiply"},
+        {name: "multiply3", component: "multiply"},
         {name: "log1", component: 'log'},
-        //branch2
-        {name: "multiply", component: "multiply"},
         {name: "log2", component: 'log'},
     ],
     //list of variables connection
-    connections: {
-        //branch1
-        'add1.output': "add2.val1",
-        'add2.output': 'add3.val1',
-        'add3.output': 'log1.data',
-        //branch2
-        'add1.branch': 'multiply.val1',
-        'multiply.output': 'log2.data'
-    },
+    connections: [
+        {id: 0, out:'add.output', in:'multiply1.val1'},
+        {id: 1, out:'multiply1.output', in:'multiply2.val1'},
+        {id: 2, out:'multiply1.output', in:'multiply3.val1'},
+        {id: 3, out:'multiply2.output', in:'log1.data'},
+        {id: 4, out:'multiply3.output', in:'log2.data'},
+    ],
     //list of begin variables connection
     init: {
-        'add1.val1': 5,
-        'add1.val2': 10,
-        'add2.val2': 1,
-        'add3.val2': 99,
-        'multiply.val2': 2
+        'add.val1': 1,
+        'add.val2': 1,
+        'multiply1.val2': 2,
+        'multiply2.val2': 4,
+        'multiply3.val2': 2
     }
 })
 
 function run(){
-    Flow.startNetwork();
+    Flow.startNetwork("start");
 }
 
 run();
