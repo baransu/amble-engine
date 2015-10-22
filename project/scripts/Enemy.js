@@ -1,6 +1,5 @@
 var Amble = require('../../core/amble.js');
 
-
 var Enemy = function(args){
     /* set variable there */
 }
