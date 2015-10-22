@@ -58,6 +58,8 @@
 // }
 
 var Flow = require('./js/flow.js');
+window.Component = require('./js/scripts/component.js');
+window.Camera = require('./js/scripts/camera.js')
 
 Flow.component({
     name: "add",
@@ -89,18 +91,37 @@ Flow.component({
     }
 });
 
+var component = {
+    componentData: {
+        _name: 'log',
+        _input: [
+            {type: Object, name:'data'}
+        ],
+        _output: [
+            {type: Object, name:'output'}
+        ],
+        _body: function(data, output) {
+            console.log(data)
+            output(null)
+        }
+    },
+    transform: { name: "Amble.Transform", args: {
+        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+        size: { name: "Amble.Math.Vector2", args: {x:300, y:200}}
+    }},
+    renderer: { name: "Component.Renderer" , args:{
+        color: "white"
+    }},
+    scripts: [
+        { name: "Component", args: {} }
+    ]
+}
+
 Flow.component({
-    name: "log",
-    input: [
-        {type: Object, name:'data'}
-    ],
-    output: [
-        {type: Object, name:'output'}
-    ],
-    body: function(data, output) {
-        console.log(data)
-        output(null)
-    }
+    name: component.componentData._name,
+    input: component.componentData._input,
+    output: component.componentData._output,
+    body: component.componentData._body
 });
 
 Flow.network({
@@ -132,8 +153,57 @@ Flow.network({
     }
 })
 
-function run(){
-    Flow.startNetwork("start");
+// function run(){
+//     Flow.startNetwork("start");
+// }
+//
+// run();
+
+var c = {
+    cam: { name: "Amble.Camera", args: {
+        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+    }},
+    scripts: [
+        { name: "Camera", args: {} }
+    ]
 }
 
-run();
+var app = new Amble.Application({
+    /* use to set width and height of canvas, default 800x600 */
+    fullscreen: true,
+    resize: true,
+    // width: 800,
+    // height: 600,
+    /* set all loading there */
+    camera: c,
+    preload: function(){
+
+        this.obj1 = this.scene.instantiate(component);
+        component.transform.args.position.args.x += 500;
+        this.obj2 = this.scene.instantiate(component);
+
+    },
+    /* every thing loaded */
+    start: function(){
+        this.layer = new Amble.Graphics.Layer(this.width, this.height).appendTo(document.body);
+        console.log(this.obj1);
+
+    },
+    /* game loop */
+    preupdate: function(){
+        if(Amble.Input.isKeyPressed(65))
+            console.log(this.camera);
+    },
+    /* update there - actors update and camera update*/
+    postupdate: function(){
+
+    },
+    prerender: function(){
+
+    },
+    /* rendering there - layer clear and actors render*/
+    /* postrendering there*/
+    postrender: function(){
+        // this.layer.fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y)
+    }
+});

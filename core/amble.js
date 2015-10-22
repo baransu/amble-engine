@@ -8,13 +8,32 @@ window.Amble = (function(){
         return size;
     };
 
+    Amble.app = {}
     /* Game */
-    Amble.Game = function(args){
+    Amble.Application = function(args){
         var that = this;
+        Amble.app = this;
 
-        //init size
-        this.width = typeof args['width'] === 'number' ? args['width'] : 800;
-        this.height = typeof args['height'] === 'number' ? args['height'] : 600;
+        this.fullscreen = typeof args['fullscreen'] === 'boolean' ? args['fullscreen'] : false;
+        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
+
+        if(this.resize) {
+            window.addEventListener('resize', function(){
+                Amble.app.width = Amble.app.layer.canvas.width = window.innerWidth;
+                Amble.app.height = Amble.app.layer.canvas.height = window.innerHeight;
+                Amble.app.camera.cam.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
+                Amble.app.camera.cam.view = new Amble.Math.Vector2(Amble.app.camera.cam.position.x - Amble.app.camera.cam.size.x, Amble.app.camera.cam.position.y - Amble.app.camera.cam.size.y);
+            });
+        }
+
+        if(this.fullscreen) {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+        } else {
+            //init size
+            this.width = typeof args['width'] === 'number' ? args['width'] : 800;
+            this.height = typeof args['height'] === 'number' ? args['height'] : 600;
+        }
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -27,9 +46,9 @@ window.Amble = (function(){
         };
         //private game loop functions
         this.update = function(){
+            this.camera.cam.update()
             this.scene.update();
 
-            this.camera.update();
             //update all objects on scene
             //priorytet sort?
         };
@@ -37,12 +56,19 @@ window.Amble = (function(){
             this.layer.clear();
             //render all objects on scene
             //z order sort
-            this.scene.render(this.layer, this.camera);
+            this.scene.render(this.layer, this.camera.cam);
         };
 
         this.scene = new Amble.Scene
-        this.camera = new Amble.Camera(this.width/2, this.height/2, this.width, this.height);
+        var cam = {
+            cam: { name: "Amble.Camera", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+                }
+            }
+        }
 
+        this.camera = this.scene.instantiate(args['camera'] || cam);
+        this.camera.cam.position = new Amble.Math.Vector2({x: window.innerWidth/2, y: window.innerHeight/2})
         /* setting loader */
         this.loader = new Amble.Data.Loader();
         /* loading screen layer and loading screen */
@@ -90,14 +116,16 @@ window.Amble = (function(){
         deltaTime: 0,
         lastTime: 0
     };
-    Amble.Camera = function(x, y, width, height){
-        this.position = new Amble.Math.Vector2(x || 0, y || 0);
-        this.size = new Amble.Math.Vector2(width || 800, height || 600);
+    Amble.Camera = function(args){
+        this.position = args['position'] || new Amble.Math.Vector2({});
+        this.size = args['size'] || new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
+        this.scale = 1;
+
     }
     Amble.Camera.prototype = {
         update: function(){
-            this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
+            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x, y:this.position.y - this.size.y});
             return this;
         }
     };
@@ -158,21 +186,22 @@ window.Amble = (function(){
         instantiate: function(obj){
             var clone = Amble.Utils.clone(obj);
             this.children.push(clone);
+            return clone;
         },
         add: function(object) {
             this.children.push(object);
+            return object;
         },
         remove: function(object){
-            var index = this.children.indexof(object);
+            var index = this.children.indexOf(object);
             if(index != -1)
-                this.children.splice(1, index);
+                this.children.splice(index, 1);
         },
         awake: function(layer){
             for(var i in this.children){
                 /* scripts start */
                 for(var j in this.children[i].scripts){
                     var script = this.children[i].scripts[j];
-                    // console.log(typeof script);
                     if(typeof script.start == 'function'){
                         script.start(this.children[i]);
                     }
@@ -192,18 +221,17 @@ window.Amble = (function(){
         },
         render: function(layer, camera){
             for(var i in this.children){
-                /* render objesc by renderer*/
-                var renderer = this.children[i].renderer;
-                if(typeof renderer.render === 'function'){
-                    renderer.render(this.children[i], layer, camera)
+                /* render objects by renderer*/
+                if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
+                    this.children[i].renderer.render(this.children[i], layer, camera)
                 }
             }
         }
     };
     /* Transform */
     Amble.Transform = function(args) {
-        this.position = args['position'] || new Amble.Math.Vector2();
-        this.size = args['size'] || new Amble.Math.Vector2();
+        this.position = args['position'] || new Amble.Math.Vector2({});
+        this.size = args['size'] || new Amble.Math.Vector2({});
     }
     /* Graphics */
     Amble.Graphics = {};
@@ -230,12 +258,15 @@ window.Amble = (function(){
             return this;
         },
         clear: function(color){
+            this.ctx.save();
+            this.ctx.setTransform(1,0,0,1,0,0);
             if (color) {
                 this.ctx.fillStyle = color;
                 this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
             } else {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
+            this.ctx.restore();
             return this;
         },
         fillStyle: function(color){
@@ -266,44 +297,104 @@ window.Amble = (function(){
         this.y = args['y'] || 0;
     }
     /* Amble.Math.Vector2 functions */
-    Amble.Math.prototype = {
+    Amble.Math.Vector2.prototype = {
+        copy: function(vec2){
+            this.x = vec2.x;
+            this.y = vec2.y;
+            return this;
+        },
+        add: function(vec2){
+            this.x += vec2.x;
+            this.y += vec2.y;
+            return this;
+        },
+        sub: function(vec2){
+            this.x -= vec2.x;
+            this.y -= vec2.y;
+            return this;
+        },
+        normalize: function(){
+            return this;
+        }
+    }
+    Amble.Math.Vector3 = function(args){
+        this.x = args['x'] || 0;
+        this.y = args['y'] || 0;
+        this.z = args['z'] || 0;
+    }
+    /* Amble.Math.Vector3 functions */
+    Amble.Math.Vector3.prototype = {
+        copy: function(vec3){
+            this.x = vec3.x;
+            this.y = vec3.y;
+            this.z = vec3.z;
+            return this;
+        },
+        add: function(vec3){
+            this.x += vec3.x;
+            this.y += vec3.y;
+            this.z += vec3.z;
+            return this;
+        },
+        sub: function(vec3){
+            this.x -= vec3.x;
+            this.y -= vec3.y;
+            this.z -= vec3.z;
+            return this;
+        },
         normalize: function(){
             return this;
         }
     }
     /* Input */
     Amble.Input = {
-        keyDebug: false,
-        keyIsPressed: function(keycode){
+        debug: false,
+        isKeyPressed: function(keycode){
             return Amble.Input._keyValues[keycode];
         },
-        mouseIsPressed: function(keycode){
+        isMousePressed: function(keycode){
             return Amble.Input._mouseValues[keycode];
-        }
+        },
+        _mouseValues: [],
+        _keyValues: [],
+        mousePosition: new Amble.Math.Vector2({}),
+        wheelDelta: new Amble.Math.Vector3({}),
+        isShiftPressed: false,
+        isCtrlPressed: false
     }
     Amble.Input._setListeners = function(){
-
-        Amble.Input._mouseValues = [];
-        Amble.Input._keyValues = [];
-        Amble.Input.mousePosition = new Amble.Math.Vector2({});
-
         document.addEventListener('keydown', function(e){
-            if(Amble.Input.keyDebug)
+            if(Amble.Input.debug)
                 console.log(e.which);
+            Amble.Input.isShiftPressed = e.shiftKey;
+            Amble.Input.isCtrlPressed = e.ctrlKey;
             Amble.Input._keyValues[e.which] = true;
         }, false);
         document.addEventListener('keyup', function(e){
             Amble.Input._keyValues[e.which] = false;
         }, false);
         document.addEventListener('mousedown', function(e){
+            if(Amble.Input.debug)
+                console.log(e.which);
             Amble.Input._mouseValues[e.which] = true;
         }, false);
         document.addEventListener('mouseup', function(e){
             Amble.Input._mouseValues[e.which] = false;
         }, false);
         document.addEventListener('mousemove', function(e){
+            if(Amble.Input.debug) {
+                console.log(e.clientX);
+                console.log(e.clientY)
+            }
             Amble.Input.mousePosition.x = e.clientX || e.pageX;
     		Amble.Input.mousePosition.y = e.clientY || e.pageY;
+        }, false);
+        document.addEventListener("wheel", function(e){
+            Amble.Input.wheelDelta.x = e.deltaX;
+            Amble.Input.wheelDelta.y = e.deltaY;
+            Amble.Input.wheelDelta.z = e.deltaZ;
+
+            Amble.app.camera.scripts[0].onmousewheel(Amble.app.camera, e);
         }, false);
         // document.addEventListener('touchstart', function(e){
         //
