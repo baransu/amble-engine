@@ -1,7 +1,6 @@
 var CAMERA = {};
 
 CAMERA = function(args){
-
 }
 
 CAMERA.prototype = {
@@ -9,7 +8,9 @@ CAMERA.prototype = {
         lastMousePos: new Amble.Math.Vector2({}),
         done: false,
         zoomSpeed: 1,
-        origin: new Amble.Math.Vector2({})
+        origin: new Amble.Math.Vector2({}),
+        maxZoom: 0.25,
+        minZoom: 2
     },
     start: function(self) {
 
@@ -31,8 +32,8 @@ CAMERA.prototype = {
     },
     onmousewheel: function(self, e){
 
-        var zoomToX = window.innerWidth/2;
-        var zoomToY = window.innerHeight/2
+        var zoomToX = self.cam.size.x/2;
+        var zoomToY = self.cam.size.y/2;
         var wheel = e.wheelDelta/120;
         var zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
 
@@ -43,10 +44,10 @@ CAMERA.prototype = {
 
         var nextScale = self.cam.scale * zoom
 
-        if(nextScale > 2) {
-            nextScale = 2;
-        } else if (nextScale < 0.25) {
-            nextScale = 0.25;
+        if(nextScale > this.variables.minZoom) {
+            nextScale = this.variables.minZoom;
+        } else if (nextScale < this.variables.maxZoom) {
+            nextScale = this.variables.maxZoom;
         }
 
         zoom = nextScale/self.cam.scale

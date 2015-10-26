@@ -17,12 +17,16 @@ window.Amble = (function(){
         this.fullscreen = typeof args['fullscreen'] === 'boolean' ? args['fullscreen'] : false;
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
 
+        //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
                 Amble.app.width = Amble.app.layer.canvas.width = window.innerWidth;
                 Amble.app.height = Amble.app.layer.canvas.height = window.innerHeight;
+                var sizeDifference = window.innerWidth/Amble.app.camera.cam.size.x;
                 Amble.app.camera.cam.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
                 Amble.app.camera.cam.view = new Amble.Math.Vector2(Amble.app.camera.cam.position.x - Amble.app.camera.cam.size.x, Amble.app.camera.cam.position.y - Amble.app.camera.cam.size.y);
+                Amble.app.camera.scripts[0].variables.maxZoom *= sizeDifference;
+                Amble.app.camera.scripts[0].variables.minZoom *= sizeDifference;
             });
         }
 

@@ -91,6 +91,7 @@ Flow.component({
     }
 });
 
+//components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
 var component = {
     componentData: {
         _name: 'log',
@@ -117,6 +118,7 @@ var component = {
     ]
 }
 
+//pass componsents
 Flow.component({
     name: component.componentData._name,
     input: component.componentData._input,
@@ -124,6 +126,7 @@ Flow.component({
     body: component.componentData._body
 });
 
+//network json (future)
 Flow.network({
     name: "start",
     //list of all components
@@ -155,18 +158,13 @@ Flow.network({
     }
 })
 
-// function run(){
-//     Flow.startNetwork("start");
-// }
-//
-// run();
-
+//camera
 var c = {
     cam: { name: "Amble.Camera", args: {
         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
     }},
     scripts: [
-        { name: "Camera", args: {} }
+        { name: "Camera", args: {}}
     ]
 }
 
