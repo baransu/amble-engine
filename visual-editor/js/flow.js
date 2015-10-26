@@ -1,4 +1,6 @@
-var FLOW = {}
+var async = require('async');
+
+var FLOW = {};
 FLOW.variables = {};
 FLOW._network = [];
 FLOW._currenNetwork = {};
@@ -165,19 +167,19 @@ FLOW.step = function(network) {
     }
 }
 
-FLOW.makeOutput = function(process, connection) {
+FLOW.makeOutput = function(process, connections) {
     return function(output) {
-        if(connection.length == 0) {
+        if(connections.length == 0) {
             FLOW._currentEndCounts++;
+            console.log('branch end')
             if(FLOW._currentEndCounts >= FLOW._currenNetwork._endCounts) {
                 FLOW._currenNetwork.running = false;
+                console.log('network end')
             }
-            console.log()
         } else {
-            // console.log(connection)
-            for(var c in connection) {
-                connection[c].data.push(output);
-            }
+            async.each(connections, function(connection){
+                connection.data.push(output);
+            });
         }
     }
 }

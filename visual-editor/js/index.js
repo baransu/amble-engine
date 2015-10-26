@@ -102,7 +102,7 @@ var component = {
         ],
         _body: function(data, output) {
             console.log(data)
-            output(null)
+            output(data)
         }
     },
     transform: { name: "Amble.Transform", args: {
@@ -134,6 +134,7 @@ Flow.network({
         {name: "multiply3", component: "multiply"},
         {name: "log1", component: 'log'},
         {name: "log2", component: 'log'},
+        {name: "log3", component: 'log'},
     ],
     //list of variables connection
     connections: [
@@ -142,6 +143,7 @@ Flow.network({
         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
         {id: 3, out:'multiply2.output', in:'log1.data'},
         {id: 4, out:'multiply3.output', in:'log2.data'},
+        {id: 5, out:'log1.output', in:'log3.data'},
     ],
     //list of begin variables connection
     init: {
@@ -182,12 +184,12 @@ var app = new Amble.Application({
         component.transform.args.position.args.x += 500;
         this.obj2 = this.scene.instantiate(component);
 
+        Flow.startNetwork("start");
+
     },
     /* every thing loaded */
     start: function(){
         this.layer = new Amble.Graphics.Layer(this.width, this.height).appendTo(document.body);
-        console.log(this.obj1);
-
     },
     /* game loop */
     preupdate: function(){

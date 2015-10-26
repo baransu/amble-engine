@@ -8,10 +8,11 @@
   "author": "Tomasz Cichocinski",
   "license": "MIT",
   "devDependencies": {
+    "async": "^1.5.0",
     "browserify": "latest",
     "electron-prebuilt": "latest",
     "gulp": "latest",
     "vinyl-source-stream": "latest",
     "watchify": "latest"
-    }
+  }
 }
