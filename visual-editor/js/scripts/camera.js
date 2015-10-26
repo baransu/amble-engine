@@ -61,7 +61,6 @@ CAMERA.prototype = {
         this.variables.origin.y = ( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale );
 
         self.cam.scale *= zoom;
-
     }
 }
 

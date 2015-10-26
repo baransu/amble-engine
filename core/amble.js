@@ -280,7 +280,16 @@ window.Amble = (function(){
         fillRect: function(x, y, width, height){
             this.ctx.fillRect(x, y, width, height);
             return this;
+        },
+        strokeStyle: function(color){
+            this.ctx.strokeStyle = color;
+            return this;
+        },
+        strokeRect: function(x, y, width, height){
+            this.ctx.strokeRect(x, y, width, height);
+            return this;
         }
+
     }
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){

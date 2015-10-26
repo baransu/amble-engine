@@ -94,7 +94,7 @@ Flow.component({
 //components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
 var component = {
     componentData: {
-        _name: 'log',
+        _name: 'Function hasdhiasdhji jopsdjoasdjo jopsdopasdkop koaskopkopas kopkoko sksk ksks ksksl ;s; ka',
         _input: [
             {type: Object, name:'data'}
         ],
@@ -108,11 +108,8 @@ var component = {
     },
     transform: { name: "Amble.Transform", args: {
         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        size: { name: "Amble.Math.Vector2", args: {x:300, y:200}}
     }},
-    renderer: { name: "Component.Renderer" , args:{
-        color: "white"
-    }},
+    renderer: { name: "Component.Renderer" , args:{}},
     scripts: [
         { name: "Component", args: {} }
     ]
@@ -127,36 +124,36 @@ Flow.component({
 });
 
 //network json (future)
-Flow.network({
-    name: "start",
-    //list of all components
-    processes:[
-        {name: "add", component: "add"},
-        {name: "multiply1", component: "multiply"},
-        {name: "multiply2", component: "multiply"},
-        {name: "multiply3", component: "multiply"},
-        {name: "log1", component: 'log'},
-        {name: "log2", component: 'log'},
-        {name: "log3", component: 'log'},
-    ],
-    //list of variables connection
-    connections: [
-        {id: 0, out:'add.output', in:'multiply1.val1'},
-        {id: 1, out:'multiply1.output', in:'multiply2.val1'},
-        {id: 2, out:'multiply1.output', in:'multiply3.val1'},
-        {id: 3, out:'multiply2.output', in:'log1.data'},
-        {id: 4, out:'multiply3.output', in:'log2.data'},
-        {id: 5, out:'log1.output', in:'log3.data'},
-    ],
-    //list of begin variables connection
-    init: {
-        'add.val1': 1,
-        'add.val2': 1,
-        'multiply1.val2': 2,
-        'multiply2.val2': 4,
-        'multiply3.val2': 2
-    }
-})
+// Flow.network({
+//     name: "start",
+//     //list of all components
+//     processes:[
+//         {name: "add", component: "add"},
+//         {name: "multiply1", component: "multiply"},
+//         {name: "multiply2", component: "multiply"},
+//         {name: "multiply3", component: "multiply"},
+//         {name: "log1", component: 'log'},
+//         {name: "log2", component: 'log'},
+//         {name: "log3", component: 'log'},
+//     ],
+//     //list of variables connection
+//     connections: [
+//         {id: 0, out:'add.output', in:'multiply1.val1'},
+//         {id: 1, out:'multiply1.output', in:'multiply2.val1'},
+//         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
+//         {id: 3, out:'multiply2.output', in:'log1.data'},
+//         {id: 4, out:'multiply3.output', in:'log2.data'},
+//         {id: 5, out:'log1.output', in:'log3.data'},
+//     ],
+//     //list of begin variables connection
+//     init: {
+//         'add.val1': 1,
+//         'add.val2': 1,
+//         'multiply1.val2': 2,
+//         'multiply2.val2': 4,
+//         'multiply3.val2': 2
+//     }
+// })
 
 //camera
 var c = {
@@ -182,7 +179,7 @@ var app = new Amble.Application({
         component.transform.args.position.args.x += 500;
         this.obj2 = this.scene.instantiate(component);
 
-        Flow.startNetwork("start");
+        // Flow.startNetwork("start");
 
     },
     /* every thing loaded */
