@@ -44,10 +44,7 @@ window.Amble = (function(){
         for(var i in gameLoopFunctionsList){
             this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
         }
-        //scene objects start function - after preload, before Amble start
-        this.awake = function(){
-            this.scene.awake(this.layer);
-        };
+
         //private game loop functions
         this.update = function(){
             this.camera.cam.update()
@@ -72,7 +69,7 @@ window.Amble = (function(){
         }
 
         this.camera = this.scene.instantiate(args['camera'] || cam);
-        this.camera.cam.position = new Amble.Math.Vector2({x: window.innerWidth/2, y: window.innerHeight/2})
+        // this.camera.cam.position = new Amble.Math.Vector2({x: window.innerWidth/2, y: window.innerHeight/2})
         /* setting loader */
         this.loader = new Amble.Data.Loader();
         /* loading screen layer and loading screen */
@@ -88,14 +85,14 @@ window.Amble = (function(){
 
         /* setting all loading heppens there */
         this.preload();
-
         /* all loading */
         this.loader.loadAll(function(){
             clearInterval(that.loadingInterval);
             that.layer.remove();
             Amble.Input._setListeners();
-            that.awake();
+
             that.start();
+
             gameLoop();
         })
 
@@ -104,6 +101,7 @@ window.Amble = (function(){
             var now = Date.now();
             Amble.Time.deltaTime = (now - Amble.Time.lastTime) / 1000.0;
 
+            //dafuq?
             that.preupdate();
             that.update();
             that.postupdate();
@@ -189,10 +187,19 @@ window.Amble = (function(){
     Amble.Scene.prototype = {
         instantiate: function(obj){
             var clone = Amble.Utils.clone(obj);
-            this.children.push(clone);
+            this.add(clone);
             return clone;
         },
         add: function(object) {
+            if(object.scripts != 'undefined') {
+                for(var i in object.scripts) {
+                    var script = object.scripts[i];
+                    if(typeof script.update == 'function'){
+                        script.start(object);
+                    }
+                }
+            }
+
             this.children.push(object);
             return object;
         },
@@ -201,7 +208,7 @@ window.Amble = (function(){
             if(index != -1)
                 this.children.splice(index, 1);
         },
-        awake: function(layer){
+        awake: function(){
             for(var i in this.children){
                 /* scripts start */
                 for(var j in this.children[i].scripts){

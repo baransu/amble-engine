@@ -10,7 +10,8 @@ CAMERA.prototype = {
         zoomSpeed: 1,
         origin: new Amble.Math.Vector2({}),
         maxZoom: 0.25,
-        minZoom: 2
+        minZoom: 2,
+        translate: new Amble.Math.Vector2({})
     },
     start: function(self) {
 
@@ -31,7 +32,7 @@ CAMERA.prototype = {
         }
     },
     onmousewheel: function(self, e){
-
+        //do it!!!
         var zoomToX = self.cam.size.x/2;
         var zoomToY = self.cam.size.y/2;
         var wheel = e.wheelDelta/120;
@@ -57,6 +58,10 @@ CAMERA.prototype = {
             -( zoomToX / self.cam.scale + this.variables.origin.x - zoomToX / nextScale ),
             -( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale )
         );
+
+        this.variables.translate.x = -( zoomToX / self.cam.scale + this.variables.origin.x - zoomToX / nextScale);
+        this.variables.translate.y = -( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale);
+
         this.variables.origin.x = ( zoomToX / self.cam.scale + this.variables.origin.x - zoomToX / nextScale );
         this.variables.origin.y = ( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale );
 

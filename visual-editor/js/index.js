@@ -60,6 +60,7 @@
 var Flow = require('./js/flow.js');
 window.Component = require('./js/scripts/component.js');
 window.Camera = require('./js/scripts/camera.js')
+window.Manager = require('./js/scripts/manager.js')
 
 Flow.component({
     name: "add",
@@ -94,12 +95,17 @@ Flow.component({
 //components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
 var component = {
     componentData: {
-        _name: 'Function hasdhiasdhji jopsdjoasdjo jopsdopasdkop koaskopkopas kopkoko sksk ksks ksksl ;s; ka',
+        _name: 'MyFunction',
         _input: [
-            {type: Object, name:'data'}
+            {type: Object, name:'value', color: 'green'},
+            {type: Object, name:'mySimpleImposibleInput'},
+            {type: Object, name:'position'},
+            {type: Object, name:'myDataFromFile'}
         ],
         _output: [
-            {type: Object, name:'output'}
+            {type: Object, name:'output'},
+            {type: Object, name:'mySimpleImposibleOutput'},
+            {type: Object, name:'error'},
         ],
         _body: function(data, output) {
             console.log(data)
@@ -165,6 +171,15 @@ var c = {
     ]
 }
 
+var manager = {
+    transform: { name: "Amble.Transform", args: {
+        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+    }},
+    scripts: [
+        { name: "Manager", args: {}}
+    ]
+}
+
 var app = new Amble.Application({
     /* use to set width and height of canvas, default 800x600 */
     fullscreen: true,
@@ -175,9 +190,10 @@ var app = new Amble.Application({
     camera: c,
     preload: function(){
 
-        this.obj1 = this.scene.instantiate(component);
-        component.transform.args.position.args.x += 500;
-        this.obj2 = this.scene.instantiate(component);
+        this.manager = this.scene.instantiate(manager);
+        this.obj = this.scene.instantiate(component);
+        // component.transform.args.position.args.x += 500;
+        // this.obj2 = this.scene.instantiate(component);
 
         // Flow.startNetwork("start");
 
@@ -188,8 +204,7 @@ var app = new Amble.Application({
     },
     /* game loop */
     preupdate: function(){
-        if(Amble.Input.isKeyPressed(65))
-            console.log(this.camera);
+
     },
     /* update there - actors update and camera update*/
     postupdate: function(){
