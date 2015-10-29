@@ -83,7 +83,7 @@ COMPONENT.prototype = {
                 size: this.var.margin,
                 type: 'in',
                 parent: self.scripts[0],
-                temp: false,
+                connected: false,
                 _x: 0,
                 _y: 0
             };
@@ -96,7 +96,7 @@ COMPONENT.prototype = {
                 size: this.var.margin,
                 type: 'out',
                 parent: self.scripts[0],
-                temp: false,
+                connected: false,
                 _x: 0,
                 _y: 0
             };
@@ -122,8 +122,11 @@ COMPONENT.prototype = {
     },
     checkCollision: function(mX, mY){
         for(var i = 0; i < this.nodes.length; i++) {
-            if( mX >= this.nodes[i].x && mX <= this.nodes[i].x + this.nodes[i].size &&
-                mY >= this.nodes[i].y && mY <= this.nodes[i].y + this.nodes[i].size) {
+            var size = this.nodes[i].size;
+            var x = this.nodes[i].x;
+            var y = this.nodes[i].y;
+            if( mX >= x && mX <= x + size &&
+                mY >= y && mY <= y + size) {
 
                 if(this.nodes[i].type == 'in') {
                     this.endNode = this.nodes[i];
@@ -138,7 +141,6 @@ COMPONENT.prototype = {
     }
 }
 
-//renderer
 COMPONENT.Renderer = function(args){
     this.headerColor = '#EEEEEE';
     this.bodyColor = '#fff';
@@ -146,6 +148,8 @@ COMPONENT.Renderer = function(args){
     this.strokeColor = '#000';
     this.dividerColor = '#BDBDBD';
     this.defaultNodeStartColor = '#BDBDBD'
+    this.componentsLayer = 1; //0 index
+    this.nodesLayer = 0; // -1 index
 }
 COMPONENT.Renderer.prototype = {
     renderText: function(ctx, text, x, y, maxWidth, lineHeight){
@@ -166,79 +170,12 @@ COMPONENT.Renderer.prototype = {
             ctx.fillText(line, x, y);
         }
     },
-    render: function(self, layer, camera){
+    render: function(self, camera){
 
         var _ = self.scripts[0].var;
-
-        //nodes
-        layer.ctx.save();
-        for(var i = 0 ; i < self.scripts[0].connections.length; i++) {
-            var c = self.scripts[0].connections[i];
-            var sizeStart = c.startNode.size || 0;
-            var sizeEnd = c.endNode.size || 0;
-
-            var startX = c.startNode.x - camera.view.x + sizeStart/2;
-            var startY = c.startNode.y - camera.view.y + sizeStart/2;
-
-            var endX = c.endNode.x - camera.view.x + sizeEnd/2;
-            var endY = c.endNode.y - camera.view.y + sizeEnd/2;
-
-            //outline
-            layer.strokeStyle('#000')
-            layer.ctx.lineWidth = _.margin/2 + 2;
-            layer.ctx.beginPath();
-            layer.ctx.moveTo(startX, startY);
-
-            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
-
-            layer.ctx.stroke();
-
-            //outline
-            layer.strokeStyle(c.endNode.color || _.color)
-            layer.ctx.lineWidth = _.margin/2;
-            layer.ctx.beginPath();
-            layer.ctx.moveTo(startX, startY);
-
-            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
-
-            layer.ctx.stroke();
-        }
-
-        //temp node
-        if(self.scripts[0].startNode && self.scripts[0].endNode) {
-            var sizeStart = self.scripts[0].startNode.size || 0;
-            var sizeEnd = self.scripts[0].endNode.size || 0;
-
-            var startX = self.scripts[0].startNode.x - camera.view.x + sizeStart/2;
-            var startY = self.scripts[0].startNode.y - camera.view.y + sizeStart/2;
-
-            var endX = self.scripts[0].endNode.x - camera.view.x + sizeEnd/2;
-            var endY = self.scripts[0].endNode.y - camera.view.y + sizeEnd/2;
-
-            //outline
-            layer.strokeStyle('#000')
-            layer.ctx.lineWidth = _.margin/2 + 2;
-            layer.ctx.beginPath();
-            layer.ctx.moveTo(startX, startY);
-
-            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
-
-            layer.ctx.stroke();
-
-            //outline
-            layer.strokeStyle(self.scripts[0].endNode.color || _.color)
-            layer.ctx.lineWidth = _.margin/2;
-            layer.ctx.beginPath();
-            layer.ctx.moveTo(startX, startY);
-
-            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
-
-            layer.ctx.stroke();
-
-        }
-        layer.ctx.restore();
-
         //draw body
+        var layer = camera.layer(this.componentsLayer);
+
         var x = self.transform.position.x - camera.view.x - _.width/2;
         var y = self.transform.position.y - camera.view.y - _.bodyHeight/2;
         layer.fillStyle(this.bodyColor).fillRect(x, y, _.width, _.bodyHeight);
@@ -246,12 +183,13 @@ COMPONENT.Renderer.prototype = {
         //draw header
         var x = self.transform.position.x - camera.view.x - _.width/2;
         var y = self.transform.position.y - camera.view.y - _.headerHeight - _.bodyHeight/2;
-        layer.fillStyle(this.headerColor).fillRect(x, y, _.width, _.headerHeight);
-        layer.ctx.strokeStyle = this.dividerColor;
+        layer.fillStyle(this.headerColor)
+            .fillRect(x, y, _.width, _.headerHeight)
+            .strokeStyle(this.dividerColor);
         layer.ctx.beginPath();
         layer.ctx.moveTo(x, y + _.headerHeight);
         layer.ctx.lineTo(x + _.width, y + _.headerHeight);
-        layer.ctx.stroke();
+        layer.stroke();
 
         //draw header text
         layer.fillStyle(this.textColor);
@@ -261,8 +199,9 @@ COMPONENT.Renderer.prototype = {
         var x = self.transform.position.x - camera.view.x - _.width/2;
         var y = self.transform.position.y - camera.view.y - _.headerHeight - _.bodyHeight/2;
         layer.ctx.save();
-        layer.ctx.lineWidth = 0.5;
-        layer.strokeStyle(this.strokeColor).strokeRect(x, y, _.width, _.headerHeight + _.bodyHeight);
+        layer.lineWidth(0.5)
+            .strokeStyle(this.strokeColor)
+            .strokeRect(x, y, _.width, _.headerHeight + _.bodyHeight);
         layer.ctx.restore();
 
         //draw inputs
@@ -303,6 +242,72 @@ COMPONENT.Renderer.prototype = {
 
         layer.ctx.restore();
 
+        //nodes drawing
+        var layer = camera.layer(this.nodesLayer);
+
+        for(var i = 0 ; i < self.scripts[0].connections.length; i++) {
+            var c = self.scripts[0].connections[i];
+            var sizeStart = c.startNode.size || 0;
+            var sizeEnd = c.endNode.size || 0;
+
+            var startX = c.startNode.x - camera.view.x + sizeStart/2;
+            var startY = c.startNode.y - camera.view.y + sizeStart/2;
+
+            var endX = c.endNode.x - camera.view.x + sizeEnd/2;
+            var endY = c.endNode.y - camera.view.y + sizeEnd/2;
+
+            //outline
+            layer.strokeStyle('#000')
+                .lineWidth( _.margin/2 + 2);
+            layer.ctx.beginPath();
+            layer.ctx.moveTo(startX, startY);
+
+            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
+
+            layer.stroke();
+
+            //outline
+            layer.strokeStyle(c.endNode.color || _.color)
+                .lineWidth(_.margin/2);
+            layer.ctx.beginPath();
+            layer.ctx.moveTo(startX, startY);
+
+            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
+
+            layer.stroke();
+        }
+
+        //temp node
+        if(self.scripts[0].startNode && self.scripts[0].endNode) {
+            var sizeStart = self.scripts[0].startNode.size || 0;
+            var sizeEnd = self.scripts[0].endNode.size || 0;
+
+            var startX = self.scripts[0].startNode.x - camera.view.x + sizeStart/2;
+            var startY = self.scripts[0].startNode.y - camera.view.y + sizeStart/2;
+
+            var endX = self.scripts[0].endNode.x - camera.view.x + sizeEnd/2;
+            var endY = self.scripts[0].endNode.y - camera.view.y + sizeEnd/2;
+
+            //outline
+            layer.strokeStyle('#000')
+                .lineWidth(_.margin/2 + 2);
+            layer.ctx.beginPath();
+            layer.ctx.moveTo(startX, startY);
+
+            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
+
+            layer.stroke();
+
+            //outline
+            layer.strokeStyle(self.scripts[0].endNode.color || _.color)
+                .lineWidth(_.margin/2);
+            layer.ctx.beginPath();
+            layer.ctx.moveTo(startX, startY);
+
+            layer.ctx.bezierCurveTo(startX, startY, startX, startY, endX, endY);
+
+            layer.stroke();
+        }
    }
 }
 

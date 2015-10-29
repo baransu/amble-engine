@@ -47,37 +47,41 @@ window.Amble = (function(){
 
         //private game loop functions
         this.update = function(){
-            this.camera.cam.update()
+            this.mainCamera.camera.update()
             this.scene.update();
 
             //update all objects on scene
             //priorytet sort?
         };
         this.render = function(){
-            this.layer.clear();
+            for(var i = 0; i < this.mainCamera.camera.layers.length; i++) {
+                this.mainCamera.camera.layers[i].layer.clear();
+            }
             //render all objects on scene
             //z order sort
-            this.scene.render(this.layer, this.camera.cam);
+            this.scene.render(this.mainCamera.camera);
         };
 
         this.scene = new Amble.Scene
-        var cam = {
+        var mainCamera = {
+
             cam: { name: "Amble.Camera", args: {
-                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                    context: document.body,
                 }
             }
         }
 
-        this.camera = this.scene.instantiate(args['camera'] || cam);
+        this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
         // this.camera.cam.position = new Amble.Math.Vector2({x: window.innerWidth/2, y: window.innerHeight/2})
         /* setting loader */
         this.loader = new Amble.Data.Loader();
         /* loading screen layer and loading screen */
-        this.layer = new Amble.Graphics.Layer(this.width, this.height);
-        this.layer.appendTo(document.body);
+        // this.layer = new Amble.Graphics.Layer(this.width, this.height);
+        // this.layer.appendTo(document.body);
         this.loadingInterval = setInterval(function(){
             var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-            that.layer
+            that.mainCamera.camera.layer('default')
                 .clear('black')
                 .fillStyle('#0ff')
                 .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8);
@@ -88,7 +92,7 @@ window.Amble = (function(){
         /* all loading */
         this.loader.loadAll(function(){
             clearInterval(that.loadingInterval);
-            that.layer.remove();
+            // that.layer.remove();
             Amble.Input._setListeners();
 
             that.start();
@@ -121,11 +125,36 @@ window.Amble = (function(){
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.size = args['size'] || new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
+        this.context = args['context'] || document.body;
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
-
+        this.layers = [];
     }
     Amble.Camera.prototype = {
+        layer: function(index){
+            if(index < 0) throw "Z-index cannot be negative!"
+            var layer = this.layers.find(l => l.index == index);
+            if(!layer) {
+                return this.addLayer(index).layer //add
+            } else {
+                return layer.layer;
+            }
+        },
+        addLayer: function(index){
+            var l = this.layers.find(l => l.index == index);
+            if(!l) {
+                var layer = {
+                    index: index,
+                    layer: new Amble.Graphics.Layer(this.size.x, this.size.y, index)
+                }
+                layer.layer.appendTo(this.context)
+                this.layers.push(layer);
+
+                // this.layers.sort(function(a, b){ return a.index - b.index })
+                return layer;
+                // throw "You can't add layer. There is layer with given z-index!";
+            }
+        },
         update: function(){
             this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x, y:this.position.y - this.size.y});
             return this;
@@ -230,11 +259,11 @@ window.Amble = (function(){
                 }
             }
         },
-        render: function(layer, camera){
+        render: function(camera){
             for(var i in this.children){
                 /* render objects by renderer*/
                 if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
-                    this.children[i].renderer.render(this.children[i], layer, camera)
+                    this.children[i].renderer.render(this.children[i], camera)
                 }
             }
         }
@@ -246,12 +275,12 @@ window.Amble = (function(){
     }
     /* Graphics */
     Amble.Graphics = {};
-    Amble.Graphics.Layer = function(width, height){
+    Amble.Graphics.Layer = function(width, height, index){
         this.canvas = document.createElement('canvas');
         this.canvas.width = width || Amble.app.width;
         this.canvas.height = height || Amble.app.height;
         this.canvas.style.position = 'absolute';
-        this.canvas.style.zIndex = 0;
+        this.canvas.style.zIndex = index.toString() || '0';
         this.ctx = this.canvas.getContext('2d');
     }
     Amble.Graphics.Layer.prototype = {
@@ -295,18 +324,28 @@ window.Amble = (function(){
         strokeRect: function(x, y, width, height){
             this.ctx.strokeRect(x, y, width, height);
             return this;
+        },
+        stroke: function(){
+            this.ctx.stroke();
+            return this;
+        },
+        lineWidth: function(width){
+            this.ctx.lineWidth = width;
+            return this;
         }
 
     }
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){
         this.color = args['color'] || 'pink';
+        this.layer = args['layer'] || 0
     }
     /* Amble.Graphics.Renderer functions */
     Amble.Graphics.RectRenderer.prototype = {
-        render: function(self, layer, camera){
-            layer.fillStyle(this.color)
-            layer.fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);
+        render: function(self, layerName, camera){
+            camera.layer(this.layer)
+                .fillStyle(this.color)
+                .fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);
         }
     }
     /* Math */
@@ -380,9 +419,13 @@ window.Amble = (function(){
         mousePosition: new Amble.Math.Vector2({}),
         wheelDelta: new Amble.Math.Vector3({}),
         isShiftPressed: false,
-        isCtrlPressed: false
+        isCtrlPressed: false,
+        // _event: {}
     }
     Amble.Input._setListeners = function(){
+        // document.addEventListener('load', function(e){
+        //     Amble.Input._event = e;
+        // }, false);
         document.addEventListener('keydown', function(e){
             if(Amble.Input.debug)
                 console.log(e.which);
@@ -413,8 +456,8 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;
-
-            Amble.app.camera.scripts[0].onmousewheel(Amble.app.camera, e);
+            // Amble.Input._event = e;
+            Amble.app.mainCamera.scripts[0].onmousewheel(Amble.app.mainCamera, e);
         }, false);
         // document.addEventListener('touchstart', function(e){
         //

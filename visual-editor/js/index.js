@@ -161,16 +161,6 @@ Flow.component({
 //     }
 // })
 
-//camera
-var c = {
-    cam: { name: "Amble.Camera", args: {
-        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
-    }},
-    scripts: [
-        { name: "Camera", args: {}}
-    ]
-}
-
 var manager = {
     transform: { name: "Amble.Transform", args: {
         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
@@ -187,7 +177,16 @@ var app = new Amble.Application({
     // width: 800,
     // height: 600,
     /* set all loading there */
-    camera: c,
+    mainCamera: {
+
+        camera: { name: "Amble.Camera", args: {
+            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+            context: document.body
+        }},
+        scripts: [
+            { name: "Camera", args: {}}
+        ],
+    },
     preload: function(){
 
         this.manager = this.scene.instantiate(manager);
@@ -200,7 +199,7 @@ var app = new Amble.Application({
     },
     /* every thing loaded */
     start: function(){
-        this.layer = new Amble.Graphics.Layer(this.width, this.height).appendTo(document.body);
+
     },
     /* game loop */
     preupdate: function(){

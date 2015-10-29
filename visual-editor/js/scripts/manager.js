@@ -20,15 +20,14 @@ MANAGER.prototype = {
     },
     update: function(self) {
         //move it to engine
-        var scale = Amble.app.camera.cam.scale;
+        var scale = Amble.app.mainCamera.camera.scale;
 
-        var mouseX = (Amble.Input.mousePosition.x/scale - Amble.app.camera.scripts[0].variables.translate.x) + Amble.app.camera.cam.view.x;
-        var mouseY = (Amble.Input.mousePosition.y/scale - Amble.app.camera.scripts[0].variables.translate.y) + Amble.app.camera.cam.view.y;
+        var mouseX = (Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x;
+        var mouseY = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y;
 
         if(Amble.Input.isMousePressed(2) && this.var.input) {
-            component.transform.args.position.args.x = mouseX;
-            component.transform.args.position.args.y = mouseY;
             var comp = this.scene.instantiate(component);
+            comp.transform.position = new Amble.Math.Vector2({x: mouseX, y: mouseY});
             this.components.push(comp);
             this.var.input = false;
         }
@@ -50,7 +49,6 @@ MANAGER.prototype = {
             if(node != null) {
 
                 this.currentNode = node;
-                this.currentNode.temp = true;
                 this.var.holdNode = true;
 
             } else {
@@ -91,7 +89,7 @@ MANAGER.prototype = {
                     }
                 }
 
-                if(n != null && n != this.currentNode) {
+                if(n != null && n != this.currentNode && this.currentNode.type != n.type) {
 
                     var obj = {};
                     if(this.currentNode.type == 'in') {
@@ -102,18 +100,21 @@ MANAGER.prototype = {
                         obj.endNode = n;
                     }
 
+                    this.currentNode.connected = true;
+                    n.connected = true;
                     this.currentNode.parent.connections.push(obj);
+                    
                 }
 
                 this.currentNode.parent.startNode = null;
                 this.currentNode.parent.endNode = null;
 
-                this.currentNode.temp = false;
                 this.var.holdNode = false;
                 this.currentNode = null;
             }
         }
 
+        //dragging
         if(this.var.holdNode) {
             if(this.currentNode.type == "in") {
                 this.currentNode.parent.startNode = {
@@ -128,6 +129,7 @@ MANAGER.prototype = {
             }
         }
 
+        //moving component
         if(this.var.hold) {
             this.component.transform.position.x = mouseX + this.var.holderMod.x;
             this.component.transform.position.y = mouseY + this.var.holderMod.y;
