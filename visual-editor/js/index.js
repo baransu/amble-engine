@@ -191,7 +191,7 @@ var app = new Amble.Application({
     preload: function(){
 
         this.manager = this.scene.instantiate(manager);
-        this.obj = this.scene.instantiate(component);
+        // this.obj = this.scene.instantiate(component);
         // component.transform.args.position.args.x += 500;
         // this.obj2 = this.scene.instantiate(component);
 

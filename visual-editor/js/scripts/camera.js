@@ -9,7 +9,7 @@ CAMERA.prototype = {
         done: false,
         zoomSpeed: 1,
         origin: new Amble.Math.Vector2({}),
-        maxZoom: 0.25,
+        maxZoom: 0.15,
         minZoom: 2,
         translate: new Amble.Math.Vector2({})
     },
@@ -66,6 +66,8 @@ CAMERA.prototype = {
         this.variables.origin.y = ( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale );
 
         self.cam.scale *= zoom;
+
+        // console.log(self.cam.scale)
     }
 }
 

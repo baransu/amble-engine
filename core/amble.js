@@ -187,8 +187,8 @@ window.Amble = (function(){
     Amble.Scene.prototype = {
         instantiate: function(obj){
             var clone = Amble.Utils.clone(obj);
-            this.add(clone);
-            return clone;
+            // this.add(clone);
+            return this.add(clone);
         },
         add: function(object) {
             if(object.scripts != 'undefined') {
