@@ -456,7 +456,7 @@ window.Amble = (function(){
             Amble.Input.mousePosition.x = e.clientX || e.pageX;
     		Amble.Input.mousePosition.y = e.clientY || e.pageY;
         }, false);
-        document.addEventListener("wheel", function(e){
+        document.body.addEventListener("wheel", function(e){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;

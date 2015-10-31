@@ -39,7 +39,6 @@ COMPONENT.prototype = {
         var ctx = canvas.getContext("2d");
         ctx.font = this.bodyLineHeight + "px Arial"
         this.componentTitle = self.componentData.idName;
-        console.log(this.componentTitle)
 
         var maxInOutText = 0;
         for(var i = 0; i < self.componentData.input.length; i++) {
@@ -122,10 +121,10 @@ COMPONENT.prototype = {
     checkCollision: function(mX, mY){
         for(var i = 0; i < this.nodes.length; i++) {
             var size = this.nodes[i].size;
-            var x = this.nodes[i].x;
-            var y = this.nodes[i].y;
-            if( mX >= x && mX <= x + size &&
-                mY >= y && mY <= y + size) {
+            var x = this.nodes[i].x + size/2;
+            var y = this.nodes[i].y + size/2;
+            if( mX >= x - size && mX <= x + size &&
+                mY >= y - size && mY <= y + size) {
 
                 if(this.nodes[i].type == 'in') {
                     this.endNode = this.nodes[i];

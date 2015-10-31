@@ -1,40 +1,74 @@
 {
     "components" : [
         {
-            "idName": "MyFunction",
+            "idName": "myAwesomeFunction",
             "input": [
-                { "name": "value", "color": "green" },
+                { "name": "value", "color": "#33691e" },
                 { "name": "mySimpleImposibleInput" },
-                { "name": "position" },
+                { "name": "position", "color": "#d81b60" },
                 { "name": "myDataFromFile" }
             ],
             "output": [
                 { "name": "output" },
-                { "name": "mySimpleImposibleOutput" },
+                { "name": "mySimpleImposibleOutput", "color": "#0d47a1" },
                 { "name": "error" }
-            ],
-            "body": "MyFunction"
+            ]
         },
         {
-            "idName": "MyFunction2",
+            "idName": "myOtherAwesomeFunction",
             "input": [
-                { "name": "value", "color": "green" },
-                { "name": "mySimpleImposibleInput" }
+                { "name": "awesomness", "color": "green" },
+                { "name": "imagination" },
+                { "name": "rainbow", "color": "#f50057" }
             ],
             "output": [
-                { "name": "output" }
-            ],
-            "body": "MyFunction"
+                { "name": "out" }
+            ]
         },
         {
-            "idName": "DZIWNA FUNCJA",
+            "idName": "console.log",
             "input": [
-                { "name": "ASD", "color": "magenta" }
+                { "name": "data", "color": "#8e24aa" }
             ],
             "output": [
-                { "name": "output" }
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "CONST",
+            "input": [
+                { "name": "CONST", "color": "#d50000" }
             ],
-            "body": "MyFunction"
+            "output": [
+                { "name": "CONST" }
+            ]
+        },
+        {
+            "idName": "getYouFatherName",
+            "input": [
+                { "name": "father", "color": "magenta" }
+            ],
+            "output": [
+                { "name": "name" }
+            ]
+        },
+        {
+            "idName": "gitGut",
+            "input": [
+                { "name": "git", "color": "magenta" }
+            ],
+            "output": [
+                { "name": "gut" }
+            ]
+        },
+        {
+            "idName": "otherUnnamedFunction",
+            "input": [
+                { "name": "in" }
+            ],
+            "output": [
+                { "name": "out", "color": "#0d47a1"}
+            ]
         }
     ]
 }

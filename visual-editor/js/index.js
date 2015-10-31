@@ -191,7 +191,6 @@ var app = new Amble.Application({
     preload: function(){
 
         var components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
-        console.log(components);
         for(var i = 0; i < components.length; i++) {
             var obj = {
                 componentData : components[i],
@@ -203,12 +202,8 @@ var app = new Amble.Application({
                     { name: "Component", args: {} }
                 ]
             }
-            for(var attr in components[i]) {
-                if(attr == 'body') {
-                    console.log(attr);
-                    obj.componentData[attr] = componentsFunctions[ components[i][attr]];
-                }
-            }
+
+            obj.componentData.body = componentsFunctions[components[i].idName];
 
             Flow.component({
                 name: obj.componentData.name,
@@ -221,9 +216,7 @@ var app = new Amble.Application({
         }
 
         this.manager = this.scene.instantiate(manager);
-        // this.obj = this.scene.instantiate(component);
-        // component.transform.args.position.args.x += 500;
-        // this.obj2 = this.scene.instantiate(component);
+
 
         // Flow.startNetwork("start");
 

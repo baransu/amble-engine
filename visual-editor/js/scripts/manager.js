@@ -14,14 +14,15 @@ MANAGER = function(args){
         idHelper: false,
         helper: null,
         context: null,
-        mouse: new Amble.Math.Vector2({})
+        mouse: new Amble.Math.Vector2({}),
+        helperNode: null
     };
 }
 
 //script part
 MANAGER.prototype = {
     start: function(self) {
-
+        //load saved file
     },
     update: function(self) {
         //move it to engine
@@ -35,7 +36,7 @@ MANAGER.prototype = {
         this.var.mouse.y = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y;
 
         if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && this.var.input) {
-
+            this.var.input = false;
             var node = null;
             for(var i = 0; i < this.components.length; i++) {
                 node = this.components[i].scripts[0].checkCollision(this.var.mouse.x, this.var.mouse.y);
@@ -76,7 +77,7 @@ MANAGER.prototype = {
         if(!Amble.Input.isMousePressed(1)) {
             this.var.hold = false;
             this.component = null;
-
+            this.var.input = true;
             if(this.var.holdNode) {
 
                 var n = null
@@ -93,17 +94,23 @@ MANAGER.prototype = {
                     if(this.currentNode.type == 'in') {
                         obj.startNode = n;
                         obj.endNode = this.currentNode;
+                        n.parent.connections.push(obj);
                     } else {
                         obj.startNode = this.currentNode;
                         obj.endNode = n;
+                        this.currentNode.parent.connections.push(obj);
                     }
 
                     this.currentNode.connected = true;
                     n.connected = true;
-                    this.currentNode.parent.connections.push(obj);
+
 
                 } else if(!this.var.helper) {
                     //show helper
+                    if(this.currentNode) {
+                        this.var.helperNode = this.currentNode;
+                    }
+
                     this.showHelper();
                 }
 
@@ -175,12 +182,33 @@ MANAGER.prototype = {
 
         var lastMouseButton = Amble.Input.isMousePressed(3);
     },
-    addComponent: function(e) {
-        var idName = e.target.id;
+    addComponent: function(idName) {
         var component = componentsArray.find(c => c.componentData.idName == idName);
         var comp = this.scene.instantiate(component);
         comp.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
         this.components.push(comp);
+
+        if(this.var.helperNode) {
+
+            var obj = {};
+            var secondNode = null;
+            if(this.var.helperNode.type == 'in') {
+                secondNode = comp.scripts[0].outNodes[0];
+                obj.startNode = secondNode;
+                obj.endNode = this.var.helperNode;
+                secondNode.parent.connections.push(obj);
+            } else {
+                secondNode = comp.scripts[0].inNodes[0];
+                obj.startNode = this.var.helperNode;
+                obj.endNode = secondNode;
+                this.var.helperNode.parent.connections.push(obj);
+            }
+
+
+            this.var.helperNode.connected = true;
+            secondNode.connected = true;
+        }
+
         this.hideHelper();
     },
     showHelper: function() {
@@ -195,6 +223,24 @@ MANAGER.prototype = {
         div.style.left = Amble.Input.mousePosition.x + 'px';
         div.style.top = Amble.Input.mousePosition.y + 'px';
         //move to fit screen
+
+        //left
+        if(parseInt(div.style.left) < 0) {
+            div.style.left = 0 + 'px';
+        }
+        //right
+        if(parseInt(div.style.left) + parseInt(div.style.width) > size.x) {
+            div.style.left = size.x - size.x/200 - parseInt(div.style.width) + 'px';
+        }
+        //down
+        if(parseInt(div.style.top) + parseInt(div.style.height) > size.y) {
+            div.style.top = size.y - size.y/100 - parseInt(div.style.height) + 'px';
+        }
+        //top
+        if(parseInt(div.style.top) < 0) {
+            div.style.top = 0 + 'px';
+        }
+
         this.var.context.appendChild(div);
 
         this.var.helperStartMouse = new Amble.Math.Vector2({x: this.var.mouse.x, y: this.var.mouse.y});
@@ -203,6 +249,9 @@ MANAGER.prototype = {
         this.var.isHelper = true;
     },
     hideHelper: function(){
+
+        this.var.helperNode = null;
+
         if(this.var.helper) {
             this.var.context.removeChild(this.var.helper);
             this.var.helper = null;

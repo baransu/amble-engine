@@ -13,22 +13,28 @@
         border: 1px solid black;
     }
 
-    #input {
-        width: 100%;
+	.collection-item {
+		cursor: pointer;
+	}
+
+    #list {
+        overflow-y: scroll;
+		height: 75%;
     }
+
 
 	</style>
 
 	<template>
 
-        <input id="input" type="text" value="{{filterText::input}}">
-        <ul>
+		<div class="input-filed">
+			<input id="inputBox" type="text" value="{{filterText::input}}" placeholder="Search" on-input="input" on-change="enter">
+		</div>
+        <div id="list" class="collection">
             <template id="componentsList" is="dom-repeat" items="{{ comp }}" filter="filterRoom" as="i">
-                <div on-click="handleClick">
-                    <h3 id="{{i.idName}}">{{i.idName}}</h3>
-                </div>
+				<a class="collection-item grey-text text-darken-4" id="{{i.idName}}" on-click="handleClick">{{i.idName}}</a>
             </template>
-        </ul>
+        </div>
 
 	</template>
 
@@ -47,20 +53,38 @@
             }
         },
 
+		attached: function(){
+			this.$.inputBox.focus();
+		},
+
         ready: function(){
             this.comp = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+			this.components = [];
         },
 
         filterRoom: function(item) {
-            return item.idName.match(new RegExp(this.filterText, 'i'));
+			if(item.idName.match(new RegExp(this.filterText, 'i'))) {
+				this.components.push(item);
+				return true;
+			} else {
+				return false;
+			};
         },
 
         refreshFilter: function() {
             this.$.componentsList.render();
         },
 
+		enter: function(e){
+			Amble.app.scene.children[1].scripts[0].addComponent(this.components[0].idName);
+		},
+
+		input: function(){
+			this.components = [];
+		},
+
         handleClick: function(e) {
-            Amble.app.scene.children[1].scripts[0].addComponent(e);
+            Amble.app.scene.children[1].scripts[0].addComponent(e.target.id);
         }
 
 	});
