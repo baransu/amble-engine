@@ -1,0 +1,68 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="helper-component">
+
+	<style>
+
+    :host {
+        position: absolute;
+        z-index: 9999;
+        color: white;
+        background-color: #424242;
+        padding: 10px;
+        border: 1px solid black;
+    }
+
+    #input {
+        width: 100%;
+    }
+
+	</style>
+
+	<template>
+
+        <input id="input" type="text" value="{{filterText::input}}">
+        <ul>
+            <template id="componentsList" is="dom-repeat" items="{{ comp }}" filter="filterRoom" as="i">
+                <div on-click="handleClick">
+                    <h3 id="{{i.idName}}">{{i.idName}}</h3>
+                </div>
+            </template>
+        </ul>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+    var fs = require('fs');
+
+	Polymer({
+		is: 'helper-component',
+        properties: {
+            filterText: {
+                value: '',
+                observer: 'refreshFilter'
+            }
+        },
+
+        ready: function(){
+            this.comp = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        },
+
+        filterRoom: function(item) {
+            return item.idName.match(new RegExp(this.filterText, 'i'));
+        },
+
+        refreshFilter: function() {
+            this.$.componentsList.render();
+        },
+
+        handleClick: function(e) {
+            Amble.app.scene.children[1].scripts[0].addComponent(e);
+        }
+
+	});
+
+</script>

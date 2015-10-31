@@ -1,0 +1,40 @@
+{
+    "components" : [
+        {
+            "idName": "MyFunction",
+            "input": [
+                { "name": "value", "color": "green" },
+                { "name": "mySimpleImposibleInput" },
+                { "name": "position" },
+                { "name": "myDataFromFile" }
+            ],
+            "output": [
+                { "name": "output" },
+                { "name": "mySimpleImposibleOutput" },
+                { "name": "error" }
+            ],
+            "body": "MyFunction"
+        },
+        {
+            "idName": "MyFunction2",
+            "input": [
+                { "name": "value", "color": "green" },
+                { "name": "mySimpleImposibleInput" }
+            ],
+            "output": [
+                { "name": "output" }
+            ],
+            "body": "MyFunction"
+        },
+        {
+            "idName": "DZIWNA FUNCJA",
+            "input": [
+                { "name": "ASD", "color": "magenta" }
+            ],
+            "output": [
+                { "name": "output" }
+            ],
+            "body": "MyFunction"
+        }
+    ]
+}

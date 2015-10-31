@@ -62,40 +62,41 @@ window.Component = require('./js/scripts/component.js');
 window.Camera = require('./js/scripts/camera.js')
 window.Manager = require('./js/scripts/manager.js')
 
-Flow.component({
-    name: "add",
-    input: [
-        {type: Number, name:'val1'},
-        {type: Number, name:'val2'}
-    ],
-    output: [
-        {type: Number, name:'output'},
-    ],
-    body: function(val1, val2, output) {
-        var sum = val1 + val2;
-        output(sum);
-    }
-});
-
-Flow.component({
-    name: "multiply",
-    input: [
-        {type: Number, name:'val1'},
-        {type: Number, name:'val2'}
-    ],
-    output: [
-        {type: Number, name:'output'}
-    ],
-    body: function(val1, val2, output) {
-        var multiply = val1 * val2;
-        output(multiply);
-    }
-});
+// Flow.component({
+//     name: "add",
+//     input: [
+//         {type: Number, name:'val1'},
+//         {type: Number, name:'val2'}
+//     ],
+//     output: [
+//         {type: Number, name:'output'},
+//     ],
+//     body: function(val1, val2, output) {
+//         var sum = val1 + val2;
+//         output(sum);
+//     }
+// });
+//
+// Flow.component({
+//     name: "multiply",
+//     input: [
+//         {type: Number, name:'val1'},
+//         {type: Number, name:'val2'}
+//     ],
+//     output: [
+//         {type: Number, name:'output'}
+//     ],
+//     body: function(val1, val2, output) {
+//         var multiply = val1 * val2;
+//         output(multiply);
+//     }
+// });
 
 //components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
 var component = {
     componentData: {
         _name: 'MyFunction',
+        _id: "my_function",
         _input: [
             {type: Object, name:'value', color: 'green'},
             {type: Object, name:'mySimpleImposibleInput'},
@@ -122,12 +123,7 @@ var component = {
 }
 
 //pass componsents
-Flow.component({
-    name: component.componentData._name,
-    input: component.componentData._input,
-    output: component.componentData._output,
-    body: component.componentData._body
-});
+
 
 //network json (future)
 // Flow.network({
@@ -170,6 +166,11 @@ var manager = {
     ]
 }
 
+var fs = require('fs');
+var componentsFunctions = require('./components-functions.js');
+
+var componentsArray = [];
+
 var app = new Amble.Application({
     /* use to set width and height of canvas, default 800x600 */
     fullscreen: true,
@@ -188,6 +189,36 @@ var app = new Amble.Application({
         ],
     },
     preload: function(){
+
+        var components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        console.log(components);
+        for(var i = 0; i < components.length; i++) {
+            var obj = {
+                componentData : components[i],
+                transform: { name: "Amble.Transform", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                }},
+                renderer: { name: "Component.Renderer" , args:{}},
+                scripts: [
+                    { name: "Component", args: {} }
+                ]
+            }
+            for(var attr in components[i]) {
+                if(attr == 'body') {
+                    console.log(attr);
+                    obj.componentData[attr] = componentsFunctions[ components[i][attr]];
+                }
+            }
+
+            Flow.component({
+                name: obj.componentData.name,
+                input: obj.componentData.input,
+                output: obj.componentData.output,
+                body: obj.componentData.body
+            });
+
+            componentsArray.push(obj);
+        }
 
         this.manager = this.scene.instantiate(manager);
         // this.obj = this.scene.instantiate(component);

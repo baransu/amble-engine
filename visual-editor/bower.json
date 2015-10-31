@@ -1,11 +1,11 @@
 {
-  "name": "polymer",
+  "name": "visual-editor",
   "homepage": "https://github.com/Baransu/amble-engine",
   "authors": [
-    "Tomasz Cichocinski <tomaszcichocinski@gmail.com>"
+    "Tomasz Cichocinski <sajgonek123@gmail.com>"
   ],
   "description": "",
-  "main": "",
+  "main": "index.html",
   "moduleType": [],
   "license": "MIT",
   "ignore": [
@@ -16,7 +16,6 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~1.1.5",
-    "google-map": "GoogleWebComponents/google-map#~1.1.4"
+    "polymer": "Polymer/polymer#~1.2.1",
   }
 }

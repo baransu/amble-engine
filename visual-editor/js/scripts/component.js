@@ -5,19 +5,18 @@ COMPONENT = function(args){
     this.outNodes = [];
     this.connections = [];
     this.nodes = [];
+    this.componentTitle = ""
+    this.width = 250;
+    this.titleLineHeight = 25;
+    this.titleFontSize = 15;
+    this.bodyLineHeight = 20;
+    this.bodyTextFont = 15;
+    this.margin = 16;
+    this.color = '#BDBDBD';
 }
 
 //script part
 COMPONENT.prototype = {
-    var: {
-        width: 250,
-        titleLineHeight: 25,
-        titleFontSize: 15,
-        bodyLineHeight: 20,
-        bodyTextFont: 15,
-        margin: 16,
-        color: '#BDBDBD'
-    },
     calcLines: function(ctx, text, maxWidth, lineHeight){
         var words = text.split(' ');
         var line = '';
@@ -36,51 +35,51 @@ COMPONENT.prototype = {
         return lines;
     },
     start: function(self) {
-
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext("2d");
-        ctx.font = this.var.bodyLineHeight + "px Arial"
-        this.var.componentTitle = self.componentData._name;
+        ctx.font = this.bodyLineHeight + "px Arial"
+        this.componentTitle = self.componentData.idName;
+        console.log(this.componentTitle)
 
         var maxInOutText = 0;
-        for(var i = 0; i < self.componentData._input.length; i++) {
-            var w = ctx.measureText(self.componentData._input[i].name).width;
+        for(var i = 0; i < self.componentData.input.length; i++) {
+            var w = ctx.measureText(self.componentData.input[i].name).width;
             if(w > maxInOutText)
                 maxInOutText = w;
         }
 
-        for(var i = 0; i < self.componentData._output.length; i++) {
-            var w = ctx.measureText(self.componentData._output[i].name).width;
+        for(var i = 0; i < self.componentData.output.length; i++) {
+            var w = ctx.measureText(self.componentData.output[i].name).width;
             if(w > maxInOutText)
                 maxInOutText = w;
         }
 
         //calc width (title width or in/out text)
-        this.var.width = ctx.measureText(this.var.componentTitle).width + 2*this.var.margin;
+        this.width = ctx.measureText(this.componentTitle).width + 2*this.margin;
 
-        if(2*maxInOutText + 4*this.var.margin > this.var.width) {
-            this.var.width = 2*maxInOutText + 5*this.var.margin;
+        if(2*maxInOutText + 4*this.margin > this.width) {
+            this.width = 2*maxInOutText + 5*this.margin;
         }
 
         var inputHeight = 0;
-        for(var i = 0; i < self.componentData._input.length; i++) {
-            inputHeight += this.var.bodyLineHeight * this.calcLines(ctx, self.componentData._input[i].name, this.var.width/2 - 2*this.var.margin, this.var.bodyLineHeight) + this.var.margin;
+        for(var i = 0; i < self.componentData.input.length; i++) {
+            inputHeight += this.bodyLineHeight * this.calcLines(ctx, self.componentData.input[i].name, this.width/2 - 2*this.margin, this.bodyLineHeight) + this.margin;
         }
 
         var outputHeight = 0;
-        for(var i = 0; i < self.componentData._output.length; i++) {
-            outputHeight += this.var.bodyLineHeight * this.calcLines(ctx, self.componentData._output[i].name, this.var.width/2 - 2*this.var.margin, this.var.bodyLineHeight) + this.var.margin;
+        for(var i = 0; i < self.componentData.output.length; i++) {
+            outputHeight += this.bodyLineHeight * this.calcLines(ctx, self.componentData.output[i].name, this.width/2 - 2*this.margin, this.bodyLineHeight) + this.margin;
         }
 
-        this.var.bodyHeight = 2*this.var.margin + (inputHeight >= outputHeight ? inputHeight : outputHeight);
-        var lines = this.calcLines(ctx, this.var.componentTitle, this.var.width - 2*this.var.margin, this.var.titleLineHeight)
-        this.var.headerHeight = lines * this.var.titleLineHeight + this.var.margin;
+        this.bodyHeight = 2*this.margin + (inputHeight >= outputHeight ? inputHeight : outputHeight);
+        var lines = this.calcLines(ctx, this.componentTitle, this.width - 2*this.margin, this.titleLineHeight)
+        this.headerHeight = lines * this.titleLineHeight + this.margin;
 
-        for(var i = 0; i < self.componentData._input.length; i++) {
+        for(var i = 0; i < self.componentData.input.length; i++) {
             var obj = {
-                name: self.componentData._input[i].name,
-                color: self.componentData._input[i].color || '#BDBDBD',
-                size: this.var.margin,
+                name: self.componentData.input[i].name,
+                color: self.componentData.input[i].color || '#BDBDBD',
+                size: this.margin,
                 type: 'in',
                 parent: self.scripts[0],
                 connected: false,
@@ -89,11 +88,11 @@ COMPONENT.prototype = {
             };
             this.inNodes.push(obj);
         }
-        for(var i = 0; i < self.componentData._output.length; i++) {
+        for(var i = 0; i < self.componentData.output.length; i++) {
             var obj = {
-                name: self.componentData._input[i].name,
-                color: self.componentData._output[i].color || '#BDBDBD',
-                size: this.var.margin,
+                name: self.componentData.output[i].name,
+                color: self.componentData.output[i].color || '#BDBDBD',
+                size: this.margin,
                 type: 'out',
                 parent: self.scripts[0],
                 connected: false,
@@ -110,14 +109,14 @@ COMPONENT.prototype = {
     update: function(self) {
         //calc inputs pos
         for(var i = 0; i < this.inNodes.length; i++) {
-            this.inNodes[i].x = self.transform.position.x - this.var.width/2 + 2*this.var.margin - 3*this.var.margin/2;
-            this.inNodes[i].y = self.transform.position.y - this.var.bodyHeight/2 + this.var.margin + i*(this.var.bodyLineHeight + this.var.margin) + this.var.margin/2;
+            this.inNodes[i].x = self.transform.position.x - this.width/2 + 2*this.margin - 3*this.margin/2;
+            this.inNodes[i].y = self.transform.position.y - this.bodyHeight/2 + this.margin + i*(this.bodyLineHeight + this.margin) + this.margin/2;
         }
 
         //calc outputs pos
         for(var i = 0; i < this.outNodes.length; i++) {
-            this.outNodes[i].x = self.transform.position.x + this.var.width/2 - 2*this.var.margin + this.var.margin/3;
-            this.outNodes[i].y = self.transform.position.y - this.var.bodyHeight/2 + this.var.margin + i*(this.var.bodyLineHeight + this.var.margin) + this.var.margin/2;
+            this.outNodes[i].x = self.transform.position.x + this.width/2 - 2*this.margin + this.margin/3;
+            this.outNodes[i].y = self.transform.position.y - this.bodyHeight/2 + this.margin + i*(this.bodyLineHeight + this.margin) + this.margin/2;
         }
     },
     checkCollision: function(mX, mY){
@@ -172,7 +171,8 @@ COMPONENT.Renderer.prototype = {
     },
     render: function(self, camera){
 
-        var _ = self.scripts[0].var;
+        var _ = self.scripts[0];
+
         //draw body
         var layer = camera.layer(this.componentsLayer);
 

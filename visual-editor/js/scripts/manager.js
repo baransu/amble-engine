@@ -5,16 +5,21 @@ MANAGER = function(args){
     this.component = null;
     this.components = [];
     this.currentNode = null;
+    this.var = {
+        input: false,
+        hold: false,
+        holderMod: new Amble.Math.Vector2({}),
+        helperStartMouse: new Amble.Math.Vector2({}),
+        holdNode: false,
+        idHelper: false,
+        helper: null,
+        context: null,
+        mouse: new Amble.Math.Vector2({})
+    };
 }
 
 //script part
 MANAGER.prototype = {
-    var: {
-        input: true,
-        hold: false,
-        holderMod: new Amble.Math.Vector2({}),
-        holdNode: false
-    },
     start: function(self) {
 
     },
@@ -22,25 +27,18 @@ MANAGER.prototype = {
         //move it to engine
         var scale = Amble.app.mainCamera.camera.scale;
 
-        var mouseX = (Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x;
-        var mouseY = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y;
+        var lastMouse = new Amble.Math.Vector2({});
+        lastMouse.x = this.var.mouse.x - ((Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x);
+        lastMouse.y = this.var.mouse.y - ((Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y);
 
-        if(Amble.Input.isMousePressed(2) && this.var.input) {
-            var comp = this.scene.instantiate(component);
-            comp.transform.position = new Amble.Math.Vector2({x: mouseX, y: mouseY});
-            this.components.push(comp);
-            this.var.input = false;
-        }
-
-        if(!Amble.Input.isMousePressed(2)) {
-            this.var.input = true;
-        }
+        this.var.mouse.x = (Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x;
+        this.var.mouse.y = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y;
 
         if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && this.var.input) {
 
             var node = null;
             for(var i = 0; i < this.components.length; i++) {
-                node = this.components[i].scripts[0].checkCollision(mouseX, mouseY);
+                node = this.components[i].scripts[0].checkCollision(this.var.mouse.x, this.var.mouse.y);
                 if(node != null) {
                     break;
                 }
@@ -58,15 +56,15 @@ MANAGER.prototype = {
                 for(var i = 0; i < this.components.length; i++) {
 
                     var pos = this.components[i].transform.position;
-                    var width = this.components[i].scripts[0].var.width;
-                    var bodyHeight = this.components[i].scripts[0].var.bodyHeight;
-                    var headerHeight = this.components[i].scripts[0].var.headerHeight;
+                    var width = this.components[i].scripts[0].width;
+                    var bodyHeight = this.components[i].scripts[0].bodyHeight;
+                    var headerHeight = this.components[i].scripts[0].headerHeight;
 
-                    if( mouseX >= pos.x - width/2 && mouseX <= pos.x + width/2 &&
-                        mouseY >= pos.y - bodyHeight/2 - headerHeight && mouseY <= pos.y + bodyHeight/2) {
+                    if( this.var.mouse.x >= pos.x - width/2 && this.var.mouse.x <= pos.x + width/2 &&
+                        this.var.mouse.y >= pos.y - bodyHeight/2 - headerHeight && this.var.mouse.y <= pos.y + bodyHeight/2) {
 
-                        this.var.holderMod.x = pos.x - mouseX;
-                        this.var.holderMod.y = pos.y - mouseY;
+                        this.var.holderMod.x = pos.x - this.var.mouse.x;
+                        this.var.holderMod.y = pos.y - this.var.mouse.y;
                         this.var.hold = true;
                         this.var.holdNode = false;
                         this.component = this.components[i]
@@ -83,7 +81,7 @@ MANAGER.prototype = {
 
                 var n = null
                 for(var i = 0; i < this.components.length; i++) {
-                    n = this.components[i].scripts[0].checkCollision(mouseX, mouseY);
+                    n = this.components[i].scripts[0].checkCollision(this.var.mouse.x, this.var.mouse.y);
                     if(n != null) {
                         break;
                     }
@@ -103,7 +101,10 @@ MANAGER.prototype = {
                     this.currentNode.connected = true;
                     n.connected = true;
                     this.currentNode.parent.connections.push(obj);
-                    
+
+                } else if(!this.var.helper) {
+                    //show helper
+                    this.showHelper();
                 }
 
                 this.currentNode.parent.startNode = null;
@@ -114,25 +115,98 @@ MANAGER.prototype = {
             }
         }
 
+        //hide/delete helper
+        if( this.var.isHelper &&
+            (
+                Amble.Input.isMousePressed(2) ||
+                (
+                    Amble.Input.isMousePressed(3) &&
+                    (
+                        lastMouse.x != 0 ||
+                        lastMouse.y != 0
+                    )
+                ) ||
+                Amble.Input.isKeyPressed(27)
+                // ||
+                // (
+                //     Amble.Input.isMousePressed(1) &&
+                //     (
+                //         Amble.Input.mousePosition.x < parseInt(this.var.helper.style.left)||
+                //         Amble.Input.mousePosition.x > parseInt(this.var.helper.style.left) + parseInt(this.var.helper.style.width) &&
+                //         Amble.Input.mousePosition.y < parseInt(this.var.helper.style.top) ||
+                //         Amble.Input.mousePosition.y > parseInt(this.var.helper.style.top) + parseInt(this.var.helper.style.height)
+                //     )
+                // )
+            )
+        ) {
+            this.hideHelper();
+        }
+
+        if (Amble.Input.isKeyPressed(65) && this.var.input && !this.var.isHelper) {
+            this.hideHelper();
+            this.showHelper();
+            this.var.input = false;
+        }
+
+        if(!Amble.Input.isKeyPressed(65)) {
+            this.var.input = true;
+        }
+
         //dragging
         if(this.var.holdNode) {
             if(this.currentNode.type == "in") {
                 this.currentNode.parent.startNode = {
-                    x: mouseX,
-                    y: mouseY
+                    x: this.var.mouse.x,
+                    y: this.var.mouse.y
                 };
             } else {
                 this.currentNode.parent.endNode = {
-                    x: mouseX,
-                    y: mouseY
+                    x: this.var.mouse.x,
+                    y: this.var.mouse.y
                 };
             }
         }
 
         //moving component
         if(this.var.hold) {
-            this.component.transform.position.x = mouseX + this.var.holderMod.x;
-            this.component.transform.position.y = mouseY + this.var.holderMod.y;
+            this.component.transform.position.x = this.var.mouse.x + this.var.holderMod.x;
+            this.component.transform.position.y = this.var.mouse.y + this.var.holderMod.y;
+        }
+
+        var lastMouseButton = Amble.Input.isMousePressed(3);
+    },
+    addComponent: function(e) {
+        var idName = e.target.id;
+        var component = componentsArray.find(c => c.componentData.idName == idName);
+        var comp = this.scene.instantiate(component);
+        comp.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
+        this.components.push(comp);
+        this.hideHelper();
+    },
+    showHelper: function() {
+        this.var.context = Amble.app.mainCamera.camera.context;
+        var size = Amble.app.mainCamera.camera.size;
+
+        var div = document.createElement('helper-component');
+        var width = 800/2;
+        var height = 600/2;
+        div.style.width = width + 'px';
+        div.style.height = height + 'px';
+        div.style.left = Amble.Input.mousePosition.x + 'px';
+        div.style.top = Amble.Input.mousePosition.y + 'px';
+        //move to fit screen
+        this.var.context.appendChild(div);
+
+        this.var.helperStartMouse = new Amble.Math.Vector2({x: this.var.mouse.x, y: this.var.mouse.y});
+
+        this.var.helper = div;
+        this.var.isHelper = true;
+    },
+    hideHelper: function(){
+        if(this.var.helper) {
+            this.var.context.removeChild(this.var.helper);
+            this.var.helper = null;
+            this.var.isHelper = false;
         }
     }
 }

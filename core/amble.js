@@ -20,13 +20,17 @@ window.Amble = (function(){
         //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
-                Amble.app.width = Amble.app.layer.canvas.width = window.innerWidth;
-                Amble.app.height = Amble.app.layer.canvas.height = window.innerHeight;
-                var sizeDifference = window.innerWidth/Amble.app.camera.cam.size.x;
-                Amble.app.camera.cam.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
-                Amble.app.camera.cam.view = new Amble.Math.Vector2(Amble.app.camera.cam.position.x - Amble.app.camera.cam.size.x, Amble.app.camera.cam.position.y - Amble.app.camera.cam.size.y);
-                Amble.app.camera.scripts[0].variables.maxZoom *= sizeDifference;
-                Amble.app.camera.scripts[0].variables.minZoom *= sizeDifference;
+
+                for(var i = 0; i > Amble.app.mainCamera.camera.layers.length; i++) {
+                    Amble.app.width = Amble.app.mainCamera.camera.layers[i].layer.canvas.width = window.innerWidth;
+                    Amble.app.height = Amble.app.mainCamera.camera.layers[i].layer.canvas.height = window.innerHeight;
+                }
+
+                var sizeDifference = window.innerWidth/Amble.app.mainCamera.camera.size.x;
+                Amble.app.mainCamera.camera.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
+                Amble.app.mainCamera.camera.view = new Amble.Math.Vector2(Amble.app.mainCamera.camera.position.x - Amble.app.mainCamera.camera.size.x, Amble.app.mainCamera.camera.position.y - Amble.app.mainCamera.camera.size.y);
+                Amble.app.mainCamera.scripts[0].variables.maxZoom *= sizeDifference;
+                Amble.app.mainCamera.scripts[0].variables.minZoom *= sizeDifference;
             });
         }
 
