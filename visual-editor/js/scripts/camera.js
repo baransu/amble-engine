@@ -1,16 +1,18 @@
-var CAMERA = {};
+var Camera = {};
 
-CAMERA = function(args){
-
-}
-
-CAMERA.prototype = {
-    variables: {
+Camera = function(args){
+    this.variables = {
         lastMousePos: new Amble.Math.Vector2({}),
         done: false,
         zoomSpeed: 1,
-        origin: new Amble.Math.Vector2({})
-    },
+        origin: new Amble.Math.Vector2({}),
+        maxZoom: 0.15,
+        minZoom: 2,
+        translate: new Amble.Math.Vector2({})
+    };
+}
+
+Camera.prototype = {
     start: function(self) {
 
     },
@@ -20,9 +22,9 @@ CAMERA.prototype = {
                 this.variables.done = true;
                 this.variables.lastMousePos.copy(Amble.Input.mousePosition);
             }
-            var x = this.variables.lastMousePos.x - Amble.Input.mousePosition.x;
-            var y = this.variables.lastMousePos.y - Amble.Input.mousePosition.y;
-            self.cam.position.add(new Amble.Math.Vector2({x: x, y: y}));
+            var x = (this.variables.lastMousePos.x - Amble.Input.mousePosition.x)/self.camera.scale;
+            var y = (this.variables.lastMousePos.y - Amble.Input.mousePosition.y)/self.camera.scale;
+            self.camera.position.add(new Amble.Math.Vector2({x: x, y: y}));
 
             this.variables.lastMousePos.copy(Amble.Input.mousePosition);
         } else {
@@ -31,37 +33,47 @@ CAMERA.prototype = {
     },
     onmousewheel: function(self, e){
 
-        var zoomToX = window.innerWidth/2;
-        var zoomToY = window.innerHeight/2
-        var wheel = e.wheelDelta/120;
-        var zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
+        if(!Amble.app.scene.children[1].getComponent('Manager').var.isHelper) {
+            var zoomToX = self.camera.size.x/2;
+            var zoomToY = self.camera.size.y/2;
+            var wheel = e.wheelDelta/120;
+            var zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
 
-        Amble.app.layer.ctx.translate(
-            this.variables.origin.x,
-            this.variables.origin.y
-        );
+            for(var i = 0; i < self.camera.layers.length; i++) {
+                self.camera.layers[i].layer.ctx.translate(
+                    this.variables.origin.x,
+                    this.variables.origin.y
+                );
+            }
 
-        var nextScale = self.cam.scale * zoom
+            var nextScale = self.camera.scale * zoom
 
-        if(nextScale > 2) {
-            nextScale = 2;
-        } else if (nextScale < 0.25) {
-            nextScale = 0.25;
+            if(nextScale > this.variables.minZoom) {
+                nextScale = this.variables.minZoom;
+            } else if (nextScale < this.variables.maxZoom) {
+                nextScale = this.variables.maxZoom;
+            }
+
+            zoom = nextScale/self.camera.scale;
+
+            for(var i = 0; i < self.camera.layers.length; i++) {
+                self.camera.layers[i].layer.ctx.scale(zoom,zoom);
+                self.camera.layers[i].layer.ctx.translate(
+                    -( zoomToX / self.camera.scale + this.variables.origin.x - zoomToX / nextScale ),
+                    -( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale )
+                );
+            }
+
+            this.variables.translate.x = -( zoomToX / self.camera.scale + this.variables.origin.x - zoomToX / nextScale);
+            this.variables.translate.y = -( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale);
+
+            this.variables.origin.x = ( zoomToX / self.camera.scale + this.variables.origin.x - zoomToX / nextScale );
+            this.variables.origin.y = ( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale );
+
+            self.camera.scale *= zoom;
+
         }
-
-        zoom = nextScale/self.cam.scale
-        Amble.app.layer.ctx.scale(zoom,zoom);
-
-        Amble.app.layer.ctx.translate(
-            -( zoomToX / self.cam.scale + this.variables.origin.x - zoomToX / nextScale ),
-            -( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale )
-        );
-        this.variables.origin.x = ( zoomToX / self.cam.scale + this.variables.origin.x - zoomToX / nextScale );
-        this.variables.origin.y = ( zoomToY / self.cam.scale + this.variables.origin.y - zoomToY / nextScale );
-
-        self.cam.scale *= zoom;
-
     }
 }
 
-module.exports = CAMERA;
+module.exports = Camera;

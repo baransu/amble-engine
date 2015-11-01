@@ -1,3 +1,8 @@
+@font-face {
+    font-family: OpenSans;
+    src: url(../fonts/OpenSans-Regular.ttf);
+}
+
 * {
     margin: 0;
     padding: 0;

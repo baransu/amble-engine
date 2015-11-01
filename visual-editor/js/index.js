@@ -60,113 +60,76 @@
 var Flow = require('./js/flow.js');
 window.Component = require('./js/scripts/component.js');
 window.Camera = require('./js/scripts/camera.js')
+window.Manager = require('./js/scripts/manager.js')
 
-Flow.component({
-    name: "add",
-    input: [
-        {type: Number, name:'val1'},
-        {type: Number, name:'val2'}
-    ],
-    output: [
-        {type: Number, name:'output'},
-    ],
-    body: function(val1, val2, output) {
-        var sum = val1 + val2;
-        output(sum);
-    }
-});
-
-Flow.component({
-    name: "multiply",
-    input: [
-        {type: Number, name:'val1'},
-        {type: Number, name:'val2'}
-    ],
-    output: [
-        {type: Number, name:'output'}
-    ],
-    body: function(val1, val2, output) {
-        var multiply = val1 * val2;
-        output(multiply);
-    }
-});
-
-var component = {
-    componentData: {
-        _name: 'log',
-        _input: [
-            {type: Object, name:'data'}
-        ],
-        _output: [
-            {type: Object, name:'output'}
-        ],
-        _body: function(data, output) {
-            console.log(data)
-            output(null)
-        }
-    },
-    transform: { name: "Amble.Transform", args: {
-        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        size: { name: "Amble.Math.Vector2", args: {x:300, y:200}}
-    }},
-    renderer: { name: "Component.Renderer" , args:{
-        color: "white"
-    }},
-    scripts: [
-        { name: "Component", args: {} }
-    ]
-}
-
-Flow.component({
-    name: component.componentData._name,
-    input: component.componentData._input,
-    output: component.componentData._output,
-    body: component.componentData._body
-});
-
-Flow.network({
-    name: "start",
-    //list of all components
-    processes:[
-        {name: "add", component: "add"},
-        {name: "multiply1", component: "multiply"},
-        {name: "multiply2", component: "multiply"},
-        {name: "multiply3", component: "multiply"},
-        {name: "log1", component: 'log'},
-        {name: "log2", component: 'log'},
-    ],
-    //list of variables connection
-    connections: [
-        {id: 0, out:'add.output', in:'multiply1.val1'},
-        {id: 1, out:'multiply1.output', in:'multiply2.val1'},
-        {id: 2, out:'multiply1.output', in:'multiply3.val1'},
-        {id: 3, out:'multiply2.output', in:'log1.data'},
-        {id: 4, out:'multiply3.output', in:'log2.data'},
-    ],
-    //list of begin variables connection
-    init: {
-        'add.val1': 1,
-        'add.val2': 1,
-        'multiply1.val2': 2,
-        'multiply2.val2': 4,
-        'multiply3.val2': 2
-    }
-})
-
-// function run(){
-//     Flow.startNetwork("start");
-// }
+// Flow.component({
+//     name: "add",
+//     input: [
+//         {type: Number, name:'val1'},
+//         {type: Number, name:'val2'}
+//     ],
+//     output: [
+//         {type: Number, name:'output'},
+//     ],
+//     body: function(val1, val2, output) {
+//         var sum = val1 + val2;
+//         output(sum);
+//     }
+// });
 //
-// run();
+// Flow.component({
+//     name: "multiply",
+//     input: [
+//         {type: Number, name:'val1'},
+//         {type: Number, name:'val2'}
+//     ],
+//     output: [
+//         {type: Number, name:'output'}
+//     ],
+//     body: function(val1, val2, output) {
+//         var multiply = val1 * val2;
+//         output(multiply);
+//     }
+// });
 
-var c = {
-    cam: { name: "Amble.Camera", args: {
-        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
-    }},
-    scripts: [
-        { name: "Camera", args: {} }
-    ]
-}
+//components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
+
+//network json (future)
+// Flow.network({
+//     name: "start",
+//     //list of all components
+//     processes:[
+//         {name: "add", component: "add"},
+//         {name: "multiply1", component: "multiply"},
+//         {name: "multiply2", component: "multiply"},
+//         {name: "multiply3", component: "multiply"},
+//         {name: "log1", component: 'log'},
+//         {name: "log2", component: 'log'},
+//         {name: "log3", component: 'log'},
+//     ],
+//     //list of variables connection
+//     connections: [
+//         {id: 0, out:'add.output', in:'multiply1.val1'},
+//         {id: 1, out:'multiply1.output', in:'multiply2.val1'},
+//         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
+//         {id: 3, out:'multiply2.output', in:'log1.data'},
+//         {id: 4, out:'multiply3.output', in:'log2.data'},
+//         {id: 5, out:'log1.output', in:'log3.data'},
+//     ],
+//     //list of begin variables connection
+//     init: {
+//         'add.val1': 1,
+//         'add.val2': 1,
+//         'multiply1.val2': 2,
+//         'multiply2.val2': 4,
+//         'multiply3.val2': 2
+//     }
+// })
+
+var fs = require('fs');
+var componentsFunctions = require('./components-functions.js');
+
+var componentsArray = [];
 
 var app = new Amble.Application({
     /* use to set width and height of canvas, default 800x600 */
@@ -175,24 +138,64 @@ var app = new Amble.Application({
     // width: 800,
     // height: 600,
     /* set all loading there */
-    camera: c,
+    mainCamera: {
+        camera: { name: "Amble.Camera", args: {
+            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+            context: document.body
+        }},
+        components: [
+            { name: "Camera", args: {}}
+        ],
+    },
     preload: function(){
 
-        this.obj1 = this.scene.instantiate(component);
-        component.transform.args.position.args.x += 500;
-        this.obj2 = this.scene.instantiate(component);
+        var _components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        for(var i = 0; i < _components.length; i++) {
+            var obj = {
+                componentData : _components[i],
+                transform: { name: "Amble.Transform", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                }},
+                renderer: { name: "Component.Renderer" , args:{}},
+                components: [
+                    { name: "Component", args: {} }
+                ]
+            }
+
+            obj.componentData.body = componentsFunctions[_components[i].idName];
+
+            Flow.component({
+                name: obj.componentData.name,
+                input: obj.componentData.input,
+                output: obj.componentData.output,
+                body: obj.componentData.body
+            });
+
+            componentsArray.push(obj);
+        }
+
+        var manager = {
+            transform: { name: "Amble.Transform", args: {
+                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+            }},
+            components: [
+                { name: "Manager", args: {}}
+            ]
+        }
+
+        this.manager = this.scene.instantiate(manager);
+
+
+        // Flow.startNetwork("start");
 
     },
     /* every thing loaded */
     start: function(){
-        this.layer = new Amble.Graphics.Layer(this.width, this.height).appendTo(document.body);
-        console.log(this.obj1);
 
     },
     /* game loop */
     preupdate: function(){
-        if(Amble.Input.isKeyPressed(65))
-            console.log(this.camera);
+
     },
     /* update there - actors update and camera update*/
     postupdate: function(){
