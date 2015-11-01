@@ -3,7 +3,7 @@ var Manager = {};
 Manager = function(args){
     this.scene = Amble.app.scene;
     this.component = null;
-    this.comps = [];
+    this.components = [];
     this.currentNode = null;
     this.var = {
         input: false,
@@ -17,6 +17,8 @@ Manager = function(args){
         mouse: new Amble.Math.Vector2({}),
         helperNode: null
     };
+    this.componentsCount = 0;
+    this.graph = [];
 }
 
 Manager.prototype = {
@@ -37,8 +39,8 @@ Manager.prototype = {
         if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && this.var.input && !this.var.isHelper) {
             this.var.input = false;
             var node = null;
-            for(var i = 0; i < this.comps.length; i++) {
-                node = this.comps[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
+            for(var i = 0; i < this.components.length; i++) {
+                node = this.components[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
                 if(node != null) {
                     break;
                 }
@@ -53,12 +55,12 @@ Manager.prototype = {
 
                 this.component = null;
 
-                for(var i = 0; i < this.comps.length; i++) {
+                for(var i = 0; i < this.components.length; i++) {
 
-                    var pos = this.comps[i].transform.position;
-                    var width = this.comps[i].getComponent('Component').width;
-                    var bodyHeight = this.comps[i].getComponent('Component').bodyHeight;
-                    var headerHeight = this.comps[i].getComponent('Component').headerHeight;
+                    var pos = this.components[i].transform.position;
+                    var width = this.components[i].getComponent('Component').width;
+                    var bodyHeight = this.components[i].getComponent('Component').bodyHeight;
+                    var headerHeight = this.components[i].getComponent('Component').headerHeight;
 
                     if( this.var.mouse.x >= pos.x - width/2 && this.var.mouse.x <= pos.x + width/2 &&
                         this.var.mouse.y >= pos.y - bodyHeight/2 - headerHeight && this.var.mouse.y <= pos.y + bodyHeight/2) {
@@ -67,7 +69,7 @@ Manager.prototype = {
                         this.var.holderMod.y = pos.y - this.var.mouse.y;
                         this.var.hold = true;
                         this.var.holdNode = false;
-                        this.component = this.comps[i]
+                        this.component = this.components[i]
                     }
                 }
             }
@@ -80,8 +82,8 @@ Manager.prototype = {
             if(this.var.holdNode) {
 
                 var n = null
-                for(var i = 0; i < this.comps.length; i++) {
-                    n = this.comps[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
+                for(var i = 0; i < this.components.length; i++) {
+                    n = this.components[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
                     if(n != null) {
                         break;
                     }
@@ -181,12 +183,20 @@ Manager.prototype = {
 
         var lastMouseButton = Amble.Input.isMousePressed(3);
     },
+    load: function(path){
+        console.log('load: ' + path)
+    },
+    save: function(path){
+        console.log('save-to: ' + path)
+    },
     addComponent: function(idName) {
         var component = componentsArray.find(c => c.componentData.idName == idName);
         var _component = this.scene.instantiate(component);
         _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
-        this.comps.push(_component);
-        console.log(_component)
+        _component.getComponent('Component').id = this.componentsCount;
+        this.componentsCount++;
+        this.components.push(_component);
+
 
         if(this.var.helperNode) {
 
@@ -210,6 +220,36 @@ Manager.prototype = {
         }
 
         this.hideHelper();
+
+        // print all network
+        this.graph = [];
+        for(var i = 0; i < this.components.length; i++) {
+            var component = this.components[i];
+            var comp = component.getComponent('Component');
+            var obj = {
+                id: comp.id,
+                idName: component.componentData.idName,
+                position: {
+                    x: component.transform.position.x,
+                    y: component.transform.position.y
+                },
+                connections: []
+            };
+            for(var j = 0 ; j < comp.connections.length; j++) {
+                var c = {
+                    outNode: comp.connections[j].startNode.id,
+                    inNode: {
+                        id: comp.connections[j].endNode.parent.id,
+                        node: comp.connections[j].endNode.id
+                    }
+                }
+                obj.connections.push(c);
+            }
+            this.graph.push(obj);
+        }
+
+        console.log(this.graph)
+
     },
     showHelper: function() {
         this.var.context = Amble.app.mainCamera.camera.context;

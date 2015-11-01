@@ -1,5 +1,8 @@
 var app = require('app');
 var BrowserWindow = require('browser-window');
+var ipc = require('ipc');
+var shell = require('shell');
+var dialog = require('dialog');
 
 app.on('ready', function(){
     var mainWindow = new BrowserWindow({
@@ -10,4 +13,8 @@ app.on('ready', function(){
     });
     mainWindow.loadUrl('file://' + __dirname + '/visual-editor/index.html');
     mainWindow.toggleDevTools();
+
+    mainWindow.on('closed', function() {
+        mainWindow = null;
+    });
 });

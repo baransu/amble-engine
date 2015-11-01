@@ -1,6 +1,7 @@
 var Component = {};
 
 Component = function(args){
+    this.id = 0;
     this.inNodes = [];
     this.outNodes = [];
     this.connections = [];
@@ -76,6 +77,7 @@ Component.prototype = {
 
         for(var i = 0; i < self.componentData.input.length; i++) {
             var obj = {
+                id: i,
                 name: self.componentData.input[i].name,
                 color: self.componentData.input[i].color || '#BDBDBD',
                 size: this.margin,
@@ -89,6 +91,7 @@ Component.prototype = {
         }
         for(var i = 0; i < self.componentData.output.length; i++) {
             var obj = {
+                id: i,
                 name: self.componentData.output[i].name,
                 color: self.componentData.output[i].color || '#BDBDBD',
                 size: this.margin,

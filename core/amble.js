@@ -47,7 +47,6 @@ window.Amble = (function(){
         }
         this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
 
-        console.log(this.mainCamera.camera.size.x)
         this.width = this.mainCamera.camera.size.x || 800;
         this.height = this.mainCamera.camera.size.y || 600;
 

@@ -63,21 +63,6 @@ window.Camera = require('./js/scripts/camera.js')
 window.Manager = require('./js/scripts/manager.js')
 
 // Flow.component({
-//     name: "add",
-//     input: [
-//         {type: Number, name:'val1'},
-//         {type: Number, name:'val2'}
-//     ],
-//     output: [
-//         {type: Number, name:'output'},
-//     ],
-//     body: function(val1, val2, output) {
-//         var sum = val1 + val2;
-//         output(sum);
-//     }
-// });
-//
-// Flow.component({
 //     name: "multiply",
 //     input: [
 //         {type: Number, name:'val1'},
@@ -127,11 +112,16 @@ window.Manager = require('./js/scripts/manager.js')
 // })
 
 var fs = require('fs');
-var componentsFunctions = require('./components-functions.js');
+var remote = require('remote');
+var Menu = remote.require('menu');
+var dialog = remote.require('dialog');
 
+var componentsFunctions = require('./components-functions.js');
 var componentsArray = [];
 
-var app = new Amble.Application({
+var file = 'untitled'
+
+var application = {
     resize: true,
     /* set all loading there */
     mainCamera: {
@@ -180,7 +170,7 @@ var app = new Amble.Application({
         }
 
         this.manager = this.scene.instantiate(manager);
-
+        this.manager.getComponent('Manager').load(file)
 
         // Flow.startNetwork("start");
 
@@ -205,4 +195,62 @@ var app = new Amble.Application({
     postrender: function(){
         // this.layer.fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y)
     }
-});
+};
+
+
+var menuFunctions = {
+    newFile: function(){
+        document.getElementById("workspace").innerHTML = "";
+        file = 'untitled';
+        var app = new Amble.Application(application);
+    },
+    open: function(){
+        var path = dialog.showOpenDialog({ properties: [ 'openFile'], filters: [{ name: 'Amble Script', extensions: ['js', 'json'] }]});
+        if(typeof path != 'undefined') {
+            document.getElementById("workspace").innerHTML = "";
+            file = path[0];
+            var app = new Amble.Application(application);
+        }
+    },
+    save: function(){
+        if(file == 'untitled') {
+            this.saveAs();
+        } else {
+            Amble.app.scene.children[1].getComponent('Manager').save(file);
+        }
+    },
+    saveAs: function(){
+        var path = dialog.showSaveDialog({ properties: [ 'openFile', 'createDirectory'], filters: [{ name: 'Amble Script', extensions: ['js', 'json'] }]});
+        if(typeof path != 'undefined') {
+            file = path;
+            Amble.app.scene.children[1].getComponent('Manager').save(path);
+        }
+    }
+}
+
+var menu = Menu.buildFromTemplate([
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'New File',
+                click: menuFunctions.newFile
+            },
+            {
+                label: 'Open',
+                click: menuFunctions.open
+            },
+            {
+                label: 'Save',
+                click: menuFunctions.save
+            },
+            {
+                label: 'Save As',
+                click: menuFunctions.saveAs
+            }
+        ]
+    }
+]);
+Menu.setApplicationMenu(menu);
+
+var app = new Amble.Application(application);
