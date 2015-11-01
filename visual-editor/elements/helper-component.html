@@ -22,7 +22,6 @@
 		height: 75%;
     }
 
-
 	</style>
 
 	<template>
@@ -59,12 +58,12 @@
 
         ready: function(){
             this.comp = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
-			this.components = [];
+			this.comps = [];
         },
 
         filterRoom: function(item) {
 			if(item.idName.match(new RegExp(this.filterText, 'i'))) {
-				this.components.push(item);
+				this.comps.push(item);
 				return true;
 			} else {
 				return false;
@@ -76,15 +75,15 @@
         },
 
 		enter: function(e){
-			Amble.app.scene.children[1].scripts[0].addComponent(this.components[0].idName);
+			Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName);
 		},
 
 		input: function(){
-			this.components = [];
+			this.comps = [];
 		},
 
         handleClick: function(e) {
-            Amble.app.scene.children[1].scripts[0].addComponent(e.target.id);
+            Amble.app.scene.children[1].getComponent('Manager').addComponent(e.target.id);
         }
 
 	});

@@ -93,37 +93,6 @@ window.Manager = require('./js/scripts/manager.js')
 // });
 
 //components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
-var component = {
-    componentData: {
-        _name: 'MyFunction',
-        _id: "my_function",
-        _input: [
-            {type: Object, name:'value', color: 'green'},
-            {type: Object, name:'mySimpleImposibleInput'},
-            {type: Object, name:'position'},
-            {type: Object, name:'myDataFromFile'}
-        ],
-        _output: [
-            {type: Object, name:'output'},
-            {type: Object, name:'mySimpleImposibleOutput'},
-            {type: Object, name:'error'},
-        ],
-        _body: function(data, output) {
-            console.log(data)
-            output(data)
-        }
-    },
-    transform: { name: "Amble.Transform", args: {
-        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-    }},
-    renderer: { name: "Component.Renderer" , args:{}},
-    scripts: [
-        { name: "Component", args: {} }
-    ]
-}
-
-//pass componsents
-
 
 //network json (future)
 // Flow.network({
@@ -157,15 +126,6 @@ var component = {
 //     }
 // })
 
-var manager = {
-    transform: { name: "Amble.Transform", args: {
-        position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
-    }},
-    scripts: [
-        { name: "Manager", args: {}}
-    ]
-}
-
 var fs = require('fs');
 var componentsFunctions = require('./components-functions.js');
 
@@ -179,31 +139,30 @@ var app = new Amble.Application({
     // height: 600,
     /* set all loading there */
     mainCamera: {
-
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
             context: document.body
         }},
-        scripts: [
+        components: [
             { name: "Camera", args: {}}
         ],
     },
     preload: function(){
 
-        var components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
-        for(var i = 0; i < components.length; i++) {
+        var _components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        for(var i = 0; i < _components.length; i++) {
             var obj = {
-                componentData : components[i],
+                componentData : _components[i],
                 transform: { name: "Amble.Transform", args: {
                     position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
                 }},
                 renderer: { name: "Component.Renderer" , args:{}},
-                scripts: [
+                components: [
                     { name: "Component", args: {} }
                 ]
             }
 
-            obj.componentData.body = componentsFunctions[components[i].idName];
+            obj.componentData.body = componentsFunctions[_components[i].idName];
 
             Flow.component({
                 name: obj.componentData.name,
@@ -213,6 +172,15 @@ var app = new Amble.Application({
             });
 
             componentsArray.push(obj);
+        }
+
+        var manager = {
+            transform: { name: "Amble.Transform", args: {
+                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}}
+            }},
+            components: [
+                { name: "Manager", args: {}}
+            ]
         }
 
         this.manager = this.scene.instantiate(manager);

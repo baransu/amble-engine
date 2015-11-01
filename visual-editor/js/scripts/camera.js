@@ -1,10 +1,7 @@
-var CAMERA = {};
+var Camera = {};
 
-CAMERA = function(args){
-}
-
-CAMERA.prototype = {
-    variables: {
+Camera = function(args){
+    this.variables = {
         lastMousePos: new Amble.Math.Vector2({}),
         done: false,
         zoomSpeed: 1,
@@ -12,7 +9,10 @@ CAMERA.prototype = {
         maxZoom: 0.15,
         minZoom: 2,
         translate: new Amble.Math.Vector2({})
-    },
+    };
+}
+
+Camera.prototype = {
     start: function(self) {
 
     },
@@ -33,7 +33,7 @@ CAMERA.prototype = {
     },
     onmousewheel: function(self, e){
 
-        if(!Amble.app.scene.children[1].scripts[0].var.isHelper) {
+        if(!Amble.app.scene.children[1].getComponent('Manager').var.isHelper) {
             var zoomToX = self.camera.size.x/2;
             var zoomToY = self.camera.size.y/2;
             var wheel = e.wheelDelta/120;
@@ -76,4 +76,4 @@ CAMERA.prototype = {
     }
 }
 
-module.exports = CAMERA;
+module.exports = Camera;

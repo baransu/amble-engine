@@ -29,8 +29,8 @@ window.Amble = (function(){
                 var sizeDifference = window.innerWidth/Amble.app.mainCamera.camera.size.x;
                 Amble.app.mainCamera.camera.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
                 Amble.app.mainCamera.camera.view = new Amble.Math.Vector2(Amble.app.mainCamera.camera.position.x - Amble.app.mainCamera.camera.size.x, Amble.app.mainCamera.camera.position.y - Amble.app.mainCamera.camera.size.y);
-                Amble.app.mainCamera.scripts[0].variables.maxZoom *= sizeDifference;
-                Amble.app.mainCamera.scripts[0].variables.minZoom *= sizeDifference;
+                Amble.app.mainCamera.getComponent('Camera').variables.maxZoom *= sizeDifference;
+                Amble.app.mainCamera.getComponent('Camera').variables.minZoom *= sizeDifference;
             });
         }
 
@@ -187,10 +187,13 @@ window.Amble = (function(){
             var copy = {};
             if (obj instanceof Object || obj instanceof Array) {
                 for(var attr in obj) {
-                    if(attr == 'scripts') {
+                    if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
-                            copy[attr][i] = Amble.Utils.makeFunction(obj[attr][i]);
+                            copy[attr][i] = {
+                                id: obj[attr][i].name,
+                                body: Amble.Utils.makeFunction(obj[attr][i])
+                            }
                         }
                     } else {
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
@@ -213,22 +216,39 @@ window.Amble = (function(){
             return  fn;
         }
     };
+    Amble.Actor = function(args) {
+        //transform is basic actro component
+        this.transform = {};
+        //other are optional
+        //2 types of components (user custom in components array, and engine built in components like renderer)
+        this.renderer = {};
+        this.components = {};
+    }
+    Amble.Actor.prototype = {
+        getComponent: function(componentName){
+            var component = this.components.find(c => c.id == componentName);
+            return component.body;
+        }
+    }
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
     }
     Amble.Scene.prototype = {
         instantiate: function(obj){
+            var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
-            // this.add(clone);
-            return this.add(clone);
+            for(var i in clone) {
+                actor[i] = clone[i];
+            }
+            return this.add(actor);
         },
         add: function(object) {
-            if(object.scripts != 'undefined') {
-                for(var i in object.scripts) {
-                    var script = object.scripts[i];
-                    if(typeof script.update == 'function'){
-                        script.start(object);
+            if(object.components != 'undefined') {
+                for(var i in object.components) {
+                    var _component = object.components[i].body;
+                    if(typeof _component.update == 'function'){
+                        _component.start(object);
                     }
                 }
             }
@@ -243,11 +263,11 @@ window.Amble = (function(){
         },
         awake: function(){
             for(var i in this.children){
-                /* scripts start */
-                for(var j in this.children[i].scripts){
-                    var script = this.children[i].scripts[j];
-                    if(typeof script.start == 'function'){
-                        script.start(this.children[i]);
+                /* component start */
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.start == 'function'){
+                        _component.start(this.children[i]);
                     }
                 }
             }
@@ -255,13 +275,14 @@ window.Amble = (function(){
         update: function(){
             for(var i in this.children){
                 /* script update */
-                for(var j in this.children[i].scripts){
-                    var script = this.children[i].scripts[j];
-                    if(typeof script.update == 'function'){
-                        script.update(this.children[i]);
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.update == 'function'){
+                        _component.update(this.children[i]);
                     }
                 }
             }
+
         },
         render: function(camera){
             for(var i in this.children){
@@ -270,12 +291,15 @@ window.Amble = (function(){
                     this.children[i].renderer.render(this.children[i], camera)
                 }
             }
+
         }
     };
     /* Transform */
     Amble.Transform = function(args) {
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.size = args['size'] || new Amble.Math.Vector2({});
+        //scale?
+        //rotation?
     }
     /* Graphics */
     Amble.Graphics = {};
@@ -456,12 +480,12 @@ window.Amble = (function(){
             Amble.Input.mousePosition.x = e.clientX || e.pageX;
     		Amble.Input.mousePosition.y = e.clientY || e.pageY;
         }, false);
-        document.body.addEventListener("wheel", function(e){
+        document.addEventListener("wheel", function(e){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;
             // Amble.Input._event = e;
-            Amble.app.mainCamera.scripts[0].onmousewheel(Amble.app.mainCamera, e);
+            Amble.app.mainCamera.getComponent('Camera').onmousewheel(Amble.app.mainCamera, e);
         }, false);
         // document.addEventListener('touchstart', function(e){
         //

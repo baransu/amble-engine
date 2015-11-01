@@ -1,6 +1,6 @@
-var COMPONENT = {};
+var Component = {};
 
-COMPONENT = function(args){
+Component = function(args){
     this.inNodes = [];
     this.outNodes = [];
     this.connections = [];
@@ -15,8 +15,7 @@ COMPONENT = function(args){
     this.color = '#BDBDBD';
 }
 
-//script part
-COMPONENT.prototype = {
+Component.prototype = {
     calcLines: function(ctx, text, maxWidth, lineHeight){
         var words = text.split(' ');
         var line = '';
@@ -35,6 +34,7 @@ COMPONENT.prototype = {
         return lines;
     },
     start: function(self) {
+
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext("2d");
         ctx.font = this.bodyLineHeight + "px Arial"
@@ -80,7 +80,7 @@ COMPONENT.prototype = {
                 color: self.componentData.input[i].color || '#BDBDBD',
                 size: this.margin,
                 type: 'in',
-                parent: self.scripts[0],
+                parent: self.getComponent('Component'), //this?
                 connected: false,
                 _x: 0,
                 _y: 0
@@ -93,7 +93,7 @@ COMPONENT.prototype = {
                 color: self.componentData.output[i].color || '#BDBDBD',
                 size: this.margin,
                 type: 'out',
-                parent: self.scripts[0],
+                parent: self.getComponent('Component'), //this?
                 connected: false,
                 _x: 0,
                 _y: 0
@@ -139,7 +139,7 @@ COMPONENT.prototype = {
     }
 }
 
-COMPONENT.Renderer = function(args){
+Component.Renderer = function(args){
     this.headerColor = '#EEEEEE';
     this.bodyColor = '#fff';
     this.textColor = '#212121';
@@ -149,7 +149,7 @@ COMPONENT.Renderer = function(args){
     this.componentsLayer = 1; //0 index
     this.nodesLayer = 0; // -1 index
 }
-COMPONENT.Renderer.prototype = {
+Component.Renderer.prototype = {
     renderText: function(ctx, text, x, y, maxWidth, lineHeight){
         var words = text.split(' ');
         var line = '';
@@ -170,7 +170,7 @@ COMPONENT.Renderer.prototype = {
     },
     render: function(self, camera){
 
-        var _ = self.scripts[0];
+        var _ = self.getComponent('Component');
 
         //draw body
         var layer = camera.layer(this.componentsLayer);
@@ -209,34 +209,34 @@ COMPONENT.Renderer.prototype = {
         layer.ctx.font = "500 " + _.bodyTextFont + "px OpenSans";
 
         layer.ctx.textAlign = "left"
-        for(var i = 0; i < self.scripts[0].inNodes.length; i++) {
+        for(var i = 0; i < self.getComponent('Component').inNodes.length; i++) {
             var x = self.transform.position.x - camera.view.x - _.width/2 + 2*_.margin;
             var y = self.transform.position.y - camera.view.y - _.bodyHeight/2 + _.margin + i*(_.bodyLineHeight + _.margin);
 
             layer.ctx.save();
-            layer.fillStyle(self.scripts[0].inNodes[i].color || this.defaultNodeStartColor)
+            layer.fillStyle(self.getComponent('Component').inNodes[i].color || this.defaultNodeStartColor)
                 .fillRect(x - 3*_.margin/2, y + _.margin/2, _.margin, _.margin)
                 .strokeStyle('#000')
                 .strokeRect(x - 3*_.margin/2, y + _.margin/2, _.margin, _.margin);
             layer.ctx.restore();
 
-            this.renderText(layer.ctx, self.scripts[0].inNodes[i].name, x, y + _.bodyLineHeight, _.width/2 - _.margin, _.bodyLineHeight)
+            this.renderText(layer.ctx, self.getComponent('Component').inNodes[i].name, x, y + _.bodyLineHeight, _.width/2 - _.margin, _.bodyLineHeight)
         }
 
         //draw outputs
         layer.ctx.textAlign = "right"
-        for(var i = 0; i < self.scripts[0].outNodes.length; i++) {
+        for(var i = 0; i < self.getComponent('Component').outNodes.length; i++) {
             var x = self.transform.position.x - camera.view.x + _.width/2 - 2*_.margin;
             var y = self.transform.position.y - camera.view.y - _.bodyHeight/2 + _.margin + i*(_.bodyLineHeight + _.margin);
 
             layer.ctx.save();
-            layer.fillStyle(self.scripts[0].outNodes[i].color || this.defaultNodeStartColor)
+            layer.fillStyle(self.getComponent('Component').outNodes[i].color || this.defaultNodeStartColor)
                 .fillRect(x + _.margin/3, y + _.margin/2, _.margin, _.margin)
                 .strokeStyle('#000')
                 .strokeRect(x + _.margin/3, y + _.margin/2, _.margin, _.margin);
             layer.ctx.restore();
 
-            this.renderText(layer.ctx, self.scripts[0].outNodes[i].name, x, y + _.bodyLineHeight, _.width/2 - _.margin, _.bodyLineHeight)
+            this.renderText(layer.ctx, self.getComponent('Component').outNodes[i].name, x, y + _.bodyLineHeight, _.width/2 - _.margin, _.bodyLineHeight)
         }
 
         layer.ctx.restore();
@@ -244,8 +244,8 @@ COMPONENT.Renderer.prototype = {
         //nodes drawing
         var layer = camera.layer(this.nodesLayer);
 
-        for(var i = 0 ; i < self.scripts[0].connections.length; i++) {
-            var c = self.scripts[0].connections[i];
+        for(var i = 0 ; i < self.getComponent('Component').connections.length; i++) {
+            var c = self.getComponent('Component').connections[i];
             var sizeStart = c.startNode.size || 0;
             var sizeEnd = c.endNode.size || 0;
 
@@ -277,15 +277,15 @@ COMPONENT.Renderer.prototype = {
         }
 
         //temp node
-        if(self.scripts[0].startNode && self.scripts[0].endNode) {
-            var sizeStart = self.scripts[0].startNode.size || 0;
-            var sizeEnd = self.scripts[0].endNode.size || 0;
+        if(self.getComponent('Component').startNode && self.getComponent('Component').endNode) {
+            var sizeStart = self.getComponent('Component').startNode.size || 0;
+            var sizeEnd = self.getComponent('Component').endNode.size || 0;
 
-            var startX = self.scripts[0].startNode.x - camera.view.x + sizeStart/2;
-            var startY = self.scripts[0].startNode.y - camera.view.y + sizeStart/2;
+            var startX = self.getComponent('Component').startNode.x - camera.view.x + sizeStart/2;
+            var startY = self.getComponent('Component').startNode.y - camera.view.y + sizeStart/2;
 
-            var endX = self.scripts[0].endNode.x - camera.view.x + sizeEnd/2;
-            var endY = self.scripts[0].endNode.y - camera.view.y + sizeEnd/2;
+            var endX = self.getComponent('Component').endNode.x - camera.view.x + sizeEnd/2;
+            var endY = self.getComponent('Component').endNode.y - camera.view.y + sizeEnd/2;
 
             //outline
             layer.strokeStyle('#000')
@@ -298,7 +298,7 @@ COMPONENT.Renderer.prototype = {
             layer.stroke();
 
             //outline
-            layer.strokeStyle(self.scripts[0].endNode.color || _.color)
+            layer.strokeStyle(self.getComponent('Component').endNode.color || _.color)
                 .lineWidth(_.margin/2);
             layer.ctx.beginPath();
             layer.ctx.moveTo(startX, startY);
@@ -310,4 +310,4 @@ COMPONENT.Renderer.prototype = {
    }
 }
 
-module.exports = COMPONENT;
+module.exports = Component;
