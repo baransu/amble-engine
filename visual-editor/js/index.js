@@ -132,16 +132,12 @@ var componentsFunctions = require('./components-functions.js');
 var componentsArray = [];
 
 var app = new Amble.Application({
-    /* use to set width and height of canvas, default 800x600 */
-    fullscreen: true,
     resize: true,
-    // width: 800,
-    // height: 600,
     /* set all loading there */
     mainCamera: {
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: document.body
+            context: "workspace"
         }},
         components: [
             { name: "Camera", args: {}}

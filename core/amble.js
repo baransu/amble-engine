@@ -14,34 +14,42 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
-        this.fullscreen = typeof args['fullscreen'] === 'boolean' ? args['fullscreen'] : false;
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
 
         //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
 
+                var camera = Amble.app.mainCamera.camera;
+                var width = parseInt(camera.context.offsetWidth);
+                var height = parseInt(camera.context.offsetHeight);
+
                 for(var i = 0; i > Amble.app.mainCamera.camera.layers.length; i++) {
-                    Amble.app.width = Amble.app.mainCamera.camera.layers[i].layer.canvas.width = window.innerWidth;
-                    Amble.app.height = Amble.app.mainCamera.camera.layers[i].layer.canvas.height = window.innerHeight;
+                    Amble.app.width = camera.layers[i].layer.canvas.width = width;
+                    Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                var sizeDifference = window.innerWidth/Amble.app.mainCamera.camera.size.x;
-                Amble.app.mainCamera.camera.size = new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
-                Amble.app.mainCamera.camera.view = new Amble.Math.Vector2(Amble.app.mainCamera.camera.position.x - Amble.app.mainCamera.camera.size.x, Amble.app.mainCamera.camera.position.y - Amble.app.mainCamera.camera.size.y);
+                var sizeDifference = width/camera.size.x;
+                camera.size = new Amble.Math.Vector2({ x: width, y: height });
+                camera.view = new Amble.Math.Vector2(camera.position.x - width, camera.position.y - height);
                 Amble.app.mainCamera.getComponent('Camera').variables.maxZoom *= sizeDifference;
                 Amble.app.mainCamera.getComponent('Camera').variables.minZoom *= sizeDifference;
             });
         }
 
-        if(this.fullscreen) {
-            this.width = window.innerWidth;
-            this.height = window.innerHeight;
-        } else {
-            //init size
-            this.width = typeof args['width'] === 'number' ? args['width'] : 800;
-            this.height = typeof args['height'] === 'number' ? args['height'] : 600;
+        this.scene = new Amble.Scene();
+
+        var mainCamera = {
+            cam: { name: "Amble.Camera", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                }
+            }
         }
+        this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
+
+        console.log(this.mainCamera.camera.size.x)
+        this.width = this.mainCamera.camera.size.x || 800;
+        this.height = this.mainCamera.camera.size.y || 600;
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -66,18 +74,6 @@ window.Amble = (function(){
             this.scene.render(this.mainCamera.camera);
         };
 
-        this.scene = new Amble.Scene
-        var mainCamera = {
-
-            cam: { name: "Amble.Camera", args: {
-                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                    context: document.body,
-                }
-            }
-        }
-
-        this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
-        // this.camera.cam.position = new Amble.Math.Vector2({x: window.innerWidth/2, y: window.innerHeight/2})
         /* setting loader */
         this.loader = new Amble.Data.Loader();
         /* loading screen layer and loading screen */
@@ -128,8 +124,8 @@ window.Amble = (function(){
     };
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
-        this.size = args['size'] || new Amble.Math.Vector2({x: window.innerWidth, y: window.innerHeight});
-        this.context = args['context'] || document.body;
+        this.context = document.getElementById(args['context']) || document.body;
+        this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
         this.layers = [];
@@ -445,6 +441,7 @@ window.Amble = (function(){
         _mouseValues: [],
         _keyValues: [],
         mousePosition: new Amble.Math.Vector2({}),
+        offset: new Amble.Math.Vector2({}),
         wheelDelta: new Amble.Math.Vector3({}),
         isShiftPressed: false,
         isCtrlPressed: false,
@@ -473,12 +470,20 @@ window.Amble = (function(){
             Amble.Input._mouseValues[e.which] = false;
         }, false);
         document.addEventListener('mousemove', function(e){
+
+            var offsetLeft = Amble.app.mainCamera.camera.context.offsetLeft;
+            var offsetTop = Amble.app.mainCamera.camera.context.offsetTop;
+
             if(Amble.Input.debug) {
-                console.log(e.clientX);
-                console.log(e.clientY)
+                console.log(e.clientX - offsetLeft);
+                console.log(e.clientY - offsetTop);
             }
-            Amble.Input.mousePosition.x = e.clientX || e.pageX;
-    		Amble.Input.mousePosition.y = e.clientY || e.pageY;
+
+            Amble.Input.offset.x = offsetLeft;
+            Amble.Input.offset.y = offsetTop;
+
+            Amble.Input.mousePosition.x = e.clientX - offsetLeft;
+    		Amble.Input.mousePosition.y = e.clientY - offsetTop;
         }, false);
         document.addEventListener("wheel", function(e){
             Amble.Input.wheelDelta.x = e.deltaX;

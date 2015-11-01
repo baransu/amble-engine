@@ -197,15 +197,16 @@ Manager.prototype = {
                 obj.startNode = secondNode;
                 obj.endNode = this.var.helperNode;
                 secondNode.parent.connections.push(obj);
-            } else {
+                this.var.helperNode.connected = true;
+                secondNode.connected = true;
+            } else if(_component.getComponent('Component').inNodes[0]) {
                 secondNode = _component.getComponent('Component').inNodes[0];
                 obj.startNode = this.var.helperNode;
                 obj.endNode = secondNode;
                 this.var.helperNode.parent.connections.push(obj);
+                this.var.helperNode.connected = true;
+                secondNode.connected = true;
             }
-
-            this.var.helperNode.connected = true;
-            secondNode.connected = true;
         }
 
         this.hideHelper();
@@ -219,13 +220,15 @@ Manager.prototype = {
         var height = 600/2;
         div.style.width = width + 'px';
         div.style.height = height + 'px';
-        div.style.left = Amble.Input.mousePosition.x + 'px';
-        div.style.top = Amble.Input.mousePosition.y + 'px';
+        div.style.left = Amble.Input.mousePosition.x + Amble.Input.offset.x + 'px';
+        div.style.top = Amble.Input.mousePosition.y + Amble.Input.offset.y + 'px';
         //move to fit screen
 
+        console.log(Amble.Input.mousePosition.x + Amble.Input.offset.x)
+
         //left
-        if(parseInt(div.style.left) < 0) {
-            div.style.left = 0 + 'px';
+        if(parseInt(div.style.left) < Amble.Input.offset.x) {
+            div.style.left = Amble.Input.offset.x + 'px';
         }
         //right
         if(parseInt(div.style.left) + parseInt(div.style.width) > size.x) {
@@ -236,8 +239,8 @@ Manager.prototype = {
             div.style.top = size.y - size.y/100 - parseInt(div.style.height) + 'px';
         }
         //top
-        if(parseInt(div.style.top) < 0) {
-            div.style.top = 0 + 'px';
+        if(parseInt(div.style.top) < Amble.Input.offset.y) {
+            div.style.top = Amble.Input.offset.y + 'px';
         }
 
         this.var.context.appendChild(div);

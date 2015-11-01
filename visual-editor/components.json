@@ -1,6 +1,20 @@
 {
     "components" : [
         {
+            "idName": "OnUpdate",
+            "input": [],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "OnStart",
+            "input": [],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
             "idName": "myAwesomeFunction",
             "input": [
                 { "name": "value", "color": "#33691e" },
