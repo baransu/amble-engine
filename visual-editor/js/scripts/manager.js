@@ -1,9 +1,9 @@
-var MANAGER = {};
+var Manager = {};
 
-MANAGER = function(args){
+Manager = function(args){
     this.scene = Amble.app.scene;
     this.component = null;
-    this.components = [];
+    this.comps = [];
     this.currentNode = null;
     this.var = {
         input: false,
@@ -19,8 +19,7 @@ MANAGER = function(args){
     };
 }
 
-//script part
-MANAGER.prototype = {
+Manager.prototype = {
     start: function(self) {
         //load saved file
     },
@@ -29,17 +28,17 @@ MANAGER.prototype = {
         var scale = Amble.app.mainCamera.camera.scale;
 
         var lastMouse = new Amble.Math.Vector2({});
-        lastMouse.x = this.var.mouse.x - ((Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x);
-        lastMouse.y = this.var.mouse.y - ((Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y);
+        lastMouse.x = this.var.mouse.x - ((Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.getComponent('Camera').variables.translate.x) + Amble.app.mainCamera.camera.view.x);
+        lastMouse.y = this.var.mouse.y - ((Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.getComponent('Camera').variables.translate.y) + Amble.app.mainCamera.camera.view.y);
 
-        this.var.mouse.x = (Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.scripts[0].variables.translate.x) + Amble.app.mainCamera.camera.view.x;
-        this.var.mouse.y = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.scripts[0].variables.translate.y) + Amble.app.mainCamera.camera.view.y;
+        this.var.mouse.x = (Amble.Input.mousePosition.x/scale - Amble.app.mainCamera.getComponent('Camera').variables.translate.x) + Amble.app.mainCamera.camera.view.x;
+        this.var.mouse.y = (Amble.Input.mousePosition.y/scale - Amble.app.mainCamera.getComponent('Camera').variables.translate.y) + Amble.app.mainCamera.camera.view.y;
 
-        if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && this.var.input) {
+        if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && this.var.input && !this.var.isHelper) {
             this.var.input = false;
             var node = null;
-            for(var i = 0; i < this.components.length; i++) {
-                node = this.components[i].scripts[0].checkCollision(this.var.mouse.x, this.var.mouse.y);
+            for(var i = 0; i < this.comps.length; i++) {
+                node = this.comps[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
                 if(node != null) {
                     break;
                 }
@@ -54,12 +53,12 @@ MANAGER.prototype = {
 
                 this.component = null;
 
-                for(var i = 0; i < this.components.length; i++) {
+                for(var i = 0; i < this.comps.length; i++) {
 
-                    var pos = this.components[i].transform.position;
-                    var width = this.components[i].scripts[0].width;
-                    var bodyHeight = this.components[i].scripts[0].bodyHeight;
-                    var headerHeight = this.components[i].scripts[0].headerHeight;
+                    var pos = this.comps[i].transform.position;
+                    var width = this.comps[i].getComponent('Component').width;
+                    var bodyHeight = this.comps[i].getComponent('Component').bodyHeight;
+                    var headerHeight = this.comps[i].getComponent('Component').headerHeight;
 
                     if( this.var.mouse.x >= pos.x - width/2 && this.var.mouse.x <= pos.x + width/2 &&
                         this.var.mouse.y >= pos.y - bodyHeight/2 - headerHeight && this.var.mouse.y <= pos.y + bodyHeight/2) {
@@ -68,7 +67,7 @@ MANAGER.prototype = {
                         this.var.holderMod.y = pos.y - this.var.mouse.y;
                         this.var.hold = true;
                         this.var.holdNode = false;
-                        this.component = this.components[i]
+                        this.component = this.comps[i]
                     }
                 }
             }
@@ -81,8 +80,8 @@ MANAGER.prototype = {
             if(this.var.holdNode) {
 
                 var n = null
-                for(var i = 0; i < this.components.length; i++) {
-                    n = this.components[i].scripts[0].checkCollision(this.var.mouse.x, this.var.mouse.y);
+                for(var i = 0; i < this.comps.length; i++) {
+                    n = this.comps[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
                     if(n != null) {
                         break;
                     }
@@ -184,26 +183,26 @@ MANAGER.prototype = {
     },
     addComponent: function(idName) {
         var component = componentsArray.find(c => c.componentData.idName == idName);
-        var comp = this.scene.instantiate(component);
-        comp.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
-        this.components.push(comp);
+        var _component = this.scene.instantiate(component);
+        _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
+        this.comps.push(_component);
+        console.log(_component)
 
         if(this.var.helperNode) {
 
             var obj = {};
             var secondNode = null;
             if(this.var.helperNode.type == 'in') {
-                secondNode = comp.scripts[0].outNodes[0];
+                secondNode = _component.getComponent('Component').outNodes[0];
                 obj.startNode = secondNode;
                 obj.endNode = this.var.helperNode;
                 secondNode.parent.connections.push(obj);
             } else {
-                secondNode = comp.scripts[0].inNodes[0];
+                secondNode = _component.getComponent('Component').inNodes[0];
                 obj.startNode = this.var.helperNode;
                 obj.endNode = secondNode;
                 this.var.helperNode.parent.connections.push(obj);
             }
-
 
             this.var.helperNode.connected = true;
             secondNode.connected = true;
@@ -260,4 +259,4 @@ MANAGER.prototype = {
     }
 }
 
-module.exports = MANAGER;
+module.exports = Manager;
