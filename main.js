@@ -18,6 +18,8 @@ app.on('ready', function(){
     mainWindow.on('closed', function() {
         mainWindow = null;
     });
+
+
 });
 
 app.on('browser-window-blur', function() {
