@@ -488,7 +488,6 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;
-            // Amble.Input._event = e;
             Amble.app.mainCamera.getComponent('Camera').onmousewheel(Amble.app.mainCamera, e);
         }, false);
         // document.addEventListener('touchstart', function(e){

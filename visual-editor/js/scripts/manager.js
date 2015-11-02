@@ -153,6 +153,7 @@ Manager.prototype = {
         if (Amble.Input.isKeyPressed(65) && this.var.input && !this.var.isHelper) {
             this.hideHelper();
             this.showHelper();
+            console.log('asdasd')
             this.var.input = false;
         }
 
@@ -182,45 +183,51 @@ Manager.prototype = {
         }
 
         var lastMouseButton = Amble.Input.isMousePressed(3);
+
     },
     load: function(path){
         console.log('load: ' + path)
+        if(path != 'untitled') {
+            var data = fs.readFileSync(path);
+            data = JSON.parse(data);
+            console.log(data);
+
+            for(var i = 0; i < data.connections.length; i++) {
+                var component = componentsArray.find(c => c.componentData.idName == data.connections[i].idName);
+                var _component = this.scene.instantiate(component);
+                _component.transform.position = new Amble.Math.Vector2({x: data.connections[i].position.x, y: data.connections[i].position.y});
+                _component.getComponent('Component').id = data.connections[i].id;
+                this.componentsCount = data.connections[i].id;
+                this.components.push(_component);
+            }
+
+            //make connections
+            for(var i = 0; i < data.connections.length; i++) {
+                var d = data.connections[i];
+                var comp = this.components.find(c => c.getComponent('Component').id == d.id);
+                for(var j = 0; j < d.connections.length; j++) {
+                    var c = d.connections[j];
+                    var startNode = comp.getComponent('Component').outNodes[c.outNode];
+                    console.log(c);
+                    var endComp = this.components.find(eC => eC.getComponent('Component').id == c.inNode.id);
+                    var endNode = endComp.getComponent('Component').inNodes[c.inNode.node];
+
+                    startNode.connected = true;
+                    endNode.connected = true;
+
+                    var obj = {
+                        startNode: startNode,
+                        endNode: endNode
+                    }
+
+                    comp.getComponent('Component').connections.push(obj);
+
+                }
+            }
+        }
     },
     save: function(path){
         console.log('save-to: ' + path)
-    },
-    addComponent: function(idName) {
-        var component = componentsArray.find(c => c.componentData.idName == idName);
-        var _component = this.scene.instantiate(component);
-        _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
-        _component.getComponent('Component').id = this.componentsCount;
-        this.componentsCount++;
-        this.components.push(_component);
-
-
-        if(this.var.helperNode) {
-
-            var obj = {};
-            var secondNode = null;
-            if(this.var.helperNode.type == 'in') {
-                secondNode = _component.getComponent('Component').outNodes[0];
-                obj.startNode = secondNode;
-                obj.endNode = this.var.helperNode;
-                secondNode.parent.connections.push(obj);
-                this.var.helperNode.connected = true;
-                secondNode.connected = true;
-            } else if(_component.getComponent('Component').inNodes[0]) {
-                secondNode = _component.getComponent('Component').inNodes[0];
-                obj.startNode = this.var.helperNode;
-                obj.endNode = secondNode;
-                this.var.helperNode.parent.connections.push(obj);
-                this.var.helperNode.connected = true;
-                secondNode.connected = true;
-            }
-        }
-
-        this.hideHelper();
-
         // print all network
         this.graph = [];
         for(var i = 0; i < this.components.length; i++) {
@@ -248,7 +255,50 @@ Manager.prototype = {
             this.graph.push(obj);
         }
 
-        console.log(this.graph)
+        var data = {
+            date: Date.now(),
+            variables: [],
+            connections: this.graph
+        }
+
+        var script = JSON.stringify(data)
+        console.log(script);
+        fs.writeFileSync(path, script);
+    },
+    addComponent: function(idName) {
+        var component = componentsArray.find(c => c.componentData.idName == idName);
+        var _component = this.scene.instantiate(component);
+        _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
+        _component.getComponent('Component').id = this.componentsCount;
+        this.componentsCount++;
+        this.components.push(_component);
+
+        if(this.var.helperNode) {
+
+            var obj = {};
+            var secondNode = null;
+            if(this.var.helperNode.type == 'in') {
+                secondNode = _component.getComponent('Component').outNodes[0];
+                obj.startNode = secondNode;
+                obj.endNode = this.var.helperNode;
+                secondNode.parent.connections.push(obj);
+                this.var.helperNode.connected = true;
+                secondNode.connected = true;
+            } else if(_component.getComponent('Component').inNodes[0]) {
+                secondNode = _component.getComponent('Component').inNodes[0];
+                obj.startNode = this.var.helperNode;
+                obj.endNode = secondNode;
+                this.var.helperNode.parent.connections.push(obj);
+                this.var.helperNode.connected = true;
+                secondNode.connected = true;
+            }
+        }
+
+        // console.log(this.var.helper)
+        // this.hideHelper();
+        this.var.helper = null;
+        this.var.isHelper = false;
+        this.var.helperNode = null;
 
     },
     showHelper: function() {
@@ -262,9 +312,7 @@ Manager.prototype = {
         div.style.height = height + 'px';
         div.style.left = Amble.Input.mousePosition.x + Amble.Input.offset.x + 'px';
         div.style.top = Amble.Input.mousePosition.y + Amble.Input.offset.y + 'px';
-        //move to fit screen
-
-        console.log(Amble.Input.mousePosition.x + Amble.Input.offset.x)
+        div.id = "helper";
 
         //left
         if(parseInt(div.style.left) < Amble.Input.offset.x) {
@@ -283,18 +331,16 @@ Manager.prototype = {
             div.style.top = Amble.Input.offset.y + 'px';
         }
 
+        this.var.helper = div;
         this.var.context.appendChild(div);
 
         this.var.helperStartMouse = new Amble.Math.Vector2({x: this.var.mouse.x, y: this.var.mouse.y});
 
-        this.var.helper = div;
         this.var.isHelper = true;
     },
     hideHelper: function(){
-
-        this.var.helperNode = null;
-
-        if(this.var.helper) {
+        if(this.var.helper != null) {
+            this.var.helperNode = null;
             this.var.context.removeChild(this.var.helper);
             this.var.helper = null;
             this.var.isHelper = false;

@@ -3,6 +3,7 @@ var BrowserWindow = require('browser-window');
 var ipc = require('ipc');
 var shell = require('shell');
 var dialog = require('dialog');
+var globalShortcut = require('global-shortcut');
 
 app.on('ready', function(){
     var mainWindow = new BrowserWindow({
@@ -18,3 +19,7 @@ app.on('ready', function(){
         mainWindow = null;
     });
 });
+
+app.on('browser-window-blur', function() {
+    globalShortcut.unregisterAll();
+})

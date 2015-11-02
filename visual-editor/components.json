@@ -8,6 +8,16 @@
             ]
         },
         {
+            "idName": "abstractGitGut",
+            "input": [
+                { "name": "abstract", "color": "#0000ff"},
+                { "name": "git"}
+            ],
+            "output": [
+                { "name": "gut" }
+            ]
+        },
+        {
             "idName": "OnStart",
             "input": [],
             "output": [
