@@ -230,6 +230,7 @@ window.Amble = (function(){
 
         //transform is basic actro component
         this.transform = {};
+
         
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
