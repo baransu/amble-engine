@@ -1,5 +1,8 @@
 window.Amble = (function(){
+
     var Amble = {};
+    Amble.app = {};
+
     Object.size = function(obj) {
         var size = 0, key;
         for (key in obj) {
@@ -8,7 +11,6 @@ window.Amble = (function(){
         return size;
     };
 
-    Amble.app = {}
     /* Game */
     Amble.Application = function(args){
         var that = this;
@@ -47,7 +49,6 @@ window.Amble = (function(){
         }
         this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
 
-        console.log(this.mainCamera.camera.size.x)
         this.width = this.mainCamera.camera.size.x || 800;
         this.height = this.mainCamera.camera.size.y || 600;
 
@@ -65,6 +66,7 @@ window.Amble = (function(){
             //update all objects on scene
             //priorytet sort?
         };
+
         this.render = function(){
             for(var i = 0; i < this.mainCamera.camera.layers.length; i++) {
                 this.mainCamera.camera.layers[i].layer.clear();
@@ -76,9 +78,8 @@ window.Amble = (function(){
 
         /* setting loader */
         this.loader = new Amble.Data.Loader();
+
         /* loading screen layer and loading screen */
-        // this.layer = new Amble.Graphics.Layer(this.width, this.height);
-        // this.layer.appendTo(document.body);
         this.loadingInterval = setInterval(function(){
             var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
             that.mainCamera.camera.layer('default')
@@ -89,8 +90,10 @@ window.Amble = (function(){
 
         /* setting all loading heppens there */
         this.preload();
+
         /* all loading */
         this.loader.loadAll(function(){
+
             clearInterval(that.loadingInterval);
             // that.layer.remove();
             Amble.Input._setListeners();
@@ -102,8 +105,9 @@ window.Amble = (function(){
 
         /* hearth of the Amble/game */
         function gameLoop(){
+
             var now = Date.now();
-            Amble.Time.deltaTime = (now - Amble.Time.lastTime) / 1000.0;
+            Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
             //dafuq?
             that.preupdate();
@@ -113,15 +117,17 @@ window.Amble = (function(){
             that.render();
             that.postrender();
 
-            Amble.Time.lastTime = now;
+            Amble.Time._lastTime = now;
             requestAnimationFrame(gameLoop)
         }
-    }
+    };
+
     /* Time */
     Amble.Time = {
         deltaTime: 0,
-        lastTime: 0
+        _lastTime: 0
     };
+
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.context = document.getElementById(args['context']) || document.body;
@@ -129,8 +135,10 @@ window.Amble = (function(){
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
         this.layers = [];
-    }
+    };
+
     Amble.Camera.prototype = {
+
         layer: function(index){
             if(index < 0) throw "Z-index cannot be negative!"
             var layer = this.layers.find(l => l.index == index);
@@ -140,6 +148,7 @@ window.Amble = (function(){
                 return layer.layer;
             }
         },
+
         addLayer: function(index){
             var l = this.layers.find(l => l.index == index);
             if(!l) {
@@ -150,18 +159,19 @@ window.Amble = (function(){
                 layer.layer.appendTo(this.context)
                 this.layers.push(layer);
 
-                // this.layers.sort(function(a, b){ return a.index - b.index })
                 return layer;
-                // throw "You can't add layer. There is layer with given z-index!";
             }
         },
+
         update: function(){
             this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x, y:this.position.y - this.size.y});
             return this;
         }
     };
+
     /* Utils */
     Amble.Utils = {
+
         makeFunction: function(obj) {
             if(obj instanceof Object) {
                 if(obj.hasOwnProperty('name')) {
@@ -179,6 +189,7 @@ window.Amble = (function(){
                 return obj;
             }
         },
+
         clone: function(obj) {
             var copy = {};
             if (obj instanceof Object || obj instanceof Array) {
@@ -198,6 +209,7 @@ window.Amble = (function(){
             }
             return copy;
         },
+
         stringToFunction: function(str) {
             var arr = str.split(".");
             var fn = (window || this);
@@ -211,7 +223,9 @@ window.Amble = (function(){
 
             return  fn;
         }
+
     };
+
     Amble.Actor = function(args) {
         //transform is basic actro component
         this.transform = {};
@@ -219,18 +233,23 @@ window.Amble = (function(){
         //2 types of components (user custom in components array, and engine built in components like renderer)
         this.renderer = {};
         this.components = {};
-    }
+    };
+
     Amble.Actor.prototype = {
+
         getComponent: function(componentName){
             var component = this.components.find(c => c.id == componentName);
             return component.body;
         }
-    }
+    };
+
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
-    }
+    };
+
     Amble.Scene.prototype = {
+
         instantiate: function(obj){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
@@ -239,6 +258,7 @@ window.Amble = (function(){
             }
             return this.add(actor);
         },
+
         add: function(object) {
             if(object.components != 'undefined') {
                 for(var i in object.components) {
@@ -252,11 +272,13 @@ window.Amble = (function(){
             this.children.push(object);
             return object;
         },
+
         remove: function(object){
             var index = this.children.indexOf(object);
             if(index != -1)
                 this.children.splice(index, 1);
         },
+
         awake: function(){
             for(var i in this.children){
                 /* component start */
@@ -268,6 +290,7 @@ window.Amble = (function(){
                 }
             }
         },
+
         update: function(){
             for(var i in this.children){
                 /* script update */
@@ -280,6 +303,7 @@ window.Amble = (function(){
             }
 
         },
+
         render: function(camera){
             for(var i in this.children){
                 /* render objects by renderer*/
@@ -288,17 +312,76 @@ window.Amble = (function(){
                 }
             }
 
+        },
+
+        //input events
+        onmousewheel: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmousewheel == 'function'){
+                        _component.onmousewheel(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        onmousedown: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmousedown == 'function'){
+                        _component.onmousedown(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        onmouseup: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmouseup == 'function'){
+                        _component.onmouseup(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        onkeydown: function(e) {
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onkeydown == 'function'){
+                        _component.onkeydown(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        onkeyup: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onkeyup == 'function'){
+                        _component.onkeyup(this.children[i], e);
+                    }
+                }
+            }
         }
     };
+
     /* Transform */
     Amble.Transform = function(args) {
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.size = args['size'] || new Amble.Math.Vector2({});
         //scale?
         //rotation?
-    }
+    };
+
     /* Graphics */
     Amble.Graphics = {};
+
     Amble.Graphics.Layer = function(width, height, index){
         this.canvas = document.createElement('canvas');
         this.canvas.width = width || Amble.app.width;
@@ -306,21 +389,26 @@ window.Amble = (function(){
         this.canvas.style.position = 'absolute';
         this.canvas.style.zIndex = index.toString() || '0';
         this.ctx = this.canvas.getContext('2d');
-    }
+    };
+
     Amble.Graphics.Layer.prototype = {
+
         appendTo: function(element){
             this.parent = element;
             element.appendChild(this.canvas);
             return this;
         },
+
         setZIndex: function(zIndex){
             this.canvas.style.zIndex = zIndex;
             return this;
         },
+
         remove: function(){
             this.parent.removeChild(this.canvas);
             return this;
         },
+
         clear: function(color){
             this.ctx.save();
             this.ctx.setTransform(1,0,0,1,0,0);
@@ -333,143 +421,186 @@ window.Amble = (function(){
             this.ctx.restore();
             return this;
         },
+
         fillStyle: function(color){
             this.ctx.fillStyle = color;
             return this;
         },
+
         fillRect: function(x, y, width, height){
             this.ctx.fillRect(x, y, width, height);
             return this;
         },
+
         strokeStyle: function(color){
             this.ctx.strokeStyle = color;
             return this;
         },
+
         strokeRect: function(x, y, width, height){
             this.ctx.strokeRect(x, y, width, height);
             return this;
         },
+
         stroke: function(){
             this.ctx.stroke();
             return this;
         },
+
         lineWidth: function(width){
             this.ctx.lineWidth = width;
             return this;
         }
 
-    }
+    };
+
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){
         this.color = args['color'] || 'pink';
         this.layer = args['layer'] || 0
-    }
+    };
+
     /* Amble.Graphics.Renderer functions */
     Amble.Graphics.RectRenderer.prototype = {
+
         render: function(self, layerName, camera){
             camera.layer(this.layer)
                 .fillStyle(this.color)
                 .fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);
         }
-    }
+
+    };
+
     /* Math */
     Amble.Math = {};
-    /* Amble.Math.Vector2 constructor */
+
     Amble.Math.Vector2 = function(args){
         this.x = args['x'] || 0;
         this.y = args['y'] || 0;
-    }
-    /* Amble.Math.Vector2 functions */
+    };
+
     Amble.Math.Vector2.prototype = {
+
         copy: function(vec2){
             this.x = vec2.x;
             this.y = vec2.y;
             return this;
         },
+
         add: function(vec2){
             this.x += vec2.x;
             this.y += vec2.y;
             return this;
         },
+
         sub: function(vec2){
             this.x -= vec2.x;
             this.y -= vec2.y;
             return this;
         },
+
         normalize: function(){
             return this;
         }
     }
+
     Amble.Math.Vector3 = function(args){
         this.x = args['x'] || 0;
         this.y = args['y'] || 0;
         this.z = args['z'] || 0;
-    }
-    /* Amble.Math.Vector3 functions */
+    };
+
     Amble.Math.Vector3.prototype = {
+
         copy: function(vec3){
             this.x = vec3.x;
             this.y = vec3.y;
             this.z = vec3.z;
             return this;
         },
+
         add: function(vec3){
             this.x += vec3.x;
             this.y += vec3.y;
             this.z += vec3.z;
             return this;
         },
+
         sub: function(vec3){
             this.x -= vec3.x;
             this.y -= vec3.y;
             this.z -= vec3.z;
             return this;
         },
+
         normalize: function(){
             return this;
         }
     }
+
     /* Input */
     Amble.Input = {
+
         debug: false,
+
         isKeyPressed: function(keycode){
             return Amble.Input._keyValues[keycode];
         },
+
         isMousePressed: function(keycode){
             return Amble.Input._mouseValues[keycode];
         },
+
         _mouseValues: [],
+
         _keyValues: [],
+
         mousePosition: new Amble.Math.Vector2({}),
+
         offset: new Amble.Math.Vector2({}),
+
         wheelDelta: new Amble.Math.Vector3({}),
+
         isShiftPressed: false,
+
         isCtrlPressed: false,
-        // _event: {}
     }
-    Amble.Input._setListeners = function(){
-        // document.addEventListener('load', function(e){
-        //     Amble.Input._event = e;
-        // }, false);
-        document.addEventListener('keydown', function(e){
+
+    Amble.Input._eventFunctions = {
+
+        keydown: function(e){
             if(Amble.Input.debug)
                 console.log(e.which);
             Amble.Input.isShiftPressed = e.shiftKey;
             Amble.Input.isCtrlPressed = e.ctrlKey;
             Amble.Input._keyValues[e.which] = true;
-        }, false);
-        document.addEventListener('keyup', function(e){
+
+            Amble.app.scene.onkeydown(e);
+        },
+
+        keyup: function(e){
             Amble.Input._keyValues[e.which] = false;
-        }, false);
-        document.addEventListener('mousedown', function(e){
+
+            Amble.app.scene.onkeyup(e);
+        },
+
+        mousedown: function(e){
             if(Amble.Input.debug)
                 console.log(e.which);
             Amble.Input._mouseValues[e.which] = true;
-        }, false);
-        document.addEventListener('mouseup', function(e){
+
+            Amble.app.scene.onmousedown(e);
+        },
+
+        mouseup: function(e){
+            if(Amble.Input.debug)
+                console.log(e.which);
             Amble.Input._mouseValues[e.which] = false;
-        }, false);
-        document.addEventListener('mousemove', function(e){
+
+            Amble.app.scene.onmouseup(e);
+        },
+
+        mousemove: function(e){
 
             var offsetLeft = Amble.app.mainCamera.camera.context.offsetLeft;
             var offsetTop = Amble.app.mainCamera.camera.context.offsetTop;
@@ -484,45 +615,82 @@ window.Amble = (function(){
 
             Amble.Input.mousePosition.x = e.clientX - offsetLeft;
     		Amble.Input.mousePosition.y = e.clientY - offsetTop;
-        }, false);
-        document.addEventListener("wheel", function(e){
+        },
+
+        wheel: function(e){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;
-            // Amble.Input._event = e;
             Amble.app.mainCamera.getComponent('Camera').onmousewheel(Amble.app.mainCamera, e);
-        }, false);
-        // document.addEventListener('touchstart', function(e){
-        //
-        // }, false);
-        // document.addEventListener('touchend', function(e){
-        //
-        // }, false);
-        // document.addEventListener('touchmove', function(e){
-        //
-        // }, false);
+
+            Amble.app.scene.onmousewheel(e);
+        }
     }
+
+    Amble.Input._setListeners = function(){
+
+        document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+        document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+        document.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+        document.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+        document.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+        document.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+
+        //touch start
+        //touch end
+        //touch move
+    }
+
+    Amble.Input._removeListeners = function(){
+
+        if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+
+            document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+            document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+            document.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            document.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            document.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            document.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+
+        } else if (document.detachEvent) { // For IE 8 and earlier versions
+
+            document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
+            document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
+            document.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            document.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            document.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            document.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+
+        }
+    }
+
     /* Data */
     Amble.Data = {};
+
     Amble.Data.Loader = function(){
         this.queue = [];
         this.types = [];
         this.successCount = 0;
         this.errorCount = 0;
         this.cache = [];
-    }
+    };
+
     Amble.Data.Loader.prototype = {
         /* Supported types: image, json */
+
         load: function(type, path){
             this.queue.push(path);
             this.types.push(type);
         },
+
         isDone: function(){
             return (this.queue.length == this.successCount + this.errorCount);
         },
+
         getAsset: function(path){
             return this.cache[path];
         },
+
         loadAll: function(callback){
             if(this.queue.length == 0){
                 callback();
@@ -584,7 +752,9 @@ window.Amble = (function(){
             }
         },
     }
+
     return Amble;
 
 }());
+
 module.exports = window.Amble;

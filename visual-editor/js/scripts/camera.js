@@ -10,12 +10,14 @@ Camera = function(args){
         minZoom: 2,
         translate: new Amble.Math.Vector2({})
     };
-}
+};
 
 Camera.prototype = {
+
     start: function(self) {
 
     },
+
     update: function(self) {
         if(Amble.Input.isMousePressed(3)) {
             if(!this.variables.done) {
@@ -31,6 +33,7 @@ Camera.prototype = {
             this.variables.done = false
         }
     },
+
     onmousewheel: function(self, e){
 
         if(!Amble.app.scene.children[1].getComponent('Manager').var.isHelper) {
@@ -71,7 +74,6 @@ Camera.prototype = {
             this.variables.origin.y = ( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale );
 
             self.camera.scale *= zoom;
-
         }
     }
 }
