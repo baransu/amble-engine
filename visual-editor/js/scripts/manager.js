@@ -20,11 +20,13 @@ Manager = function(args){
     this.componentsCount = 0;
     this.graph = [];
     this.moved = false;
+    this.componentsList = [];
+    this.variables = [];
 }
 
 Manager.prototype = {
     start: function(self) {
-
+        this.componentsList = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
     },
 
     update: function(self) {
@@ -185,6 +187,25 @@ Manager.prototype = {
 
     },
 
+    updateVariables: function(variables){
+        this.variables = [];
+        for(var i = 0; i < variables.length; i++) {
+            var obj = {
+                componentData : variables[i],
+                transform: { name: "Amble.Transform", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                }},
+                renderer: { name: "Component.Renderer" , args:{}},
+                components: [
+                    { name: "Component", args: {} }
+                ]
+            }
+
+            this.variables.push(obj);
+        }
+        console.log(this.variables)
+    },
+
     load: function(path){
         console.log('load: ' + path)
         if(path != 'untitled') {
@@ -192,18 +213,28 @@ Manager.prototype = {
             data = JSON.parse(data);
             console.log(data);
 
-            for(var i = 0; i < data.connections.length; i++) {
-                var component = componentsArray.find(c => c.componentData.idName == data.connections[i].idName);
+            this.updateVariables(data.variables);
+
+            for(var i = 0; i < data.components.length; i++) {
+                console.log(data.components);
+                if(data.components[i].type == 'function' || data.components[i].type == 'event') {
+                    var component = componentsArray.find(c => c.componentData.idName == data.components[i].idName);
+                } else if(data.components[i].type == 'variable') {
+                    var component = this.variables.find(c => c.componentData.idName == data.components[i].idName);
+                }
+
+                console.log(component);
+
                 var _component = this.scene.instantiate(component);
-                _component.transform.position = new Amble.Math.Vector2({x: data.connections[i].position.x, y: data.connections[i].position.y});
-                _component.getComponent('Component').id = data.connections[i].id;
-                this.componentsCount = data.connections[i].id;
+                _component.transform.position = new Amble.Math.Vector2({x: data.components[i].position.x, y: data.components[i].position.y});
+                _component.getComponent('Component').id = data.components[i].id;
+                this.componentsCount = data.components[i].id;
                 this.components.push(_component);
             }
 
             //make connections
-            for(var i = 0; i < data.connections.length; i++) {
-                var d = data.connections[i];
+            for(var i = 0; i < data.components.length; i++) {
+                var d = data.components[i];
                 var comp = this.components.find(c => c.getComponent('Component').id == d.id);
                 for(var j = 0; j < d.connections.length; j++) {
                     var c = d.connections[j];
@@ -236,6 +267,7 @@ Manager.prototype = {
             var comp = component.getComponent('Component');
             var obj = {
                 id: comp.id,
+                type: component.componentData.type,
                 idName: component.componentData.idName,
                 position: {
                     x: component.transform.position.x,
@@ -256,20 +288,28 @@ Manager.prototype = {
             this.graph.push(obj);
         }
 
+        var variables = document.querySelector('variables-component').data;
+        this.updateVariables(variables);
+
         var data = {
             version: '0.1.0',
             date: Date.now(),
-            variables: [],
-            connections: this.graph
+            variables: variables,
+            components: this.graph
         }
 
         var script = JSON.stringify(data)
-        console.log(script);
         fs.writeFileSync(path, script);
     },
 
-    addComponent: function(idName) {
-        var component = componentsArray.find(c => c.componentData.idName == idName);
+    addComponent: function(idName, type) {
+        console.log(idName + ' | ' + type)
+        if(type == 'function' || type  == 'event') {
+            var component = componentsArray.find(c => c.componentData.idName == idName);
+        } else if(type == 'variable') {
+            var component = this.variables.find(c => c.componentData.idName == idName);
+        }
+
         var _component = this.scene.instantiate(component);
         _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
         _component.getComponent('Component').id = this.componentsCount;
@@ -277,7 +317,6 @@ Manager.prototype = {
         this.components.push(_component);
 
         if(this.var.helperNode) {
-
             var obj = {};
             var secondNode = null;
             if(this.var.helperNode.type == 'in') {
@@ -307,34 +346,45 @@ Manager.prototype = {
         this.var.context = Amble.app.mainCamera.camera.context;
         var size = Amble.app.mainCamera.camera.size;
 
-        var div = document.createElement('helper-component');
+        var helper = document.createElement('helper-component');
         var width = 800/2;
         var height = 600/2;
-        div.style.width = width + 'px';
-        div.style.height = height + 'px';
-        div.style.left = Amble.Input.mousePosition.x + Amble.Input.offset.x + 'px';
-        div.style.top = Amble.Input.mousePosition.y + Amble.Input.offset.y + 'px';
-        div.id = "helper";
+        helper.style.width = width + 'px';
+        helper.style.height = height + 'px';
+        helper.style.left = Amble.Input.mousePosition.x + Amble.Input.offset.x + 'px';
+        helper.style.top = Amble.Input.mousePosition.y + Amble.Input.offset.y + 'px';
+        helper.id = "helper";
+
+        var comp = [];
+        for(var i = 0; i < this.componentsList.length; i++) {
+            comp.push(this.componentsList[i]);
+        }
+
+        for(var i = 0; i < this.variables.length; i++) {
+            comp.push(this.variables[i].componentData);
+        }
+        console.log(comp)
+        helper.comp = comp;
 
         //left
-        if(parseInt(div.style.left) < Amble.Input.offset.x) {
-            div.style.left = Amble.Input.offset.x + 'px';
+        if(parseInt(helper.style.left) < Amble.Input.offset.x) {
+            helper.style.left = Amble.Input.offset.x + 'px';
         }
         //right
-        if(parseInt(div.style.left) + parseInt(div.style.width) > size.x) {
-            div.style.left = size.x - size.x/200 - parseInt(div.style.width) + 'px';
+        if(parseInt(helper.style.left) + parseInt(helper.style.width) > size.x) {
+            helper.style.left = size.x - size.x/200 - parseInt(helper.style.width) + 'px';
         }
         //down
-        if(parseInt(div.style.top) + parseInt(div.style.height) > size.y) {
-            div.style.top = size.y - size.y/100 - parseInt(div.style.height) + 'px';
+        if(parseInt(helper.style.top) + parseInt(helper.style.height) > size.y) {
+            helper.style.top = size.y - size.y/100 - parseInt(helper.style.height) + 'px';
         }
         //top
-        if(parseInt(div.style.top) < Amble.Input.offset.y) {
-            div.style.top = Amble.Input.offset.y + 'px';
+        if(parseInt(helper.style.top) < Amble.Input.offset.y) {
+            helper.style.top = Amble.Input.offset.y + 'px';
         }
 
-        this.var.helper = div;
-        this.var.context.appendChild(div);
+        this.var.helper = helper;
+        this.var.context.appendChild(helper);
 
         this.var.helperStartMouse = new Amble.Math.Vector2({x: this.var.mouse.x, y: this.var.mouse.y});
 

@@ -33,16 +33,15 @@
 	<template>
 
 		<div class="add">
-
 			<div class="input-field variableInput center-align">
 				<input value="{{variableName::input}}" type="text" class="validate" placeholder="variable name" on-change="addItem">
 			</div>
 		</div>
 
 		<div id="list" class="collection">
-			<iron-list items="[[data]]" as="item">
+			<iron-list id="variablesList" items="[[data]]" as="item">
 				<template>
-					<a class="collection-item grey-text text-darken-4" id="[[item.name]]" on-click="handleClick">[[item.name]]</a>
+					<a class="collection-item grey-text text-darken-4" id="[[item.idName]]" on-click="handleClick">[[item.idName]]</a>
 				</template>
 			</iron-list>
         </div>
@@ -67,19 +66,41 @@
 	Polymer({
 		is: 'variables-component',
 
-		ready: function(){
-			this.data = [
-				{
-					name: 'asdasdsd',
-					value: null
-				}
-			];
+		properties: {
 
+			filePath: {
+				type: String,
+				value: 'untitled',
+				observer: 'updateVariables'
+			},
+
+			data: {
+				type: Array,
+				value: []
+			}
+		},
+
+		updateVariables: function(){
+			if(typeof this.data != 'undefined') {
+				console.log('splice')
+				this.splice('data', 0, this.data.length);
+				this.notifyPath('data', this.data);
+			}
+			if(this.filePath != 'untitled'){
+				console.log('add')
+				var json = JSON.parse(fs.readFileSync(this.filePath, 'utf8'));
+				console.log('add')
+				for(var i = 0; i < json.variables.length; i++) {
+					this.push('data', json.variables[i]);
+				}
+			}
+		},
+
+		ready: function(){
 			this.currentVariable = "";
 			this.lastActive = null;
 			this.defaultClass = "collection-item grey-text text-darken-4"
 			this.activeClass = "collection-item grey-text text-darken-4 active"
-			//load variables
 		},
 
 		handleClick: function(e) {
@@ -92,7 +113,7 @@
 
 			this.currentVariable = e.target.id;
 
-			var v = this.data.find(v => v.name == this.currentVariable);
+			var v = this.data.find(v => v.idName == this.currentVariable);
 			if(typeof v != 'undefined') {
 				if(v.value == null) {
 					this.currentValue = "";
@@ -108,7 +129,7 @@
 
 		handleValueString: function(e) {
 			var name = this.currentVariable;
-			var v = this.data.find(v => v.name == name);
+			var v = this.data.find(v => v.idName == name);
 			if(typeof v != 'undefined') {
 				v.value = this.valueString;
 				this.currentValue = this.valueString;
@@ -118,7 +139,7 @@
 
 		handleValueNumber: function(e) {
 			var name = this.currentVariable;
-			var v = this.data.find(v => v.name == name);
+			var v = this.data.find(v => v.idName == name);
 			if(typeof v != 'undefined') {
 				v.value = Number(this.valueNumber);
 				this.currentValue = Number(this.valueNumber);
@@ -129,17 +150,25 @@
 
 		addItem: function() {
 			if(this.variableName.length > 0) {
-				var name = this.variableName;
+				//regexp all incorrect chars
+				var name = this.variableName.replace(/\s+/g, '');
 				this.variableName = "";
-				var v = this.data.find(v => v.name == name);
+				var v = this.data.find(v => v.idName == name);
 
 				if(typeof v == 'undefined') {
 
 					var obj = {
-						name: name
+						idName: name,
+						type: "variable",
+						value: null,
+						input: [],
+						output: [
+			                { name: name }
+			            ]
 					}
 
 					this.push('data', obj);
+					Amble.app.scene.children[1].getComponent('Manager').updateVariables(this.data);
 				}
 			}
 		},
