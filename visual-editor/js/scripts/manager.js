@@ -19,6 +19,7 @@ Manager = function(args){
     };
     this.componentsCount = 0;
     this.graph = [];
+    this.moved = false;
 }
 
 Manager.prototype = {
@@ -56,13 +57,13 @@ Manager.prototype = {
             this.component.transform.position.x = this.var.mouse.x + this.var.holderMod.x;
             this.component.transform.position.y = this.var.mouse.y + this.var.holderMod.y;
         }
+
+        if(Amble.Input.isMousePressed(3) && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0)) {
+            this.moved = true;
+        }
     },
 
     onkeydown: function(self, e) {
-        if (Amble.Input.isKeyPressed(65) && !this.var.isHelper && !this.var.holdNode) {
-            this.hideHelper();
-            this.showHelper();
-        }
 
         if(Amble.Input.isKeyPressed(27)) {
             this.hideHelper();
@@ -75,7 +76,7 @@ Manager.prototype = {
 
     onmousedown: function(self, e) {
 
-        if(Amble.Input.isMousePressed(2) || Amble.Input.isMousePressed(3) ||
+        if(Amble.Input.isMousePressed(2) ||
             (Amble.Input.isMousePressed(3) && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0))) {
 
             this.hideHelper();
@@ -121,6 +122,14 @@ Manager.prototype = {
     },
 
     onmouseup: function(self, e) {
+
+        var key = e.which;
+
+        if (key == 3 && !this.var.isHelper && !this.var.holdNode && !this.moved) {
+            this.hideHelper();
+            this.showHelper();
+        }
+
         this.var.hold = false;
         this.component = null;
         if(this.var.holdNode) {
@@ -165,6 +174,11 @@ Manager.prototype = {
             this.var.holdNode = false;
             this.currentNode = null;
         }
+
+        if(key == 3) {
+            this.moved = false;
+        }
+
     },
 
     onmousewheel: function(self, e) {
@@ -283,8 +297,6 @@ Manager.prototype = {
             }
         }
 
-        // console.log(this.var.helper)
-        // this.hideHelper();
         this.var.helper = null;
         this.var.isHelper = false;
         this.var.helperNode = null;

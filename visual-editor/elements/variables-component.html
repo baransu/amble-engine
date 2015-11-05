@@ -1,20 +1,60 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
 <dom-module id="variables-component">
 
 	<style>
 
     :host {
-        background-color: green;
+		background-color: #fff;
     }
+
+	.add {
+		height: 5%;
+	}
+
+	#list {
+		overflow-y: scroll;
+		height: 45%;
+	}
+
+	.edit {
+		overflow-y: scroll;
+		height: 45%;
+	}
+
+	.value {
+		overflow: hidden;
+	}
+
 
 	</style>
 
 	<template>
 
-        <div class="bg">
+		<div class="add">
 
+			<div class="input-field variableInput center-align">
+				<input value="{{variableName::input}}" type="text" class="validate" placeholder="variable name" on-change="addItem">
+			</div>
+		</div>
+
+		<div id="list" class="collection">
+			<iron-list items="[[data]]" as="item">
+				<template>
+					<a class="collection-item grey-text text-darken-4" id="[[item.name]]" on-click="handleClick">[[item.name]]</a>
+				</template>
+			</iron-list>
         </div>
+
+		<div class="edit">
+			<h5 class=" value left-align">{{currentVariable}}</h5>
+			<div class="input-field variableInput center-align">
+				<input value="{{valueString::input}}" type="text" class="validate" placeholder="string" on-change="handleValueString">
+				<input value="{{valueNumber::input}}" type="number" class="validate" placeholder="number" on-change="handleValueNumber">
+			</div>
+			<h6 class=" value left-align">{{currentValue}}</h6>
+		</div>
 
 	</template>
 
@@ -26,6 +66,92 @@
 
 	Polymer({
 		is: 'variables-component',
+
+		ready: function(){
+			this.data = [
+				{
+					name: 'asdasdsd',
+					value: null
+				}
+			];
+
+			this.currentVariable = "";
+			this.lastActive = null;
+			this.defaultClass = "collection-item grey-text text-darken-4"
+			this.activeClass = "collection-item grey-text text-darken-4 active"
+			//load variables
+		},
+
+		handleClick: function(e) {
+			if(this.lastActive) {
+				this.lastActive.className = this.defaultClass;
+			}
+
+			this.lastActive = e.target;
+			e.target.className = this.activeClass;
+
+			this.currentVariable = e.target.id;
+
+			var v = this.data.find(v => v.name == this.currentVariable);
+			if(typeof v != 'undefined') {
+				if(v.value == null) {
+					this.currentValue = "";
+				} else {
+					this.currentValue = v.value;
+				}
+			}
+
+			this.valueString = "";
+			this.valueNumber = null
+
+		},
+
+		handleValueString: function(e) {
+			var name = this.currentVariable;
+			var v = this.data.find(v => v.name == name);
+			if(typeof v != 'undefined') {
+				v.value = this.valueString;
+				this.currentValue = this.valueString;
+				this.valueString = "";
+			}
+		},
+
+		handleValueNumber: function(e) {
+			var name = this.currentVariable;
+			var v = this.data.find(v => v.name == name);
+			if(typeof v != 'undefined') {
+				v.value = Number(this.valueNumber);
+				this.currentValue = Number(this.valueNumber);
+				this.valueNumber = null;
+			}
+		},
+
+
+		addItem: function() {
+			if(this.variableName.length > 0) {
+				var name = this.variableName;
+				this.variableName = "";
+				var v = this.data.find(v => v.name == name);
+
+				if(typeof v == 'undefined') {
+
+					var obj = {
+						name: name
+					}
+
+					this.push('data', obj);
+				}
+			}
+		},
+
+		isInt: function(n){
+    		return Number(n) === n && n % 1 === 0;
+		},
+
+		isFloat: function(n){
+    		return n === Number(n) && n % 1 !== 0;
+		}
+
 	});
 
 </script>

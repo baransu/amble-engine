@@ -1,1 +1,0 @@
-{"version":"0.1.0","date":1446577404033,"variables":[],"connections":[{"id":0,"idName":"OnUpdate","position":{"x":-856,"y":-485},"connections":[]},{"id":1,"idName":"OnUpdate","position":{"x":-527,"y":-576},"connections":[{"outNode":0,"inNode":{"id":2,"node":0}}]},{"id":2,"idName":"myAwesomeFunction","position":{"x":-575,"y":-300},"connections":[]}]}

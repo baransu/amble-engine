@@ -75,8 +75,10 @@
         },
 
 		enter: function(e){
-			Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName);
-			this.remove();
+			if(this.comps.length > 0) {
+				Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName);
+				this.remove();
+			}
 		},
 
 		input: function(){
