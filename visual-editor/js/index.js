@@ -214,6 +214,9 @@ var menuFunctions = {
         document.getElementById("workspace").innerHTML = "";
         Amble.Input._removeListeners();
         document.title = file = 'untitled';
+
+        document.querySelector('variables-component').filePath = file;
+
         var app = new Amble.Application(application);
     },
 
@@ -223,6 +226,9 @@ var menuFunctions = {
             document.getElementById("workspace").innerHTML = "";
             Amble.Input._removeListeners();
             document.title = file = path[0];
+
+            document.querySelector('variables-component').filePath = file;
+
             var app = new Amble.Application(application);
         }
     },

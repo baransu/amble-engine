@@ -45,11 +45,18 @@
 
 	Polymer({
 		is: 'helper-component',
+
         properties: {
-            filterText: {
+
+			filterText: {
                 value: '',
                 observer: 'refreshFilter'
-            }
+            },
+
+			comp: {
+				type: Array,
+				value: []
+			}
         },
 
 		attached: function(){
@@ -57,7 +64,6 @@
 		},
 
         ready: function(){
-            this.comp = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
 			this.comps = [];
         },
 
@@ -75,8 +81,10 @@
         },
 
 		enter: function(e){
-			Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName);
-			this.remove();
+			if(this.comps.length > 0) {
+				Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName, this.comps[0].type);
+				this.remove();
+			}
 		},
 
 		input: function(){
@@ -84,7 +92,9 @@
 		},
 
         handleClick: function(e) {
-            Amble.app.scene.children[1].getComponent('Manager').addComponent(e.target.id);
+			var component = this.comp.find(c => c.idName == e.target.id);
+			console.log(component)
+		    Amble.app.scene.children[1].getComponent('Manager').addComponent(component.idName, component.type);
 			this.remove();
         }
 

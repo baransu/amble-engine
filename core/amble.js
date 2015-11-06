@@ -231,7 +231,7 @@ window.Amble = (function(){
         //transform is basic actro component
         this.transform = {};
 
-        
+
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
         this.renderer = {};
@@ -604,7 +604,6 @@ window.Amble = (function(){
         },
 
         mousemove: function(e){
-
             var offsetLeft = Amble.app.mainCamera.camera.context.offsetLeft;
             var offsetTop = Amble.app.mainCamera.camera.context.offsetTop;
 
@@ -632,12 +631,13 @@ window.Amble = (function(){
 
     Amble.Input._setListeners = function(){
 
+        var element = Amble.app.mainCamera.camera.context;
         document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
         document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-        document.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-        document.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-        document.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-        document.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        element.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+        element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+        element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+        element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
 
         //touch start
         //touch end
@@ -646,23 +646,24 @@ window.Amble = (function(){
 
     Amble.Input._removeListeners = function(){
 
+        var element = Amble.app.mainCamera.camera.context;
         if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
 
             document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
             document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-            document.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-            document.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-            document.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-            document.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
 
         } else if (document.detachEvent) { // For IE 8 and earlier versions
 
             document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
             document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
-            document.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
-            document.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
-            document.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
-            document.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
 
         }
     }
