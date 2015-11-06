@@ -34,8 +34,8 @@ window.Amble = (function(){
                 var sizeDifference = width/camera.size.x;
                 camera.size = new Amble.Math.Vector2({ x: width, y: height });
                 camera.view = new Amble.Math.Vector2(camera.position.x - width, camera.position.y - height);
-                Amble.app.mainCamera.getComponent('Camera').variables.maxZoom *= sizeDifference;
-                Amble.app.mainCamera.getComponent('Camera').variables.minZoom *= sizeDifference;
+                // Amble.app.mainCamera.getComponent('Camera').variables.maxZoom *= sizeDifference;
+                // Amble.app.mainCamera.getComponent('Camera').variables.minZoom *= sizeDifference;
             });
         }
 
@@ -732,22 +732,22 @@ window.Amble = (function(){
                         xobj.open('GET', jsonPath, true);
 
                         xobj.addEventListener("load", function(e){
+                            var path = e.srcElement.responseURL.toString();
+                            var href = window.location.href.toString();
+                            that.cache[path.split(href).pop()] = e.srcElement.responseText;
                             that.successCount++;
                             if(that.isDone()){
                                 callback();
                             }
+                        }, false);
+                        xobj.addEventListener("error", function(e){
                             var path = e.srcElement.responseURL.toString();
                             var href = window.location.href.toString();
                             that.cache[path.split(href).pop()] = e.srcElement.responseText;
-                        }, false);
-                        xobj.addEventListener("error", function(e){
                             that.errorCount++;
                             if(that.isDone()){
                                 callback();
                             }
-                            var path = e.srcElement.responseURL.toString();
-                            var href = window.location.href.toString();
-                            that.cache[path.split(href).pop()] = e.srcElement.responseText;
                         }, false);
                         xobj.send(null);
 

@@ -57,7 +57,7 @@
 //   };
 // }
 
-var Flow = require('./js/flow.js');
+var Flow = require('../core/flow.js');
 window.Component = require('./js/scripts/component.js');
 window.Camera = require('./js/scripts/camera.js')
 window.Manager = require('./js/scripts/manager.js')
@@ -111,6 +111,44 @@ window.Manager = require('./js/scripts/manager.js')
 //     }
 // })
 
+
+// {
+//     name: "start",
+//     //list of all components
+//     processes:[
+//         {id: "add", component: "add"},
+//         {id: "multiply1", component: "multiply"},
+//         {id: "multiply2", component: "multiply"},
+//         {id: "multiply3", component: "multiply"},
+//         {id: "log1", component: 'log'},
+//         {id: "log2", component: 'log'},
+//         {id: "log3", component: 'log'},
+//     ],
+//     //list of variables connection
+//     connections: [
+        //start from event nodes and save only connected nodes
+            // id | out : componentid.outputName, in: componentid.inputName
+//         {id: 0, out:'add.output', in:'multiply1.val1'},
+//         {id: 1, out:'multiply1.output', in:'multiply2.val1'},
+//         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
+//         {id: 3, out:'multiply2.output', in:'log1.data'},
+//         {id: 4, out:'multiply3.output', in:'log2.data'},
+//         {id: 5, out:'log1.output', in:'log3.data'},
+//     ],
+//     //list of begin variables connection
+//     init: {
+            //componentid.inputName: variable.value
+//         'add.val1': 1,
+//         'add.val2': 1,
+//         'multiply1.val2': 2,
+//         'multiply2.val2': 4,
+//         'multiply3.val2': 2
+//     },
+//
+//      variables: [
+        // {id : idName: value: null}
+    // ]
+
 var fs = require('fs');
 var remote = require('remote');
 var Menu = remote.require('menu');
@@ -118,7 +156,7 @@ var dialog = remote.require('dialog');
 var ipc = require('ipc');
 var globalShortcut = remote.require('global-shortcut');
 
-var componentsFunctions = require('./components-functions.js');
+var componentsFunctions = require('../core/components-functions.js');
 var componentsArray = [];
 
 var file = 'untitled'
@@ -140,7 +178,7 @@ var application = {
 
     preload: function(){
 
-        var _components = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        var _components = JSON.parse(fs.readFileSync('./core/components.json', 'utf8')).components;
         for(var i = 0; i < _components.length; i++) {
             var obj = {
                 componentData : _components[i],
@@ -152,16 +190,6 @@ var application = {
                     { name: "Component", args: {} }
                 ]
             }
-
-            obj.componentData.body = componentsFunctions[_components[i].idName];
-
-            Flow.component({
-                name: obj.componentData.name,
-                input: obj.componentData.input,
-                output: obj.componentData.output,
-                body: obj.componentData.body
-            });
-
             componentsArray.push(obj);
         }
 

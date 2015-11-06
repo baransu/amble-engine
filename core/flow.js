@@ -5,8 +5,6 @@ FLOW.variables = {};
 FLOW._network = [];
 FLOW._currenNetwork = {};
 FLOW._components = [];
-FLOW._maxIgnore = 1000;
-FLOW._ignoreCount = 0;
 FLOW._currentEndCounts = 0;
 
 FLOW.component = function(component) {
@@ -14,16 +12,17 @@ FLOW.component = function(component) {
 }
 
 FLOW.network = function(network) {
+
     network._processes = [];
     //processes
     for(var key in network.processes) {
         var componentName = network.processes[key].component;
-        var processName = network.processes[key].name;
+        var processName = network.processes[key].id;
         var p = FLOW.initProcess(componentName, processName);
         network._processes.push(p);
     }
 
-    //conections
+    //connections
     for(var key in network.connections) {
         // find the process
         var process = network._processes.find(p => p.processName === network.connections[key].out.split('.')[0]);
@@ -48,18 +47,18 @@ FLOW.network = function(network) {
 
     network._endCounts = 0;
     for(var key in network._processes) {
-        // console.log(network._processes[key]);
         if(network._processes[key].output[0].connectedTo.length === 0) {
             network._endCounts++;
         }
     }
+
     FLOW._network.push(network);
     return network;
 }
 
 FLOW.initProcess = function(componentName, processName) {
     var newInput, newOutput, component, process;
-
+    
     component = FLOW._components.find(c => c.name == componentName);
     if(!component) throw new Error('no component found: ' + componentName);
 
@@ -92,6 +91,7 @@ FLOW.startNetwork = function(name){
     var network = FLOW._network.find(n => n.name === name);
     FLOW._currenNetwork = network;
     var init = network.init;
+    var variables = network.variables;
 
     //values in initial input
     for(var key in init) {
@@ -102,12 +102,13 @@ FLOW.startNetwork = function(name){
         var process = network._processes.find(p => p.processName === processName);
         if (!process) throw new Error('whoops.. no process: ' + processName);
 
-
         var port = process.input.find(p => p.name.name === portName);
         if (!port) throw new Error('whoops.. no port: ' + portName)
         var indexOfPort = process.input.indexOf(port);
 
-        process.input[indexOfPort].data.push(init[key]);
+        var value = variables.find(v => v.id == init[key]).value
+
+        process.input[indexOfPort].data.push(value);
     }
     network.running = true;
     FLOW.loop(network);
@@ -115,17 +116,13 @@ FLOW.startNetwork = function(name){
 }
 
 FLOW.loop = function(network) {
-    var id = setTimeout(function(){
-        if(!network.running || FLOW._ignoreCount > FLOW._maxIgnore) {
-            clearTimeout(id);
-            FLOW._ignoreCount = 0;
-            return;
-        } else {
-            FLOW.step(network);
-            FLOW.loop(network);
-        }
-
-    }, network.delay || 0);
+    if(!network.running) {
+        FLOW._ignoreCount = 0;
+        return;
+    } else {
+        FLOW.step(network);
+        FLOW.loop(network);
+    }
 }
 
 FLOW.step = function(network) {
@@ -137,16 +134,8 @@ FLOW.step = function(network) {
         //every input have data
         for(var j = 0; j < process.input.length; j++) {
             if(process.input[j].data.length === 0) {
-                // console.log(process)
-                ignore = true;
-                break;
+                process.input[j].data.push(null);
             }
-        }
-
-        //stop if not every process have input
-        if(ignore) {
-            FLOW._ignoreCount++;
-            continue;
         }
 
         //args for the component
@@ -159,10 +148,11 @@ FLOW.step = function(network) {
         }
 
         for(var j = 0; j < process.output.length; j++) {
-            var connection = process.output[j].connectedTo;
-            var output = FLOW.makeOutput(process, connection);
+            var connections = process.output[j].connectedTo;
+            var output = FLOW.makeOutput(process, connections);
             args.push(output);
         }
+
         process.body.apply(process, args);
     }
 }
@@ -177,9 +167,9 @@ FLOW.makeOutput = function(process, connections) {
                 console.log('network end')
             }
         } else {
-            async.each(connections, function(connection){
-                connection.data.push(output);
-            });
+            for(var i = 0; i < connections.length; i++) {
+                connections[i].data.push(output);
+            }
         }
     }
 }

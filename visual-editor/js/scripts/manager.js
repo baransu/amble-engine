@@ -22,11 +22,12 @@ Manager = function(args){
     this.moved = false;
     this.componentsList = [];
     this.variables = [];
+    this.connectionsCount = 0;
 }
 
 Manager.prototype = {
     start: function(self) {
-        this.componentsList = JSON.parse(fs.readFileSync('./visual-editor/components.json', 'utf8')).components;
+        this.componentsList = JSON.parse(fs.readFileSync('./core/components.json', 'utf8')).components;
     },
 
     update: function(self) {
@@ -236,12 +237,18 @@ Manager.prototype = {
             for(var i = 0; i < data.components.length; i++) {
                 var d = data.components[i];
                 var comp = this.components.find(c => c.getComponent('Component').id == d.id);
+                console.log(d.connections.length)
                 for(var j = 0; j < d.connections.length; j++) {
                     var c = d.connections[j];
-                    var startNode = comp.getComponent('Component').outNodes[c.outNode];
-                    console.log(c);
+
+                    var node = c.outNode.substr(1);
+                    var startNode = comp.getComponent('Component').outNodes[node];
+
                     var endComp = this.components.find(eC => eC.getComponent('Component').id == c.inNode.id);
-                    var endNode = endComp.getComponent('Component').inNodes[c.inNode.node];
+
+                    var node = c.inNode.node.substr(1);
+
+                    var endNode = endComp.getComponent('Component').inNodes[node];
 
                     startNode.connected = true;
                     endNode.connected = true;
@@ -295,15 +302,98 @@ Manager.prototype = {
             version: '0.1.0',
             date: Date.now(),
             variables: variables,
-            components: this.graph
+            components: this.graph,
+            networks: this.getNetworks()
         }
 
         var script = JSON.stringify(data)
         fs.writeFileSync(path, script);
     },
 
+    getNetworks: function(path){
+
+        var networks = [];
+
+        var network = {
+            name: "",
+            processes: [],
+            connections: [],
+            init: {},
+            variables: []
+        };
+
+        //process components
+        for(var i = 0; i < this.components.length; i++) {
+            var component = this.components[i];
+            if(component.getComponent('Component').type != 'variable') {
+                var id = component.getComponent('Component').id;
+                var name = component.componentData.idName;
+
+                network.processes.push({
+                    id: id,
+                    component: name
+                });
+            }
+        }
+
+        //process variables
+        var variables = this.components.filter(c => c.getComponent('Component').type == 'variable');
+        for(var i = 0; i < variables.length; i++) {
+            var v = variables[i];
+
+            var id = v.getComponent('Component').id;
+            var value = v.componentData.value;
+
+            network.variables.push({
+                id: id,
+                value: value
+            });
+
+            for(var j = 0; j < v.getComponent('Component').connections.length; j++) {
+                var connection = v.getComponent('Component').connections[j];
+                network.init[connection.endNode.parent.id + '.' + connection.endNode.name] = id;
+            }
+        }
+
+        //process connections
+        var events = this.components.filter(c => c.getComponent('Component').type == 'event');
+        for(var i = 0; i < events.length; i++) {
+            network.name = events[i].componentData.idName;
+            network.connections = this.getConnection(events[i].getComponent('Component'));
+            networks.push(network);
+
+        }
+
+        console.log(networks);
+        return networks;
+    },
+
+    getConnection: function(component){
+
+        var connections = [];
+        for(var i = 0; i < component.connections.length; i++) {
+            var connection = {
+                id: this.connectionsCount.toString(),
+                in: component.connections[i].endNode.parent.id + '.' + component.connections[i].endNode.name,
+                out: component.id + '.' + component.connections[i].startNode.name
+            }
+
+            connections.push(connection);
+            this.connectionsCount++;
+
+            var n = this.getConnection(component.connections[i].endNode.parent);
+            for(var j = 0; j < n.length; j++) {
+                connections.push(n[j]);
+            }
+
+        }
+
+        return connections;
+
+    },
+
     addComponent: function(idName, type) {
-        console.log(idName + ' | ' + type)
+
         if(type == 'function' || type  == 'event') {
             var component = componentsArray.find(c => c.componentData.idName == idName);
         } else if(type == 'variable') {
@@ -312,7 +402,7 @@ Manager.prototype = {
 
         var _component = this.scene.instantiate(component);
         _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
-        _component.getComponent('Component').id = this.componentsCount;
+        _component.getComponent('Component').id = 'component' + this.componentsCount;
         this.componentsCount++;
         this.components.push(_component);
 

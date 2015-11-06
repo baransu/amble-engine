@@ -14,6 +14,7 @@ Component = function(args){
     this.bodyTextFont = 15;
     this.margin = 16;
     this.color = '#BDBDBD';
+    this.type = ""
 }
 
 Component.prototype = {
@@ -40,6 +41,7 @@ Component.prototype = {
         var ctx = canvas.getContext("2d");
         ctx.font = this.bodyLineHeight + "px Arial"
         this.componentTitle = self.componentData.idName;
+        this.type = self.componentData.type;
 
         var maxInOutText = 0;
         for(var i = 0; i < self.componentData.input.length; i++) {
@@ -77,7 +79,7 @@ Component.prototype = {
 
         for(var i = 0; i < self.componentData.input.length; i++) {
             var obj = {
-                id: i,
+                id: 'i' + i,
                 name: self.componentData.input[i].name,
                 color: self.componentData.input[i].color || '#BDBDBD',
                 size: this.margin,
@@ -91,7 +93,7 @@ Component.prototype = {
         }
         for(var i = 0; i < self.componentData.output.length; i++) {
             var obj = {
-                id: i,
+                id: 'o' + i,
                 name: self.componentData.output[i].name,
                 color: self.componentData.output[i].color || '#BDBDBD',
                 size: this.margin,

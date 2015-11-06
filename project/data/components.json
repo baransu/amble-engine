@@ -1,0 +1,73 @@
+{
+    "components" : [
+        {
+            "idName": "OnUpdate",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "OnStart",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "consoleLog",
+            "type": "function",
+            "input": [
+                { "name": "data" }
+            ],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "return10",
+            "type": "function",
+            "input": [
+                { "name": "input" }
+            ],
+            "output": [
+                { "name": "out" }
+            ]
+        },
+        {
+            "idName": "add",
+            "type": "function",
+            "input": [
+                { "name": "value1", "color": "green" },
+                { "name": "value2", "color": "green" }
+            ],
+            "output": [
+                { "name": "sum" }
+            ]
+        },
+        {
+            "idName": "multiply",
+            "type": "function",
+            "input": [
+                { "name": "value1", "color": "green" },
+                { "name": "value2", "color": "green" }
+            ],
+            "output": [
+                { "name": "product" }
+            ]
+        },
+        {
+            "idName": "divide",
+            "type": "function",
+            "input": [
+                { "name": "value1", "color": "purple" },
+                { "name": "value2", "color": "purple" }
+            ],
+            "output": [
+                { "name": "quotient" }
+            ]
+        }
+    ]
+}
