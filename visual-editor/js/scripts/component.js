@@ -15,6 +15,9 @@ Component = function(args){
     this.margin = 16;
     this.color = '#BDBDBD';
     this.type = ""
+    this.parentName = ""
+    this.selected = false;
+    this.connectedTo = [];
 }
 
 Component.prototype = {
@@ -40,7 +43,7 @@ Component.prototype = {
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext("2d");
         ctx.font = this.bodyLineHeight + "px Arial"
-        this.componentTitle = self.componentData.idName;
+        this.componentTitle = this.parentName = self.componentData.idName;
         this.type = self.componentData.type;
 
         var maxInOutText = 0;
@@ -150,7 +153,8 @@ Component.Renderer = function(args){
     this.textColor = '#212121';
     this.strokeColor = '#000';
     this.dividerColor = '#BDBDBD';
-    this.defaultNodeStartColor = '#BDBDBD'
+    this.defaultNodeStartColor = '#BDBDBD';
+    this.outlineColor = "red";
     this.componentsLayer = 1; //0 index
     this.nodesLayer = 0; // -1 index
 }
@@ -200,12 +204,19 @@ Component.Renderer.prototype = {
         layer.ctx.font = "bold " + _.titleFontSize + "px OpenSans";
         this.renderText(layer.ctx, _.componentTitle, x + _.margin, y + _.titleLineHeight, _.width - _.margin, _.titleLineHeight)
 
+        //outline
         var x = self.transform.position.x - camera.view.x - _.width/2;
         var y = self.transform.position.y - camera.view.y - _.headerHeight - _.bodyHeight/2;
+
         layer.ctx.save();
-        layer.lineWidth(0.5)
-            .strokeStyle(this.strokeColor)
-            .strokeRect(x, y, _.width, _.headerHeight + _.bodyHeight);
+
+        if(_.selected) {
+            layer.lineWidth(3).strokeStyle(this.outlineColor)
+        } else {
+            layer.lineWidth(0.5).strokeStyle(this.strokeColor)
+        }
+
+        layer.strokeRect(x, y, _.width, _.headerHeight + _.bodyHeight);
         layer.ctx.restore();
 
         //draw inputs

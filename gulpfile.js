@@ -25,4 +25,10 @@ gulp.task('browserify', function() {
         .pipe(gulp.dest(destFolder));
 });
 
-gulp.task('default', ['browserify']);
+gulp.task('copy-components-json', function() {
+    gulp.src('./core/components.json')
+    // Perform minification tasks, etc here
+    .pipe(gulp.dest('./project/data'));
+});
+
+gulp.task('default', ['browserify', 'copy-components-json']);

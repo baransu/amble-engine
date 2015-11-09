@@ -152,19 +152,68 @@ window.Manager = require('./js/scripts/manager.js')
 var fs = require('fs');
 var remote = require('remote');
 var Menu = remote.require('menu');
-var dialog = remote.require('dialog');
 var ipc = require('ipc');
-var globalShortcut = remote.require('global-shortcut');
 
 var componentsFunctions = require('../core/components-functions.js');
 var componentsArray = [];
 
-var file = 'untitled'
+ipc.on('open-respond', function(data){
+    Amble.app.scene.children[1].getComponent('Manager').load(data);
+});
 
-var application = {
+ipc.on('new-file-respond',function(){
+    Amble.app.scene.children[1].getComponent('Manager').load();
+});
+
+ipc.on('save-request', function(){
+    var data = Amble.app.scene.children[1].getComponent('Manager').save();
+    ipc.send('save-respond', data);
+});
+
+var menu = Menu.buildFromTemplate([
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'New File',
+                accelerator: 'Ctrl+N',
+                click: function(){
+                    ipc.send('new-file-request');
+                }
+            },
+            {
+                label: 'Open',
+                accelerator: 'Ctrl+O',
+                click: function(){
+                    ipc.send('open-request');
+                }
+            },
+            {
+                label: 'Save',
+                accelerator: 'Ctrl+S',
+                click: function(){
+                    ipc.send('save');
+                }
+            },
+            {
+                label: 'Save As',
+                accelerator: 'Ctrl+Shift+S',
+                click: function(){
+                    ipc.send('save-as');
+                }
+            },
+            {
+                type: 'separator'
+            }
+        ]
+    }
+]);
+
+Menu.setApplicationMenu(menu);
+
+var app = new Amble.Application({
 
     resize: true,
-    /* set all loading there */
 
     mainCamera: {
         camera: { name: "Amble.Camera", args: {
@@ -203,24 +252,18 @@ var application = {
         }
 
         this.manager = this.scene.instantiate(manager);
-        document.title = file;
-        this.manager.getComponent('Manager').load(file)
-
-        // Flow.startNetwork("start");
+        document.title = 'untitled';
 
     },
 
-    /* every thing loaded */
     start: function(){
 
     },
 
-    /* game loop */
     preupdate: function(){
 
     },
 
-    /* update there - actors update and camera update*/
     postupdate: function(){
 
     },
@@ -229,108 +272,7 @@ var application = {
 
     },
 
-    /* rendering there - layer clear and actors render*/
-    /* postrendering there*/
     postrender: function(){
-        // this.layer.fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y)
+
     }
-};
-
-var menuFunctions = {
-
-    newFile: function(){
-        document.getElementById("workspace").innerHTML = "";
-        Amble.Input._removeListeners();
-        document.title = file = 'untitled';
-
-        document.querySelector('variables-component').filePath = file;
-
-        var app = new Amble.Application(application);
-    },
-
-    open: function(){
-        var path = dialog.showOpenDialog({ properties: [ 'openFile'], filters: [{ name: 'Amble Script', extensions: ['ascript'] }]});
-        if(typeof path != 'undefined') {
-            document.getElementById("workspace").innerHTML = "";
-            Amble.Input._removeListeners();
-            document.title = file = path[0];
-
-            document.querySelector('variables-component').filePath = file;
-
-            var app = new Amble.Application(application);
-        }
-    },
-
-    saveAs: function(){
-        var path = dialog.showSaveDialog({
-            properties: [ 'openFile', 'createDirectory'],
-            defaultPath: 'untitled.ascript',
-            filters: [
-                {
-                    name: 'Amble Script',
-                    extensions: ['ascript']
-                }
-            ]
-        });
-        if(typeof path != 'undefined') {
-            document.title = file = path;
-            Amble.app.scene.children[1].getComponent('Manager').save(path);
-        }
-    },
-
-    save: function(){
-        if(file == 'untitled') {
-            menuFunctions.saveAs();
-        } else {
-            Amble.app.scene.children[1].getComponent('Manager').save(file);
-        }
-    }
-}
-
-var menu = Menu.buildFromTemplate([
-    {
-        label: 'File',
-        submenu: [
-            {
-                label: 'New File',
-                accelerator: 'Ctrl+N',
-                click: menuFunctions.newFile
-            },
-            {
-                label: 'Open',
-                accelerator: 'Ctrl+O',
-                click: menuFunctions.open
-            },
-            {
-                label: 'Save',
-                accelerator: 'Ctrl+S',
-                click: menuFunctions.save
-            },
-            {
-                label: 'Save As',
-                click: menuFunctions.saveAs
-            },
-            {
-                type: 'separator'
-            }
-        ]
-    }
-]);
-Menu.setApplicationMenu(menu);
-
-var shortcuts = {
-
-    open: globalShortcut.register('ctrl+o', function() {
-        menuFunctions.open();
-    }),
-
-    newFile: globalShortcut.register('ctrl+n', function() {
-        menuFunctions.newFile();
-    }),
-
-    save: globalShortcut.register('ctrl+s', function() {
-        menuFunctions.save();
-    }),
-}
-
-var app = new Amble.Application(application);
+});

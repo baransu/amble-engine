@@ -68,8 +68,33 @@ Manager.prototype = {
 
     onkeydown: function(self, e) {
 
-        if(Amble.Input.isKeyPressed(27)) {
+        var key = e.which;
+
+        if(key == 27) {
             this.hideHelper();
+            if(this.component) {
+                this.component.getComponent('Component').selected = false;
+                this.component = null;
+            }
+        }
+
+        if(key == 46 || key == 8) {
+            if(this.component) {
+                var comp = this.component.getComponent('Component');
+                for(var i = 0; i < comp.connectedTo.length; i++) {
+                    var cC =  comp.connectedTo[i].connections.filter(c => c.endNode.parent.id == comp.id);
+                    for(var j = 0; j < cC.length; j++) {
+                        var index = comp.connectedTo[i].connections.indexOf(cC[j]);
+                        comp.connectedTo[i].connections.splice(index, 1);
+                    }
+
+                    console.log(comp.connectedTo[i].connections);
+                }
+
+                this.scene.remove(this.component);
+                var index = this.components.indexOf(this.component);
+                this.components.splice(index, 1);
+            }
         }
     },
 
@@ -79,13 +104,15 @@ Manager.prototype = {
 
     onmousedown: function(self, e) {
 
-        if(Amble.Input.isMousePressed(2) ||
-            (Amble.Input.isMousePressed(3) && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0))) {
+        var key = e.which;
+
+        if(key == 2 ||
+            (key == 3 && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0))) {
 
             this.hideHelper();
         }
 
-        if(Amble.Input.isMousePressed(1) && !this.var.hold && !this.var.holdNode && !this.var.isHelper) {
+        if(key == 1 && !this.var.hold && !this.var.holdNode && !this.var.isHelper) {
             var node = null;
             for(var i = 0; i < this.components.length; i++) {
                 node = this.components[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
@@ -101,8 +128,6 @@ Manager.prototype = {
 
             } else {
 
-                this.component = null;
-
                 for(var i = 0; i < this.components.length; i++) {
 
                     var pos = this.components[i].transform.position;
@@ -117,7 +142,13 @@ Manager.prototype = {
                         this.var.holderMod.y = pos.y - this.var.mouse.y;
                         this.var.hold = true;
                         this.var.holdNode = false;
-                        this.component = this.components[i]
+
+                        //unselectr previous component
+                        if(this.component) {
+                            this.component.getComponent('Component').selected = false;
+                        }
+                        this.component = this.components[i];
+                        this.component.getComponent('Component').selected = true;
                     }
                 }
             }
@@ -134,10 +165,10 @@ Manager.prototype = {
         }
 
         this.var.hold = false;
-        this.component = null;
+
         if(this.var.holdNode) {
 
-            var n = null
+            var n = null;
             for(var i = 0; i < this.components.length; i++) {
                 n = this.components[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
                 if(n != null) {
@@ -152,9 +183,11 @@ Manager.prototype = {
                     obj.startNode = n;
                     obj.endNode = this.currentNode;
                     n.parent.connections.push(obj);
+                    this.currentNode.parent.connectedTo.push(n.parent);
                 } else {
                     obj.startNode = this.currentNode;
                     obj.endNode = n;
+                    n.parent.connectedTo.push(this.currentNode.parent);
                     this.currentNode.parent.connections.push(obj);
                 }
 
@@ -204,27 +237,43 @@ Manager.prototype = {
 
             this.variables.push(obj);
         }
-        console.log(this.variables)
     },
 
-    load: function(path){
-        console.log('load: ' + path)
-        if(path != 'untitled') {
-            var data = fs.readFileSync(path);
-            data = JSON.parse(data);
+    //data - json string
+    load: function(json){
+
+        //reset manager
+        if(this.component) {
+            this.component.getComponent('Component').selected = false;
+            this.component = null;
+        }
+
+        for(var i = 0; i < this.components.length; i++) {
+            this.scene.remove(this.components[i]);
+        }
+
+        this.components = [];
+        this.currentNode = null;
+
+        this.hideHelper();
+
+        this.var.hold = false;
+        this.var.holdNode = false;
+        this.componentsCount = 0;
+        this.connectionsCount = 0;
+
+        if(json != null) {
+            var data = JSON.parse(json);
             console.log(data);
 
             this.updateVariables(data.variables);
 
             for(var i = 0; i < data.components.length; i++) {
-                console.log(data.components);
                 if(data.components[i].type == 'function' || data.components[i].type == 'event') {
                     var component = componentsArray.find(c => c.componentData.idName == data.components[i].idName);
                 } else if(data.components[i].type == 'variable') {
                     var component = this.variables.find(c => c.componentData.idName == data.components[i].idName);
                 }
-
-                console.log(component);
 
                 var _component = this.scene.instantiate(component);
                 _component.transform.position = new Amble.Math.Vector2({x: data.components[i].position.x, y: data.components[i].position.y});
@@ -237,7 +286,6 @@ Manager.prototype = {
             for(var i = 0; i < data.components.length; i++) {
                 var d = data.components[i];
                 var comp = this.components.find(c => c.getComponent('Component').id == d.id);
-                console.log(d.connections.length)
                 for(var j = 0; j < d.connections.length; j++) {
                     var c = d.connections[j];
 
@@ -265,8 +313,9 @@ Manager.prototype = {
         }
     },
 
-    save: function(path){
-        console.log('save-to: ' + path)
+    save: function(){
+        // console.log('save-to: ' + path)
+
         // print all network
         this.graph = [];
         for(var i = 0; i < this.components.length; i++) {
@@ -306,8 +355,9 @@ Manager.prototype = {
             networks: this.getNetworks()
         }
 
-        var script = JSON.stringify(data)
-        fs.writeFileSync(path, script);
+        // var script = JSON.stringify(data)
+        // fs.writeFileSync(path, script);
+        return JSON.stringify(data)
     },
 
     getNetworks: function(path){
@@ -342,7 +392,8 @@ Manager.prototype = {
             var v = variables[i];
 
             var id = v.getComponent('Component').id;
-            var value = v.componentData.value;
+            var parent = this.variables.find(variable => variable.componentData.idName == v.getComponent('Component').parentName);
+            var value = v.componentData.value = parent.componentData.value;
 
             network.variables.push({
                 id: id,
@@ -364,7 +415,6 @@ Manager.prototype = {
 
         }
 
-        console.log(networks);
         return networks;
     },
 
@@ -406,6 +456,10 @@ Manager.prototype = {
         this.componentsCount++;
         this.components.push(_component);
 
+        if(this.component) {
+            this.component.getComponent('Component').selected = false;
+        }
+
         if(this.var.helperNode) {
             var obj = {};
             var secondNode = null;
@@ -415,11 +469,13 @@ Manager.prototype = {
                 obj.endNode = this.var.helperNode;
                 secondNode.parent.connections.push(obj);
                 this.var.helperNode.connected = true;
+                this.var.helperNode.parent.connectedTo.push(secondNode.parent);
                 secondNode.connected = true;
             } else if(_component.getComponent('Component').inNodes[0]) {
                 secondNode = _component.getComponent('Component').inNodes[0];
                 obj.startNode = this.var.helperNode;
                 obj.endNode = secondNode;
+                secondNode.parent.connectedTo.push(this.var.helperNode.parent);
                 this.var.helperNode.parent.connections.push(obj);
                 this.var.helperNode.connected = true;
                 secondNode.connected = true;

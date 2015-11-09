@@ -10,7 +10,7 @@
   "devDependencies": {
     "async": "^1.5.0",
     "browserify": "latest",
-    "electron-prebuilt": "latest",
+    "electron-prebuilt": "^0.34.3",
     "gulp": "latest",
     "vinyl-source-stream": "latest",
     "watchify": "latest"

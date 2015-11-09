@@ -863,7 +863,7 @@ FLOW.network = function(network) {
 
 FLOW.initProcess = function(componentName, processName) {
     var newInput, newOutput, component, process;
-    console.log(FLOW._components)
+    
     component = FLOW._components.find(c => c.name == componentName);
     if(!component) throw new Error('no component found: ' + componentName);
 
