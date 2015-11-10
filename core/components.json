@@ -1,11 +1,15 @@
 {
     "components" : [
         {
-            "idName": "OnUpdate",
-            "type": "event",
-            "input": [],
+            "idName": "branch",
+            "type": "function",
+            "input": [
+                { "name": "exe", "type": "exe"},
+                { "name": "condition", "type": "data", "color": "red", "value": true}
+            ],
             "output": [
-                { "name": "out" }
+                { "name": "true", "type": "exe"},
+                { "name": "false", "type": "exe"}
             ]
         },
         {
@@ -13,60 +17,78 @@
             "type": "event",
             "input": [],
             "output": [
-                { "name": "out" }
+                { "name": "exe", "type": "exe"}
             ]
         },
         {
             "idName": "consoleLog",
             "type": "function",
             "input": [
-                { "name": "data" }
+                { "name": "exe", "type": "exe"},
+                { "name": "data", "type": "data", "value": null}
             ],
             "output": [
-                { "name": "out" }
-            ]
-        },
-        {
-            "idName": "return10",
-            "type": "function",
-            "input": [
-                { "name": "input" }
-            ],
-            "output": [
-                { "name": "out" }
+                { "name": "exe", "type": "exe"}
             ]
         },
         {
             "idName": "add",
             "type": "function",
             "input": [
-                { "name": "value1", "color": "green" },
-                { "name": "value2", "color": "green" }
+                { "name": "exe", "type": "exe"},
+                { "name": "value1", "type": "data", "color": "green", "value": 0},
+                { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "sum" }
+                { "name": "exe", "type": "exe"},
+                { "name": "sum", "type": "data", "value" : 0}
             ]
         },
         {
             "idName": "multiply",
             "type": "function",
             "input": [
-                { "name": "value1", "color": "green" },
-                { "name": "value2", "color": "green" }
+                { "name": "exe", "type": "exe"},
+                { "name": "value1", "type": "data", "color": "green", "value": 0},
+                { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "product" }
+                { "name": "exe", "type": "exe"},
+                { "name": "product", "type": "data", "value" : 0}
+            ]
+        },
+        {
+            "idName": "subtract",
+            "type": "function",
+            "input": [
+                { "name": "exe", "type": "exe"},
+                { "name": "value1", "type": "data", "color": "green", "value": 0},
+                { "name": "value2", "type": "data", "color": "green", "value": 0}
+            ],
+            "output": [
+                { "name": "exe", "type": "exe"},
+                { "name": "difference", "type": "data", "value" : 0}
             ]
         },
         {
             "idName": "divide",
             "type": "function",
             "input": [
-                { "name": "value1", "color": "purple" },
-                { "name": "value2", "color": "purple" }
+                { "name": "exe", "type": "exe"},
+                { "name": "value1", "type": "data", "color": "green", "value": 0},
+                { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "quotient" }
+                { "name": "exe", "type": "exe"},
+                { "name": "quotient", "type": "data", "value" : 0}
+            ]
+        },
+        {
+            "idName": "OnUpdate",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
             ]
         }
     ]

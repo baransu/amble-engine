@@ -32,7 +32,9 @@ var app = new Amble.Application({
             Flow.component({
                 name: comp.components[i].idName,
                 input: comp.components[i].input,
+                type: comp.components[i].type,
                 output: comp.components[i].output,
+                connectedTo: null,
                 body: ComponentsFunctions[comp.components[i].idName]
             });
         }

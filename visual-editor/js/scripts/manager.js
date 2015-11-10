@@ -88,12 +88,13 @@ Manager.prototype = {
                         comp.connectedTo[i].connections.splice(index, 1);
                     }
 
-                    console.log(comp.connectedTo[i].connections);
+                    // console.log(comp.connectedTo[i].connections);
                 }
 
                 this.scene.remove(this.component);
                 var index = this.components.indexOf(this.component);
                 this.components.splice(index, 1);
+                this.component = null;
             }
         }
     },
@@ -106,9 +107,13 @@ Manager.prototype = {
 
         var key = e.which;
 
+        if(key == 1 && this.component) {
+            this.component.getComponent('Component').selected = false;
+            this.component = null;
+        }
+
         if(key == 2 ||
             (key == 3 && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0))) {
-
             this.hideHelper();
         }
 
@@ -223,6 +228,7 @@ Manager.prototype = {
 
     updateVariables: function(variables){
         this.variables = [];
+
         for(var i = 0; i < variables.length; i++) {
             var obj = {
                 componentData : variables[i],
@@ -235,6 +241,7 @@ Manager.prototype = {
                 ]
             }
 
+            // console.log(obj);.
             this.variables.push(obj);
         }
     },
@@ -259,12 +266,14 @@ Manager.prototype = {
 
         this.var.hold = false;
         this.var.holdNode = false;
-        this.componentsCount = 0;
-        this.connectionsCount = 0;
+
+        document.querySelector('variables-component').data = [];
 
         if(json != null) {
             var data = JSON.parse(json);
             console.log(data);
+
+            document.querySelector('variables-component').data = data.variables;
 
             this.updateVariables(data.variables);
 
@@ -366,10 +375,10 @@ Manager.prototype = {
 
         var network = {
             name: "",
-            processes: [],
+            components: [],
             connections: [],
-            init: {},
-            variables: []
+            variables: [],
+            variablesConnections: {}
         };
 
         //process components
@@ -379,7 +388,7 @@ Manager.prototype = {
                 var id = component.getComponent('Component').id;
                 var name = component.componentData.idName;
 
-                network.processes.push({
+                network.components.push({
                     id: id,
                     component: name
                 });
@@ -388,13 +397,13 @@ Manager.prototype = {
 
         //process variables
         var variables = this.components.filter(c => c.getComponent('Component').type == 'variable');
+        console.log(this.variables);
         for(var i = 0; i < variables.length; i++) {
             var v = variables[i];
 
             var id = v.getComponent('Component').id;
             var parent = this.variables.find(variable => variable.componentData.idName == v.getComponent('Component').parentName);
             var value = v.componentData.value = parent.componentData.value;
-
             network.variables.push({
                 id: id,
                 value: value
@@ -402,7 +411,7 @@ Manager.prototype = {
 
             for(var j = 0; j < v.getComponent('Component').connections.length; j++) {
                 var connection = v.getComponent('Component').connections[j];
-                network.init[connection.endNode.parent.id + '.' + connection.endNode.name] = id;
+                network.variablesConnections[connection.endNode.parent.id + '.' + connection.endNode.name] = id;
             }
         }
 
@@ -412,7 +421,6 @@ Manager.prototype = {
             network.name = events[i].componentData.idName;
             network.connections = this.getConnection(events[i].getComponent('Component'));
             networks.push(network);
-
         }
 
         return networks;
@@ -421,6 +429,7 @@ Manager.prototype = {
     getConnection: function(component){
 
         var connections = [];
+        console.log(component.connections);
         for(var i = 0; i < component.connections.length; i++) {
             var connection = {
                 id: this.connectionsCount.toString(),

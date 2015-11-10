@@ -67,32 +67,16 @@
 		is: 'variables-component',
 
 		properties: {
-
-			filePath: {
-				type: String,
-				value: 'untitled',
-				observer: 'updateVariables'
-			},
+			// 
+			// filePath: {
+			// 	type: String,
+			// 	value: 'untitled',
+			// 	observer: 'updateVariables'
+			// },
 
 			data: {
 				type: Array,
 				value: []
-			}
-		},
-
-		updateVariables: function(){
-			if(typeof this.data != 'undefined') {
-				console.log('splice')
-				this.splice('data', 0, this.data.length);
-				// this.notifyPath('data', this.data);
-			}
-			if(this.filePath != 'untitled'){
-				console.log('add')
-				var json = JSON.parse(fs.readFileSync(this.filePath, 'utf8'));
-				console.log('add')
-				for(var i = 0; i < json.variables.length; i++) {
-					this.push('data', json.variables[i]);
-				}
 			}
 		},
 
@@ -152,6 +136,13 @@
 			if(this.variableName.length > 0) {
 				//regexp all incorrect chars
 				var name = this.variableName.replace(/\s+/g, '');
+
+				if(name == 'true') {
+					name = 'true_';
+				} else if( name == 'false') {
+					name = 'false_';
+				}
+
 				this.variableName = "";
 				var v = this.data.find(v => v.idName == name);
 
