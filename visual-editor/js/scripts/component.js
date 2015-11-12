@@ -18,6 +18,7 @@ Component = function(args){
     this.parentName = ""
     this.selected = false;
     this.connectedTo = [];
+    this.visited = false;
 }
 
 Component.prototype = {

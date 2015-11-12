@@ -34,6 +34,19 @@ Camera.prototype = {
         }
     },
 
+    onresize: function(self) {
+
+        var width = parseInt(self.camera.context.offsetWidth);
+        var height = parseInt(self.camera.context.offsetHeight);
+        var sizeDifference = width/self.camera.size.x;
+
+        self.camera.size = new Amble.Math.Vector2({ x: width, y: height });
+        self.camera.view = new Amble.Math.Vector2(self.camera.position.x - width, self.camera.position.y - height);
+
+        this.variables.maxZoom *= sizeDifference;
+        this.variables.minZoom *= sizeDifference;
+    },
+
     onmousewheel: function(self, e){
 
         if(!Amble.app.scene.children[1].getComponent('Manager').var.isHelper) {

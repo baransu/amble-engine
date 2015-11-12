@@ -1,31 +1,31 @@
-var COMPONENTS_FUNCTIONS = {}
+var ComponentsFunction = {}
 
-COMPONENTS_FUNCTIONS.consoleLog  = function(data) {
+ComponentsFunction.consoleLog  = function(data) {
     console.log(data.value);
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.add  = function(a, b, c) {
+ComponentsFunction.add  = function(a, b, c) {
     c.value = a.value + b.value;
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.subtract  = function(a, b, c) {
+ComponentsFunction.subtract  = function(a, b, c) {
     c.value = a.value - b.value;
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.multiply  = function(a, b, c) {
+ComponentsFunction.multiply  = function(a, b, c) {
     c.value = a.value * b.value;
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.divide  = function(a, b, c) {
+ComponentsFunction.divide  = function(a, b, c) {
     c.value = a.value/b.value;
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.branch  = function(condition) {
+ComponentsFunction.branch  = function(condition) {
     if(condition.value) {
         return 0; //out node id first (true)
     } else {
@@ -33,12 +33,12 @@ COMPONENTS_FUNCTIONS.branch  = function(condition) {
     }
 }
 
-COMPONENTS_FUNCTIONS.OnStart  = function() {
+ComponentsFunction.OnStart  = function() {
     return 0;
 }
 
-COMPONENTS_FUNCTIONS.OnUpdate  = function() {
+ComponentsFunction.OnUpdate  = function() {
     return 0;
 }
 
-module.exports = COMPONENTS_FUNCTIONS;
+module.exports = ComponentsFunction;
