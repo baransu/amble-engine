@@ -31,11 +31,8 @@ window.Amble = (function(){
                     Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                var sizeDifference = width/camera.size.x;
-                camera.size = new Amble.Math.Vector2({ x: width, y: height });
-                camera.view = new Amble.Math.Vector2(camera.position.x - width, camera.position.y - height);
-                // Amble.app.mainCamera.getComponent('Camera').variables.maxZoom *= sizeDifference;
-                // Amble.app.mainCamera.getComponent('Camera').variables.minZoom *= sizeDifference;
+                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+
             });
         }
 

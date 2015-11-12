@@ -1,11 +1,10 @@
 {
-  "name": "polymer",
+  "name": "amble-engine",
   "homepage": "https://github.com/Baransu/amble-engine",
   "authors": [
     "Tomasz Cichocinski <tomaszcichocinski@gmail.com>"
   ],
   "description": "",
-  "main": "",
   "moduleType": [],
   "license": "MIT",
   "ignore": [
@@ -16,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~1.1.5",
-    "google-map": "GoogleWebComponents/google-map#~1.1.4"
+    "polymer": "Polymer/polymer#~1.2.1",
+    "iron-list": "PolymerElements/iron-list#~1.1.5"
   }
 }

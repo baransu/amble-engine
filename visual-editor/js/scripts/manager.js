@@ -23,6 +23,7 @@ Manager = function(args){
     this.componentsList = [];
     this.variables = [];
     this.connectionsCount = 0;
+    this.nodeDisconnect = false;
 }
 
 Manager.prototype = {
@@ -80,16 +81,8 @@ Manager.prototype = {
 
         if(key == 46 || key == 8) {
             if(this.component) {
-                var comp = this.component.getComponent('Component');
-                for(var i = 0; i < comp.connectedTo.length; i++) {
-                    var cC =  comp.connectedTo[i].connections.filter(c => c.endNode.parent.id == comp.id);
-                    for(var j = 0; j < cC.length; j++) {
-                        var index = comp.connectedTo[i].connections.indexOf(cC[j]);
-                        comp.connectedTo[i].connections.splice(index, 1);
-                    }
 
-                    // console.log(comp.connectedTo[i].connections);
-                }
+                this.disconnectComponent(this.component);
 
                 this.scene.remove(this.component);
                 var index = this.components.indexOf(this.component);
@@ -112,6 +105,37 @@ Manager.prototype = {
             this.component = null;
         }
 
+        //disconnect node
+        if(key == 3) {
+            for(var i = 0; i < this.components.length; i++) {
+                node = this.components[i].getComponent('Component').checkCollision(this.var.mouse.x, this.var.mouse.y);
+                if(node != null) {
+                    break;
+                }
+            }
+
+            if(node) {
+                this.nodeDisconnect = true;
+                var parent = node.parent;
+
+                //disconnect form other component - in port
+                for(var i = 0; i < parent.connectedTo.length; i++) {
+                    var connections =  parent.connectedTo[i].connections.filter(c => c.endNode.parent.id == parent.id && c.endNode.id == node.id);
+                    for(var j = 0; j < connections.length; j++) {
+                        var index = parent.connectedTo[i].connections.indexOf(connections[j]);
+                        parent.connectedTo[i].connections.splice(index, 1);
+                    }
+                }
+
+                //disconnect form node component - out port
+                var connection = parent.connections.filter(c => c.startNode.id == node.id);
+                for(var j = 0; j < connection.length; j++) {
+                    var index = parent.connections.indexOf(connection[j]);
+                    parent.connections.splice(index, 1);
+                }
+            }
+        }
+
         if(key == 2 ||
             (key == 3 && (this.var.lastMouse.x != 0 || this.var.lastMouse.y != 0))) {
             this.hideHelper();
@@ -126,7 +150,7 @@ Manager.prototype = {
                 }
             }
 
-            if(node != null) {
+            if(node) {
 
                 this.currentNode = node;
                 this.var.holdNode = true;
@@ -164,11 +188,12 @@ Manager.prototype = {
 
         var key = e.which;
 
-        if (key == 3 && !this.var.isHelper && !this.var.holdNode && !this.moved) {
+        if (key == 3 && !this.var.isHelper && !this.var.holdNode && !this.moved && !this.nodeDisconnect) {
             this.hideHelper();
             this.showHelper();
         }
 
+        this.nodeDisconnect = false;
         this.var.hold = false;
 
         if(this.var.holdNode) {
@@ -226,6 +251,17 @@ Manager.prototype = {
 
     },
 
+    disconnectComponent: function(comp){
+        var component = comp.getComponent('Component');
+        for(var i = 0; i < component.connectedTo.length; i++) {
+            var cC =  component.connectedTo[i].connections.filter(c => c.endNode.parent.id == component.id);
+            for(var j = 0; j < cC.length; j++) {
+                var index = component.connectedTo[i].connections.indexOf(cC[j]);
+                component.connectedTo[i].connections.splice(index, 1);
+            }
+        }
+    },
+
     updateVariables: function(variables){
         this.variables = [];
 
@@ -278,7 +314,7 @@ Manager.prototype = {
             this.updateVariables(data.variables);
 
             for(var i = 0; i < data.components.length; i++) {
-                if(data.components[i].type == 'function' || data.components[i].type == 'event') {
+                if(data.components[i].type == 'function' || data.components[i].type == 'event' || data.components[i].type == 'calculate') {
                     var component = componentsArray.find(c => c.componentData.idName == data.components[i].idName);
                 } else if(data.components[i].type == 'variable') {
                     var component = this.variables.find(c => c.componentData.idName == data.components[i].idName);
@@ -287,7 +323,8 @@ Manager.prototype = {
                 var _component = this.scene.instantiate(component);
                 _component.transform.position = new Amble.Math.Vector2({x: data.components[i].position.x, y: data.components[i].position.y});
                 _component.getComponent('Component').id = data.components[i].id;
-                this.componentsCount = data.components[i].id;
+                var id = data.components[i].id;
+                this.componentsCount = Number(id.replace('component', ''));
                 this.components.push(_component);
             }
 
@@ -383,10 +420,13 @@ Manager.prototype = {
 
         //process components
         for(var i = 0; i < this.components.length; i++) {
-            var component = this.components[i];
-            if(component.getComponent('Component').type != 'variable') {
-                var id = component.getComponent('Component').id;
-                var name = component.componentData.idName;
+            var component = this.components[i].getComponent('Component');
+
+            component.visited = false;
+
+            if(component.type != 'variable') {
+                var id = component.id;
+                var name = this.components[i].componentData.idName;
 
                 network.components.push({
                     id: id,
@@ -429,7 +469,9 @@ Manager.prototype = {
     getConnection: function(component){
 
         var connections = [];
-        console.log(component.connections);
+
+        component.visited = true;
+
         for(var i = 0; i < component.connections.length; i++) {
             var connection = {
                 id: this.connectionsCount.toString(),
@@ -440,12 +482,24 @@ Manager.prototype = {
             connections.push(connection);
             this.connectionsCount++;
 
-            var n = this.getConnection(component.connections[i].endNode.parent);
-            for(var j = 0; j < n.length; j++) {
-                connections.push(n[j]);
+            if(!component.connections[i].endNode.parent.visited) {
+                var n = this.getConnection(component.connections[i].endNode.parent);
+                for(var j = 0; j < n.length; j++) {
+                    connections.push(n[j]);
+                }
             }
 
         }
+
+        for(var i = 0; i < component.connectedTo.length; i++) {
+            if(component.connectedTo[i].type == 'calculate' && !component.connectedTo[i].visited) {
+                var n = this.getConnection(component.connectedTo[i]);
+                for(var j = 0; j < n.length; j++) {
+                    connections.push(n[j]);
+                }
+            }
+        }
+
 
         return connections;
 
@@ -453,7 +507,7 @@ Manager.prototype = {
 
     addComponent: function(idName, type) {
 
-        if(type == 'function' || type  == 'event') {
+        if(type == 'function' || type  == 'event' || type == 'calculate') {
             var component = componentsArray.find(c => c.componentData.idName == idName);
         } else if(type == 'variable') {
             var component = this.variables.find(c => c.componentData.idName == idName);

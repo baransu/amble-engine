@@ -33,53 +33,45 @@
         },
         {
             "idName": "add",
-            "type": "function",
+            "type": "calculate",
             "input": [
-                { "name": "exe", "type": "exe"},
                 { "name": "value1", "type": "data", "color": "green", "value": 0},
                 { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "exe", "type": "exe"},
                 { "name": "sum", "type": "data", "value" : 0}
             ]
         },
         {
             "idName": "multiply",
-            "type": "function",
+            "type": "calculate",
             "input": [
-                { "name": "exe", "type": "exe"},
                 { "name": "value1", "type": "data", "color": "green", "value": 0},
                 { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "exe", "type": "exe"},
                 { "name": "product", "type": "data", "value" : 0}
             ]
         },
         {
             "idName": "subtract",
-            "type": "function",
+            "type": "calculate",
             "input": [
-                { "name": "exe", "type": "exe"},
                 { "name": "value1", "type": "data", "color": "green", "value": 0},
                 { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "exe", "type": "exe"},
                 { "name": "difference", "type": "data", "value" : 0}
             ]
         },
         {
             "idName": "divide",
-            "type": "function",
+            "type": "calculate",
             "input": [
-                { "name": "exe", "type": "exe"},
                 { "name": "value1", "type": "data", "color": "green", "value": 0},
                 { "name": "value2", "type": "data", "color": "green", "value": 0}
             ],
             "output": [
-                { "name": "exe", "type": "exe"},
                 { "name": "quotient", "type": "data", "value" : 0}
             ]
         },

@@ -27,7 +27,6 @@ gulp.task('browserify', function() {
 
 gulp.task('copy-components-json', function() {
     gulp.src('./core/components.json')
-    // Perform minification tasks, etc here
     .pipe(gulp.dest('./project/data'));
 });
 

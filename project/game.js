@@ -44,11 +44,11 @@ var app = new Amble.Application({
         }
 
         Flow.startNetwork("OnStart");
+
     },
 
     /* game loop */
     preupdate: function(){
-
     },
 
     /* update there - actors update and camera update*/
