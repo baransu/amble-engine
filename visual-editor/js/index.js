@@ -63,99 +63,12 @@ window.Component = require('./js/scripts/component.js');
 window.Camera = require('./js/scripts/camera.js')
 window.Manager = require('./js/scripts/manager.js')
 
-// Flow.component({
-//     name: "multiply",
-//     input: [
-//         {type: Number, name:'val1'},
-//         {type: Number, name:'val2'}
-//     ],
-//     output: [
-//         {type: Number, name:'output'}
-//     ],
-//     body: function(val1, val2, output) {
-//         var multiply = val1 * val2;
-//         output(multiply);
-//     }
-// });
-
-//components in separate files? (merge on build and bundle) iterate over every and add to Flow.components
-
-//network json (future)
-// Flow.network({
-//     name: "start",
-//     //list of all components
-//     processes:[
-//         {name: "add", component: "add"},
-//         {name: "multiply1", component: "multiply"},
-//         {name: "multiply2", component: "multiply"},
-//         {name: "multiply3", component: "multiply"},
-//         {name: "log1", component: 'log'},
-//         {name: "log2", component: 'log'},
-//         {name: "log3", component: 'log'},
-//     ],
-//     //list of variables connection
-//     connections: [
-//         {id: 0, out:'add.output', in:'multiply1.val1'},
-//         {id: 1, out:'multiply1.output', in:'multiply2.val1'},
-//         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
-//         {id: 3, out:'multiply2.output', in:'log1.data'},
-//         {id: 4, out:'multiply3.output', in:'log2.data'},
-//         {id: 5, out:'log1.output', in:'log3.data'},
-//     ],
-//     //list of begin variables connection
-//     init: {
-//         'add.val1': 1,
-//         'add.val2': 1,
-//         'multiply1.val2': 2,
-//         'multiply2.val2': 4,
-//         'multiply3.val2': 2
-//     }
-// })
-
-
-// {
-//     name: "start",
-//     //list of all components
-//     processes:[
-//         {id: "add", component: "add"},
-//         {id: "multiply1", component: "multiply"},
-//         {id: "multiply2", component: "multiply"},
-//         {id: "multiply3", component: "multiply"},
-//         {id: "log1", component: 'log'},
-//         {id: "log2", component: 'log'},
-//         {id: "log3", component: 'log'},
-//     ],
-//     //list of variables connection
-//     connections: [
-        //start from event nodes and save only connected nodes
-            // id | out : componentid.outputName, in: componentid.inputName
-//         {id: 0, out:'add.output', in:'multiply1.val1'},
-//         {id: 1, out:'multiply1.output', in:'multiply2.val1'},
-//         {id: 2, out:'multiply1.output', in:'multiply3.val1'},
-//         {id: 3, out:'multiply2.output', in:'log1.data'},
-//         {id: 4, out:'multiply3.output', in:'log2.data'},
-//         {id: 5, out:'log1.output', in:'log3.data'},
-//     ],
-//     //list of begin variables connection
-//     init: {
-            //componentid.inputName: variable.value
-//         'add.val1': 1,
-//         'add.val2': 1,
-//         'multiply1.val2': 2,
-//         'multiply2.val2': 4,
-//         'multiply3.val2': 2
-//     },
-//
-//      variables: [
-        // {id : idName: value: null}
-    // ]
-
 var fs = require('fs');
 var remote = require('remote');
 var Menu = remote.require('menu');
 var ipc = require('ipc');
 
-var componentsFunctions = require('../core/components-functions.js');
+var componentsFunctions = Flow.ComponentsFunction;
 var componentsArray = [];
 
 ipc.on('open-respond', function(data){

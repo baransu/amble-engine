@@ -27,7 +27,7 @@
 	<template>
 
 		<div class="input-filed">
-			<input id="inputBox" type="text" value="{{filterText::input}}" placeholder="Search" on-input="input" on-change="enter">
+			<input id="inputBox" type="text" value="{{filterText::input}}" placeholder="Search" on-input="input">
 		</div>
         <div id="list" class="collection">
             <template id="componentsList" is="dom-repeat" items="{{ comp }}" filter="filterRoom" as="i">
@@ -40,8 +40,6 @@
 </dom-module>
 
 <script>
-
-    var fs = require('fs');
 
 	Polymer({
 		is: 'helper-component',
@@ -70,6 +68,7 @@
         filterRoom: function(item) {
 			if(item.idName.match(new RegExp(this.filterText, 'i'))) {
 				this.comps.push(item);
+				// console.log(this.comps)
 				return true;
 			} else {
 				return false;
@@ -80,19 +79,19 @@
             this.$.componentsList.render();
         },
 
-		enter: function(e){
-			if(this.comps.length > 0) {
-				Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName, this.comps[0].type);
-				this.remove();
-			}
-		},
+		// enter: function(e){
+		// 	if(this.comps.length > 0) {
+		// 		Amble.app.scene.children[1].getComponent('Manager').addComponent(this.comps[0].idName, this.comps[0].type);
+		// 		this.remove();
+		// 	}
+		// },
 
 		input: function(){
 			this.comps = [];
 		},
 
         handleClick: function(e) {
-			var component = this.comp.find(c => c.idName == e.target.id);
+			var component = this.comps.find(c => c.idName == e.target.id);
 			console.log(component)
 		    Amble.app.scene.children[1].getComponent('Manager').addComponent(component.idName, component.type);
 			this.remove();

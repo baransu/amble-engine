@@ -1,4 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+window.Flow = require('./flow.js');
 window.Amble = (function(){
 
     var Amble = {};
@@ -32,7 +33,7 @@ window.Amble = (function(){
                     Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
@@ -105,7 +106,11 @@ window.Amble = (function(){
         function gameLoop(){
 
             var now = Date.now();
-            Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
+            if(Amble.Time._lastTime == 0) {
+                Amble.Time.deltaTime = 0;
+            } else {
+                Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
+            }
 
             //dafuq?
             that.preupdate();
@@ -192,16 +197,10 @@ window.Amble = (function(){
             var copy = {};
             if (obj instanceof Object || obj instanceof Array) {
                 for(var attr in obj) {
-                    if(attr == 'components') {
-                        copy[attr] = [];
-                        for(var i in obj[attr]) {
-                            copy[attr][i] = {
-                                id: obj[attr][i].name,
-                                body: Amble.Utils.makeFunction(obj[attr][i])
-                            }
-                        }
-                    } else {
+                    if(attr != 'scritps') {
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
+                    } else {
+                        copy[attr] = obj[attr];
                     }
                 }
             }
@@ -229,19 +228,18 @@ window.Amble = (function(){
         //transform is basic actro component
         this.transform = {};
 
-
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
         this.renderer = {};
-        this.components = {};
+        this.scripts = {};
     };
 
-    Amble.Actor.prototype = {
 
-        getComponent: function(componentName){
-            var component = this.components.find(c => c.id == componentName);
-            return component.body;
-        }
+    Amble.Actor.prototype = {
+        // getComponent: function(componentName){
+        //     var component = this.components.find(c => c.id == componentName);
+        //     return component.body;
+        // }
     };
 
     /* Scene */
@@ -261,13 +259,8 @@ window.Amble = (function(){
         },
 
         add: function(object) {
-            if(object.components != 'undefined') {
-                for(var i in object.components) {
-                    var _component = object.components[i].body;
-                    if(typeof _component.update == 'function'){
-                        _component.start(object);
-                    }
-                }
+            for(var i in object.scripts) {
+                Flow.queueNetwork(object, object.scripts[i].name, 'OnStart');
             }
 
             this.children.push(object);
@@ -280,31 +273,6 @@ window.Amble = (function(){
                 this.children.splice(index, 1);
         },
 
-        awake: function(){
-            for(var i in this.children){
-                /* component start */
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.start == 'function'){
-                        _component.start(this.children[i]);
-                    }
-                }
-            }
-        },
-
-        update: function(){
-            for(var i in this.children){
-                /* script update */
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.update == 'function'){
-                        _component.update(this.children[i]);
-                    }
-                }
-            }
-
-        },
-
         render: function(camera){
             for(var i in this.children){
                 /* render objects by renderer*/
@@ -312,61 +280,54 @@ window.Amble = (function(){
                     this.children[i].renderer.render(this.children[i], camera)
                 }
             }
+        },
 
+        update: function(){
+            for(var i in this.children){
+                /* script update */
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnUpdate');
+                }
+            }
         },
 
         //input events
         onmousewheel: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.onmousewheel == 'function'){
-                        _component.onmousewheel(this.children[i], e);
-                    }
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseWheel');
                 }
             }
         },
 
         onmousedown: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.onmousedown == 'function'){
-                        _component.onmousedown(this.children[i], e);
-                    }
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseDown');
                 }
             }
         },
 
         onmouseup: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.onmouseup == 'function'){
-                        _component.onmouseup(this.children[i], e);
-                    }
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseUp');
                 }
             }
         },
 
         onkeydown: function(e) {
             for(var i in this.children){
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.onkeydown == 'function'){
-                        _component.onkeydown(this.children[i], e);
-                    }
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnKeyDown');
                 }
             }
         },
 
         onkeyup: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].components){
-                    var _component = this.children[i].components[j].body;
-                    if(typeof _component.onkeyup == 'function'){
-                        _component.onkeyup(this.children[i], e);
-                    }
+                for(var j in this.children[i].scripts){
+                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnKeyUp');
                 }
             }
         }
@@ -464,7 +425,7 @@ window.Amble = (function(){
     /* Amble.Graphics.Renderer functions */
     Amble.Graphics.RectRenderer.prototype = {
 
-        render: function(self, layerName, camera){
+        render: function(self, camera){
             camera.layer(this.layer)
                 .fillStyle(this.color)
                 .fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);
@@ -621,7 +582,6 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.x = e.deltaX;
             Amble.Input.wheelDelta.y = e.deltaY;
             Amble.Input.wheelDelta.z = e.deltaZ;
-            Amble.app.mainCamera.getComponent('Camera').onmousewheel(Amble.app.mainCamera, e);
 
             Amble.app.scene.onmousewheel(e);
         }
@@ -761,55 +721,7 @@ window.Amble = (function(){
 
 module.exports = window.Amble;
 
-},{}],2:[function(require,module,exports){
-var ComponentsFunction = {}
-
-ComponentsFunction.consoleLog  = function(data) {
-    console.log(data.value);
-    // console.log(Amble.Time.deltaTime)
-    return 0;
-}
-
-ComponentsFunction.add  = function(a, b, c) {
-    c.value = a.value + b.value;
-    return 0;
-}
-
-ComponentsFunction.subtract  = function(a, b, c) {
-    c.value = a.value - b.value;
-    return 0;
-}
-
-ComponentsFunction.multiply  = function(a, b, c) {
-    c.value = a.value * b.value;
-    return 0;
-}
-
-ComponentsFunction.divide  = function(a, b, c) {
-    c.value = a.value/b.value;
-    return 0;
-}
-
-ComponentsFunction.branch  = function(condition) {
-    if(condition.value) {
-        return 0; //out node id first (true)
-    } else {
-        return 1; //out node id second (false)
-    }
-}
-
-ComponentsFunction.OnStart  = function() {
-    return 0;
-}
-
-ComponentsFunction.OnUpdate  = function() {
-    return 0;
-}
-
-module.exports = ComponentsFunction;
-
-},{}],3:[function(require,module,exports){
-(function (process){
+},{"./flow.js":2}],2:[function(require,module,exports){
 var async = require('async');
 
 var FLOW = {};
@@ -855,6 +767,7 @@ FLOW.initComponent = function(componentName, componentId) {
         type: component.type,
         body: component.body
     };
+
     return _component;
 }
 
@@ -864,18 +777,17 @@ FLOW.network = function(network){
     network._components = [];
 
     for(var key in network.components) {
+
         var componentName = network.components[key].component;
         var componentId = network.components[key].id;
         var component = FLOW.initComponent(componentName, componentId);
-        console.log(component);
+
         if(component.type == "event") {
             network._components.unshift(component);
         } else {
             network._components.push(component);
         }
     }
-
-    console.log(network);
 
     //connections
     for(var key in network.connections) {
@@ -894,7 +806,7 @@ FLOW.network = function(network){
 
         // find the second process's port to connect to
         var connectedPort = secondComponent.input.find(p => p.name === network.connections[key].in.split('.')[1]);
-        if (!connectedPort) throw new Error('whoops missing ' + network.connections[key] + ' port for: ' + process.name);
+        if (!connectedPort) throw new Error('whoops missing ' + network.connections[key] + ' port for: ' + componentName);
 
         //output
         port.connectedTo.push({
@@ -909,25 +821,24 @@ FLOW.network = function(network){
             port: port.name || '',
             type: port.type || ''
         }
-
     }
 
-    network._endCounts = 0;
-    for(var key in network._processes) {
-        if(network._processes[key].output[0].connectedTo = null) {
-            network._endCounts++;
-        }
-    }
-
-    console.log(network)
     FLOW._networks.push(network);
 }
 
-FLOW.startNetwork = function(name){
+FLOW.queueNetwork = function(self, scriptName, name) {
 
-    var network = FLOW._networks.find(n => n.name === name);
+    var networks = FLOW._networks.filter(n => n.name === name && n.scriptName == scriptName);
 
-    FLOW._currentNetwork = network;
+    for(var i = 0; i < networks.length; i++) {
+
+        networks[i].self = self;
+
+        FLOW.startNetwork(networks[i]);
+    }
+}
+
+FLOW.startNetwork = function(network){
 
     var variablesConnections = network.variablesConnections;
 
@@ -960,15 +871,18 @@ FLOW.startNetwork = function(name){
 
     network.running = true;
 
-    FLOW.step(network._components[0]);
+    FLOW.step(network, network._components[0]);
+
 }
 
-FLOW.step = function(component) {
+FLOW.step = function(network, component) {
 
     //process in/out into array
     var args = [];
 
-    var inputs = FLOW.getInputs(component);
+    // console.log(component);
+
+    var inputs = FLOW.getInputs(network, component);
 
     for(var i = 0; i < inputs.length; i++) {
         args.push(inputs[i]);
@@ -985,24 +899,22 @@ FLOW.step = function(component) {
     if(next === -1) throw new Error('Flow unexpected stoped at: ' + component.id);
 
     if(component.output[next].connectedTo.length > 0) {
-        var _component = FLOW._currentNetwork._components.find(c => c.id == component.output[next].connectedTo[0].id);
+        var _component = network._components.find(c => c.id == component.output[next].connectedTo[0].id);
 
         if(typeof _component == 'undefined') {
-            FLOW._currentNetwork.running = false;
-            console.log('network end')
+            network.running = false;
+            // console.log(network.scriptName + ' network end undefined')
         } else {
-            FLOW.step(_component);
+            FLOW.step(network, _component);
         }
 
     } else {
-        FLOW._currentNetwork.running = false;
-        console.log('network end')
+        network.running = false;
+        // console.log(network.scriptName + ' network end not undefined')
     }
 }
 
-FLOW.getInputs = function(component)  {
-
-    // console.log(component);
+FLOW.getInputs = function(network, component)  {
 
     var args = [];
 
@@ -1012,12 +924,12 @@ FLOW.getInputs = function(component)  {
             var c = component.input[i];
 
             if(c.connectedTo.type == 'variable') {
-                var variable = FLOW._currentNetwork.variables.find(v => v.id == c.connectedTo.id);
+                var variable = network.variables.find(v => v.id == c.connectedTo.id);
                 c.value = variable.value;
 
             } else if (c.connectedTo.type == 'data') {
 
-                var comp = FLOW._currentNetwork._components.find(v => v.id == c.connectedTo.id);
+                var comp = network._components.find(v => v.id == c.connectedTo.id);
                 if(comp.output[0].type == 'exe') {
                     var port = comp.output.find(p => p.name == c.connectedTo.port);
                     c.value = port.value;
@@ -1026,7 +938,7 @@ FLOW.getInputs = function(component)  {
 
                     var argss = [];
 
-                    var inputs = FLOW.getInputs(comp);
+                    var inputs = FLOW.getInputs(network, comp);
                     for(var x = 0; x < inputs.length; x++) {
                         argss.push(inputs[x]);
                     }
@@ -1048,13 +960,118 @@ FLOW.getInputs = function(component)  {
         }
     }
 
+    //secial functions
+    if(component.name === 'forLoop') {
+
+        args.unshift(network);
+
+    } else if (component.name === 'self') {
+
+        args.unshift(network.self);
+
+    }
+
     return args;
+}
+
+FLOW.ComponentsFunction = {}
+
+FLOW.ComponentsFunction.forLoop = function(network, first, last, currentIndex) {
+    for(var i = first.value; i <= last.value; i++) {
+        currentIndex.value = i;
+
+        var component = network._components.find(c => c.id == this.output[0].connectedTo[0].id);
+        FLOW.step(network, component);
+    }
+    return 1;
+}
+
+FLOW.ComponentsFunction.consoleLog  = function(data) {
+    console.log(data.value);
+    return 0;
+}
+
+FLOW.ComponentsFunction.add  = function(a, b, c) {
+    c.value = a.value + b.value;
+}
+
+FLOW.ComponentsFunction.subtract  = function(a, b, c) {
+    c.value = a.value - b.value;
+}
+
+FLOW.ComponentsFunction.multiply  = function(a, b, c) {
+    c.value = a.value * b.value;
+}
+
+FLOW.ComponentsFunction.divide  = function(a, b, c) {
+    c.value = a.value/b.value;
+}
+
+FLOW.ComponentsFunction.branch  = function(condition) {
+    if(condition.value) {
+        return 0; //out node id first (true)
+    } else {
+        return 1; //out node id second (false)
+    }
+}
+
+FLOW.ComponentsFunction.setVector2 = function(vec2In, x, y, vec2Out){
+    vec2In.value.x = x.value;
+    vec2In.value.y = y.value;
+    vec2Out.value = vec2In.value;
+    return 0;
+}
+
+FLOW.ComponentsFunction.getVector2 = function(vec2, x, y){
+    x.value = vec2.value.x;
+    y.value = vec2.value.y;
+}
+
+FLOW.ComponentsFunction.self = function(self, selfOut){
+    selfOut.value = self;
+}
+
+FLOW.ComponentsFunction.deltaTime = function(deltaOut) {
+    deltaOut.value = Amble.Time.deltaTime;
+}
+
+FLOW.ComponentsFunction.getTransform = function(self, transform, position, size){
+    transform.value = self.value.transform;
+    position.value = self.value.transform.position;
+    size.value = self.value.transform.size;
+}
+
+FLOW.ComponentsFunction.OnStart  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnUpdate  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnMouseWheel  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnMouseUp  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnMouseDown  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnKeyUp  = function() {
+    return 0;
+}
+
+FLOW.ComponentsFunction.OnKeyDown  = function() {
+    return 0;
 }
 
 module.exports = FLOW;
 
-}).call(this,require('_process'))
-},{"_process":5,"async":4}],4:[function(require,module,exports){
+},{"async":3}],3:[function(require,module,exports){
 (function (process,global){
 /*!
  * async
@@ -2318,7 +2335,7 @@ module.exports = FLOW;
 }());
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":5}],5:[function(require,module,exports){
+},{"_process":4}],4:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -2411,10 +2428,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],6:[function(require,module,exports){
-var Flow = require('../core/flow.js')
-var ComponentsFunctions = require('../core/components-functions.js');
-
+},{}],5:[function(require,module,exports){
 var app = new Amble.Application({
 
     resize: true,
@@ -2424,24 +2438,21 @@ var app = new Amble.Application({
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
             context: "workspace"
-        }},
-        // components: [
-        //     { name: "Camera", args: {}}
-        // ],
+        }}
     },
 
     preload: function(){
 
-        this.loader.load('json', 'untitled.ascript');
+        this.loader.load('json', 'scripts/untitled.ascript');
+        this.loader.load('json', 'scripts/simpleTestScript.ascript');
         this.loader.load('json', 'data/components.json');
 
     },
 
     /* every thing loaded */
     start: function(){
+        // move to engine?
         var comp = JSON.parse(this.loader.getAsset('data/components.json'));
-        var script = JSON.parse(this.loader.getAsset('untitled.ascript'));
-
         for(var i = 0; i < comp.components.length; i++) {
             Flow.component({
                 name: comp.components[i].idName,
@@ -2449,15 +2460,35 @@ var app = new Amble.Application({
                 type: comp.components[i].type,
                 output: comp.components[i].output,
                 connectedTo: null,
-                body: ComponentsFunctions[comp.components[i].idName]
+                body: Flow.ComponentsFunction[comp.components[i].idName]
             });
         }
 
+        var script = JSON.parse(this.loader.getAsset('scripts/untitled.ascript'));
         for(var i = 0; i < script.networks.length; i++) {
+            script.networks[i].scriptName = script.scriptName;
             Flow.network(script.networks[i]);
         }
 
-        Flow.startNetwork("OnStart");
+        var script = JSON.parse(this.loader.getAsset('scripts/simpleTestScript.ascript'));
+        for(var i = 0; i < script.networks.length; i++) {
+            script.networks[i].scriptName = script.scriptName;
+            Flow.network(script.networks[i]);
+        }
+
+        var object = {
+            transform: { name: 'Amble.Transform', args: {
+                position: { name: 'Amble.Math.Vector2', args:{ x: 0, y: 0}},
+                size: {name: 'Amble.Math.Vector2', args:{x: 100, y: 100}}
+            }},
+            renderer: { name: 'Amble.Graphics.RectRenderer', args:{ color: 'red'}},
+            scripts: [
+                { name: 'untitled.ascript', args:{ /*variables?*/}},
+                { name: 'simpleTestScript.ascript', args:{ /*variables?*/}}
+            ]
+        }
+
+        this.scene.instantiate(object);
 
     },
 
@@ -2481,4 +2512,4 @@ var app = new Amble.Application({
     }
 });
 
-},{"../core/components-functions.js":2,"../core/flow.js":3}]},{},[1,2,3,6]);
+},{}]},{},[1,2,5]);

@@ -1,4 +1,3 @@
-window.Flow = require('./flow.js');
 window.Amble = (function(){
 
     var Amble = {};
@@ -32,7 +31,7 @@ window.Amble = (function(){
                     Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
@@ -105,11 +104,7 @@ window.Amble = (function(){
         function gameLoop(){
 
             var now = Date.now();
-            if(Amble.Time._lastTime == 0) {
-                Amble.Time.deltaTime = 0;
-            } else {
-                Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
-            }
+            Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
             //dafuq?
             that.preupdate();
@@ -196,10 +191,16 @@ window.Amble = (function(){
             var copy = {};
             if (obj instanceof Object || obj instanceof Array) {
                 for(var attr in obj) {
-                    if(attr != 'scritps') {
-                        copy[attr] = Amble.Utils.makeFunction(obj[attr]);
+                    if(attr == 'components') {
+                        copy[attr] = [];
+                        for(var i in obj[attr]) {
+                            copy[attr][i] = {
+                                id: obj[attr][i].name,
+                                body: Amble.Utils.makeFunction(obj[attr][i])
+                            }
+                        }
                     } else {
-                        copy[attr] = obj[attr];
+                        copy[attr] = Amble.Utils.makeFunction(obj[attr]);
                     }
                 }
             }
@@ -227,18 +228,19 @@ window.Amble = (function(){
         //transform is basic actro component
         this.transform = {};
 
+
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
         this.renderer = {};
-        this.scripts = {};
+        this.components = {};
     };
 
-
     Amble.Actor.prototype = {
-        // getComponent: function(componentName){
-        //     var component = this.components.find(c => c.id == componentName);
-        //     return component.body;
-        // }
+
+        getComponent: function(componentName){
+            var component = this.components.find(c => c.id == componentName);
+            return component.body;
+        }
     };
 
     /* Scene */
@@ -258,8 +260,13 @@ window.Amble = (function(){
         },
 
         add: function(object) {
-            for(var i in object.scripts) {
-                Flow.queueNetwork(object, object.scripts[i].name, 'OnStart');
+            if(object.components != 'undefined') {
+                for(var i in object.components) {
+                    var _component = object.components[i].body;
+                    if(typeof _component.update == 'function'){
+                        _component.start(object);
+                    }
+                }
             }
 
             this.children.push(object);
@@ -272,11 +279,14 @@ window.Amble = (function(){
                 this.children.splice(index, 1);
         },
 
-        render: function(camera){
+        awake: function(){
             for(var i in this.children){
-                /* render objects by renderer*/
-                if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
-                    this.children[i].renderer.render(this.children[i], camera)
+                /* component start */
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.start == 'function'){
+                        _component.start(this.children[i]);
+                    }
                 }
             }
         },
@@ -284,49 +294,78 @@ window.Amble = (function(){
         update: function(){
             for(var i in this.children){
                 /* script update */
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnUpdate');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.update == 'function'){
+                        _component.update(this.children[i]);
+                    }
                 }
             }
+
+        },
+
+        render: function(camera){
+            for(var i in this.children){
+                /* render objects by renderer*/
+                if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
+                    this.children[i].renderer.render(this.children[i], camera)
+                }
+            }
+
         },
 
         //input events
         onmousewheel: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseWheel');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmousewheel == 'function'){
+                        _component.onmousewheel(this.children[i], e);
+                    }
                 }
             }
         },
 
         onmousedown: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseDown');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmousedown == 'function'){
+                        _component.onmousedown(this.children[i], e);
+                    }
                 }
             }
         },
 
         onmouseup: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnMouseUp');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onmouseup == 'function'){
+                        _component.onmouseup(this.children[i], e);
+                    }
                 }
             }
         },
 
         onkeydown: function(e) {
             for(var i in this.children){
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnKeyDown');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onkeydown == 'function'){
+                        _component.onkeydown(this.children[i], e);
+                    }
                 }
             }
         },
 
         onkeyup: function(e){
             for(var i in this.children){
-                for(var j in this.children[i].scripts){
-                    Flow.queueNetwork(this.children[i], this.children[i].scripts[j].name, 'OnKeyUp');
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.onkeyup == 'function'){
+                        _component.onkeyup(this.children[i], e);
+                    }
                 }
             }
         }
@@ -424,7 +463,7 @@ window.Amble = (function(){
     /* Amble.Graphics.Renderer functions */
     Amble.Graphics.RectRenderer.prototype = {
 
-        render: function(self, camera){
+        render: function(self, layerName, camera){
             camera.layer(this.layer)
                 .fillStyle(this.color)
                 .fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);

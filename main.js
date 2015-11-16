@@ -31,7 +31,6 @@ var menuFunctions = {
         scriptFilePath = 'untitled';
         mainWindow.setTitle(scriptFilePath);
         mainWindow.webContents.send('new-file-respond');
-
     },
 
     open: function(){
@@ -72,7 +71,11 @@ var menuFunctions = {
 //respond to data save
 ipc.on('save-respond', function(event, data){
     mainWindow.setTitle(scriptFilePath);
-    fs.writeFileSync(scriptFilePath, data, 'utf8');
+    var string = scriptFilePath.replace(/^.*[\\\/]/, '');
+    // console.log(string);
+    data.scriptName = string;
+    // console.log(data);
+    fs.writeFileSync(scriptFilePath, JSON.stringify(data), 'utf8');
 });
 
 //respond to menu options

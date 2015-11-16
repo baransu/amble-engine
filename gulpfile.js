@@ -1,5 +1,5 @@
 var browserify = require('browserify'),
-    watchify = require('watchify'),
+    // watchify = require('watchify'),
     gulp = require('gulp'),
     source = require('vinyl-source-stream'),
     destFolder = './project/',
@@ -15,7 +15,6 @@ gulp.task('browserify', function() {
     //     files.push('.' + projectFolder + 'scripts/' + file);
     // });
     files.push('./core/amble.js');
-    files.push('./core/components-functions.js');
     files.push('./core/flow.js');
     files.push('.' + projectFolder + 'game.js');
 

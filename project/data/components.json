@@ -13,11 +13,18 @@
             ]
         },
         {
-            "idName": "OnStart",
-            "type": "event",
-            "input": [],
+            "idName": "forLoop",
+            "type": "function",
+            "input": [
+                { "name": "exe", "type": "exe"},
+                { "name": "first index", "type": "data", "value": 0},
+                { "name": "last index", "type": "data", "value": 0},
+                { "name": "break", "type": "exe"}
+            ],
             "output": [
-                { "name": "exe", "type": "exe"}
+                { "name": "step", "type": "exe"},
+                { "name": "completed", "type": "exe"},
+                { "name": "index", "type": "data"}
             ]
         },
         {
@@ -29,6 +36,59 @@
             ],
             "output": [
                 { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "self",
+            "type": "calculate",
+            "input": [],
+            "output": [
+                { "name": "self", "type": "data", "value" : null}
+            ]
+        },
+        {
+            "idName": "getTransform",
+            "type": "calculate",
+            "input": [
+                { "name": "self", "type": "data", "value": null}
+            ],
+            "output": [
+                { "name": "transform", "type": "data", "value" : null},
+                { "name": "position", "type": "data", "value" : null},
+                { "name": "size", "type": "data", "value" : null}
+            ]
+        },
+        {
+            "idName": "setVector2",
+            "type": "function",
+            "input": [
+                { "name": "exe", "type": "exe"},
+                { "name": "vector2", "type": "data", "value": null},
+                { "name": "x", "type": "data", "value": 0},
+                { "name": "y", "type": "data", "value": 0}
+            ],
+            "output": [
+                { "name": "exe", "type": "exe"},
+                { "name": "vector2", "type": "data", "value" : null}
+            ]
+        },
+        {
+            "idName": "deltaTime",
+            "type": "calculate",
+            "input": [],
+            "output": [
+                { "name": "deltaTime", "type": "data", "value" : 0}
+            ]
+        },
+        {
+            "idName": "getVector2",
+            "type": "calculate",
+            "input": [
+                { "name": "vector2", "type": "data", "value": null}
+            ],
+            "output": [
+                { "name": "x", "type": "data", "value" : 0},
+                { "name": "y", "type": "data", "value" : 0}
             ]
         },
         {
@@ -76,7 +136,55 @@
             ]
         },
         {
+            "idName": "OnStart",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
             "idName": "OnUpdate",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "OnKeyDown",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "OnKeyUp",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "OnMouseUp",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "OnMouseDown",
+            "type": "event",
+            "input": [],
+            "output": [
+                { "name": "exe", "type": "exe"}
+            ]
+        },
+        {
+            "idName": "OnMouseWheel",
             "type": "event",
             "input": [],
             "output": [

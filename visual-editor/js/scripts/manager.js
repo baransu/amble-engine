@@ -360,7 +360,6 @@ Manager.prototype = {
     },
 
     save: function(){
-        // console.log('save-to: ' + path)
 
         // print all network
         this.graph = [];
@@ -401,69 +400,124 @@ Manager.prototype = {
             networks: this.getNetworks()
         }
 
-        // var script = JSON.stringify(data)
-        // fs.writeFileSync(path, script);
-        return JSON.stringify(data)
+        console.log(data);
+
+        return data
     },
 
-    getNetworks: function(path){
+    getNetworks: function(){
 
         var networks = [];
-
-        var network = {
-            name: "",
-            components: [],
-            connections: [],
-            variables: [],
-            variablesConnections: {}
-        };
-
-        //process components
-        for(var i = 0; i < this.components.length; i++) {
-            var component = this.components[i].getComponent('Component');
-
-            component.visited = false;
-
-            if(component.type != 'variable') {
-                var id = component.id;
-                var name = this.components[i].componentData.idName;
-
-                network.components.push({
-                    id: id,
-                    component: name
-                });
-            }
-        }
-
-        //process variables
-        var variables = this.components.filter(c => c.getComponent('Component').type == 'variable');
-        console.log(this.variables);
-        for(var i = 0; i < variables.length; i++) {
-            var v = variables[i];
-
-            var id = v.getComponent('Component').id;
-            var parent = this.variables.find(variable => variable.componentData.idName == v.getComponent('Component').parentName);
-            var value = v.componentData.value = parent.componentData.value;
-            network.variables.push({
-                id: id,
-                value: value
-            });
-
-            for(var j = 0; j < v.getComponent('Component').connections.length; j++) {
-                var connection = v.getComponent('Component').connections[j];
-                network.variablesConnections[connection.endNode.parent.id + '.' + connection.endNode.name] = id;
-            }
-        }
 
         //process connections
         var events = this.components.filter(c => c.getComponent('Component').type == 'event');
         for(var i = 0; i < events.length; i++) {
-            network.name = events[i].componentData.idName;
-            network.connections = this.getConnection(events[i].getComponent('Component'));
-            networks.push(network);
+
+            for(var j = 0; j < this.components.length; j++) {
+                this.components[j].getComponent('Component').visited = false;
+            }
+
+            var bundle = this.getComponent(events[i].getComponent('Component'));
+
+            for(var j = 0; j < this.components.length; j++) {
+                this.components[j].getComponent('Component').visited = false;
+            }
+
+            var n = {
+                name: events[i].componentData.idName,
+                variablesConnections: bundle.variablesConnections,
+                components: bundle.components,
+                variables: bundle.variables,
+                connections: this.getConnection(events[i].getComponent('Component')),
+            }
+
+            networks.push(n);
         }
 
         return networks;
+    },
+
+    getComponent: function(component){
+
+        var bundle = {};
+        var components = [];
+        var variables = [];
+        var variablesConnections = {};
+
+        component.visited = true;
+        
+        if(component.type != 'variable') {
+
+
+            var comp = {
+                id: component.id,
+                component: component.parentName
+            };
+
+            components.push(comp);
+
+        } else {
+
+            var id = component.id;
+            var parent = this.variables.find(variable => variable.componentData.idName == component.parentName);
+            var value  = parent.componentData.value;
+
+            variables.push({
+                id: id,
+                value: value
+            });
+
+            for(var i = 0; i < component.connections.length; i++) {
+                var connection = component.connections[i];
+                variablesConnections[connection.endNode.parent.id + '.' + connection.endNode.name] = id;
+            }
+
+        }
+
+        for(var i = 0; i < component.connections.length; i++) {
+
+            if(!component.connections[i].endNode.parent.visited) {
+                var b = this.getComponent(component.connections[i].endNode.parent);
+                console.log(b)
+
+                for(var j = 0; j < b.components.length; j++) {
+                    components.push(b.components[j]);
+                }
+
+                for(var j = 0; j < b.variables.length; j++) {
+                    variables.push(b.variables[j]);
+                }
+
+                for(var key in b.variablesConnections) {
+                    variablesConnections[key] = b.variablesConnections[key];
+                }
+            }
+        }
+
+        for(var i = 0; i < component.connectedTo.length; i++) {
+            if(!component.connectedTo[i].visited) {
+                var b = this.getComponent(component.connectedTo[i]);
+                console.log(b);
+
+                for(var j = 0; j < b.components.length; j++) {
+                    components.push(b.components[j]);
+                }
+
+                for(var j = 0; j < b.variables.length; j++) {
+                    variables.push(b.variables[j]);
+                }
+
+                for(var key in b.variablesConnections) {
+                    variablesConnections[key] = b.variablesConnections[key];
+                }
+            }
+        }
+
+        return bundle = {
+            components: components,
+            variables: variables,
+            variablesConnections: variablesConnections
+        };
     },
 
     getConnection: function(component){
@@ -507,42 +561,54 @@ Manager.prototype = {
 
     addComponent: function(idName, type) {
 
-        if(type == 'function' || type  == 'event' || type == 'calculate') {
-            var component = componentsArray.find(c => c.componentData.idName == idName);
-        } else if(type == 'variable') {
-            var component = this.variables.find(c => c.componentData.idName == idName);
+        var allow = true;
+
+        if(type == 'event') {
+            var c = this.components.find(c => c.componentData.idName == idName);
+            if(typeof c != 'undefined') {
+                console.log('You cant have move than one the same event components');
+                allow = false;
+            }
         }
 
-        var _component = this.scene.instantiate(component);
-        _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
-        _component.getComponent('Component').id = 'component' + this.componentsCount;
-        this.componentsCount++;
-        this.components.push(_component);
+        if(allow) {
+            if(type == 'function' || type  == 'event' || type == 'calculate') {
+                var component = componentsArray.find(c => c.componentData.idName == idName);
+            } else if(type == 'variable') {
+                var component = this.variables.find(c => c.componentData.idName == idName);
+            }
+
+            var _component = this.scene.instantiate(component);
+            _component.transform.position = new Amble.Math.Vector2({x: this.var.helperStartMouse.x, y: this.var.helperStartMouse.y});
+            _component.getComponent('Component').id = 'component' + this.componentsCount;
+            this.componentsCount++;
+            this.components.push(_component);
+
+            if(this.var.helperNode) {
+                var obj = {};
+                var secondNode = null;
+                if(this.var.helperNode.type == 'in') {
+                    secondNode = _component.getComponent('Component').outNodes[0];
+                    obj.startNode = secondNode;
+                    obj.endNode = this.var.helperNode;
+                    secondNode.parent.connections.push(obj);
+                    this.var.helperNode.connected = true;
+                    this.var.helperNode.parent.connectedTo.push(secondNode.parent);
+                    secondNode.connected = true;
+                } else if(_component.getComponent('Component').inNodes[0]) {
+                    secondNode = _component.getComponent('Component').inNodes[0];
+                    obj.startNode = this.var.helperNode;
+                    obj.endNode = secondNode;
+                    secondNode.parent.connectedTo.push(this.var.helperNode.parent);
+                    this.var.helperNode.parent.connections.push(obj);
+                    this.var.helperNode.connected = true;
+                    secondNode.connected = true;
+                }
+            }
+        }
 
         if(this.component) {
             this.component.getComponent('Component').selected = false;
-        }
-
-        if(this.var.helperNode) {
-            var obj = {};
-            var secondNode = null;
-            if(this.var.helperNode.type == 'in') {
-                secondNode = _component.getComponent('Component').outNodes[0];
-                obj.startNode = secondNode;
-                obj.endNode = this.var.helperNode;
-                secondNode.parent.connections.push(obj);
-                this.var.helperNode.connected = true;
-                this.var.helperNode.parent.connectedTo.push(secondNode.parent);
-                secondNode.connected = true;
-            } else if(_component.getComponent('Component').inNodes[0]) {
-                secondNode = _component.getComponent('Component').inNodes[0];
-                obj.startNode = this.var.helperNode;
-                obj.endNode = secondNode;
-                secondNode.parent.connectedTo.push(this.var.helperNode.parent);
-                this.var.helperNode.parent.connections.push(obj);
-                this.var.helperNode.connected = true;
-                secondNode.connected = true;
-            }
         }
 
         this.var.helper = null;
