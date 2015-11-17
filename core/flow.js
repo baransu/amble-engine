@@ -1,5 +1,3 @@
-var async = require('async');
-
 var FLOW = {};
 FLOW.variables = {};
 FLOW._networks = [];
@@ -74,7 +72,7 @@ FLOW.network = function(network){
 
         // find the ports
         var port = component.output.find(n => n.name === network.connections[key].out.split('.')[1]);
-        if (!port) throw new Error('whoops no port found: ', key);
+        if (!port) throw new Error('whoops no port found: ' + key + ' in component: ' + component.name);
 
         // find the second component
         var secondComponent = network._components.find(c => c.id === network.connections[key].in.split('.')[0]);

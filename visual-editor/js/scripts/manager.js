@@ -28,7 +28,7 @@ Manager = function(args){
 
 Manager.prototype = {
     start: function(self) {
-        this.componentsList = JSON.parse(fs.readFileSync('./core/components.json', 'utf8')).components;
+        this.componentsList = JSON.parse(fs.readFileSync('../core/components.json', 'utf8')).components;
     },
 
     update: function(self) {
@@ -324,14 +324,21 @@ Manager.prototype = {
                 _component.transform.position = new Amble.Math.Vector2({x: data.components[i].position.x, y: data.components[i].position.y});
                 _component.getComponent('Component').id = data.components[i].id;
                 var id = data.components[i].id;
-                this.componentsCount = Number(id.replace('component', ''));
+                var count = Number(id.replace('component', ''));
+                if(count > this.componentsCount) {
+                    this.componentsCount = count;
+                }
+
                 this.components.push(_component);
+
             }
 
             //make connections
             for(var i = 0; i < data.components.length; i++) {
                 var d = data.components[i];
                 var comp = this.components.find(c => c.getComponent('Component').id == d.id);
+
+                //connectrions
                 for(var j = 0; j < d.connections.length; j++) {
                     var c = d.connections[j];
 
@@ -355,6 +362,18 @@ Manager.prototype = {
                     comp.getComponent('Component').connections.push(obj);
 
                 }
+
+                //connectedTo
+                for(var j = 0; j < d.connectedTo.length; j++) {
+
+                    var _id = d.connectedTo[j];
+                    var connectedComponent = this.components.find(_c => _c.getComponent('Component').id == _id);
+                    if(typeof connectedComponent != 'undefined') {
+
+                        comp.getComponent('Component').connectedTo.push(connectedComponent.getComponent('Component'));
+
+                    }
+                }
             }
         }
     },
@@ -374,7 +393,8 @@ Manager.prototype = {
                     x: component.transform.position.x,
                     y: component.transform.position.y
                 },
-                connections: []
+                connections: [],
+                connectedTo: []
             };
             for(var j = 0 ; j < comp.connections.length; j++) {
                 var c = {
@@ -386,6 +406,11 @@ Manager.prototype = {
                 }
                 obj.connections.push(c);
             }
+
+            for(var j = 0; j < comp.connectedTo.length; j++) {
+                obj.connectedTo.push(comp.connectedTo[j].id);
+            }
+
             this.graph.push(obj);
         }
 
@@ -394,7 +419,6 @@ Manager.prototype = {
 
         var data = {
             version: '0.1.0',
-            date: Date.now(),
             variables: variables,
             components: this.graph,
             networks: this.getNetworks()
@@ -445,16 +469,13 @@ Manager.prototype = {
         var variablesConnections = {};
 
         component.visited = true;
-        
+
         if(component.type != 'variable') {
 
-
-            var comp = {
+            components.push({
                 id: component.id,
                 component: component.parentName
-            };
-
-            components.push(comp);
+            });
 
         } else {
 
@@ -473,6 +494,8 @@ Manager.prototype = {
             }
 
         }
+
+        console.log(component)
 
         for(var i = 0; i < component.connections.length; i++) {
 
@@ -542,7 +565,6 @@ Manager.prototype = {
                     connections.push(n[j]);
                 }
             }
-
         }
 
         for(var i = 0; i < component.connectedTo.length; i++) {

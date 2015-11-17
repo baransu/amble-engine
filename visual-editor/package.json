@@ -1,0 +1,13 @@
+{
+  "name": "amble-engine",
+  "version": "0.1.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Tomasz Cichocinski",
+  "license": "MIT",
+  "devDependencies": {
+    "electron-prebuilt": "^0.34.3"
+  }
+}

@@ -141,7 +141,7 @@ var app = new Amble.Application({
 
     preload: function(){
 
-        var _components = JSON.parse(fs.readFileSync('./core/components.json', 'utf8')).components;
+        var _components = JSON.parse(fs.readFileSync('../core/components.json', 'utf8')).components;
         for(var i = 0; i < _components.length; i++) {
             var obj = {
                 componentData : _components[i],

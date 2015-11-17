@@ -1,0 +1,17 @@
+{
+  "name": "amble-builder",
+  "version": "0.1.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "start": "gulp"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "latest",
+    "gulp": "latest",
+    "vinyl-source-stream": "latest",
+    "watchify": "latest"
+  }
+}

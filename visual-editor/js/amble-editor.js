@@ -17,7 +17,7 @@ window.Amble = (function(){
         Amble.app = this;
 
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
-
+        
         //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
