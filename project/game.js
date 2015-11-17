@@ -13,7 +13,7 @@ var app = new Amble.Application({
     preload: function(){
 
         this.loader.load('json', 'scripts/untitled.ascript');
-        this.loader.load('json', 'scripts/simpleTestScript.ascript');
+        // this.loader.load('json', 'scripts/simpleTestScript.ascript');
         this.loader.load('json', 'data/components.json');
 
     },
@@ -39,11 +39,11 @@ var app = new Amble.Application({
             Flow.network(script.networks[i]);
         }
 
-        var script = JSON.parse(this.loader.getAsset('scripts/simpleTestScript.ascript'));
-        for(var i = 0; i < script.networks.length; i++) {
-            script.networks[i].scriptName = script.scriptName;
-            Flow.network(script.networks[i]);
-        }
+        // var script = JSON.parse(this.loader.getAsset('scripts/simpleTestScript.ascript'));
+        // for(var i = 0; i < script.networks.length; i++) {
+        //     script.networks[i].scriptName = script.scriptName;
+        //     Flow.network(script.networks[i]);
+        // }
 
         var object = {
             transform: { name: 'Amble.Transform', args: {

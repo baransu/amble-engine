@@ -47,13 +47,28 @@
             ]
         },
         {
+            "idName": "getMousePosition",
+            "type": "calculate",
+            "input": [],
+            "output": [
+                { "name": "position", "type": "data", "value" : null}
+            ]
+        },
+        {
+            "idName": "mouseToWorldPosition",
+            "type": "calculate",
+            "input": [],
+            "output": [
+                { "name": "position", "type": "data", "value" : null}
+            ]
+        },
+        {
             "idName": "getTransform",
             "type": "calculate",
             "input": [
                 { "name": "self", "type": "data", "value": null}
             ],
             "output": [
-                { "name": "transform", "type": "data", "value" : null},
                 { "name": "position", "type": "data", "value" : null},
                 { "name": "size", "type": "data", "value" : null}
             ]
@@ -70,6 +85,19 @@
             "output": [
                 { "name": "exe", "type": "exe"},
                 { "name": "vector2", "type": "data", "value" : null}
+            ]
+        },
+        {
+            "idName": "setVariable",
+            "type": "function",
+            "input": [
+                { "name": "exe", "type": "exe"},
+                { "name": "value", "type": "data", "value": 0},
+                { "name": "newValue", "type": "data", "value": 0}
+            ],
+            "output": [
+                { "name": "exe", "type": "exe"},
+                { "name": "newValue", "type": "data", "value" : 0}
             ]
         },
         {
@@ -100,6 +128,26 @@
             ],
             "output": [
                 { "name": "sum", "type": "data", "value" : 0}
+            ]
+        },
+        {
+            "idName": "mathSin",
+            "type": "calculate",
+            "input": [
+                { "name": "value", "type": "data", "color": "green", "value": 0}
+            ],
+            "output": [
+                { "name": "sin", "type": "data", "value" : 0}
+            ]
+        },
+        {
+            "idName": "mathCos",
+            "type": "calculate",
+            "input": [
+                { "name": "value", "type": "data", "color": "green", "value": 0}
+            ],
+            "output": [
+                { "name": "cos", "type": "data", "value" : 0}
             ]
         },
         {

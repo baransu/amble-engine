@@ -25,8 +25,8 @@ gulp.task('browserify', function() {
 });
 
 gulp.task('copy-components-json', function() {
-    gulp.src('./core/components.json')
-    .pipe(gulp.dest('./project/data'));
+    gulp.src('../core/components.json')
+    .pipe(gulp.dest(projectFolder + 'data'));
 });
 
 gulp.task('default', ['browserify', 'copy-components-json']);

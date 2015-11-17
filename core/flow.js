@@ -72,7 +72,7 @@ FLOW.network = function(network){
 
         // find the ports
         var port = component.output.find(n => n.name === network.connections[key].out.split('.')[1]);
-        if (!port) throw new Error('whoops no port found: ' + key + ' in component: ' + component.name);
+        if (!port) throw new Error('whoops no port found: ' + network.connections[key].out + ' in component: ' + component.name);
 
         // find the second component
         var secondComponent = network._components.find(c => c.id === network.connections[key].in.split('.')[0]);
@@ -198,8 +198,17 @@ FLOW.getInputs = function(network, component)  {
             var c = component.input[i];
 
             if(c.connectedTo.type == 'variable') {
-                var variable = network.variables.find(v => v.id == c.connectedTo.id);
-                c.value = variable.value;
+
+                if(component.name == 'setVariable' && i == 1) {
+                    var variable = network.variables.find(v => v.id == c.connectedTo.id);
+                    var vars = network.variables.filter(v => v.name == variable.name);
+                    c.value = vars;
+                } else {
+                    var variable = network.variables.find(v => v.id == c.connectedTo.id);
+                    c.value = variable.value;
+                }
+
+
 
             } else if (c.connectedTo.type == 'data') {
 
@@ -281,6 +290,16 @@ FLOW.ComponentsFunction.divide  = function(a, b, c) {
     c.value = a.value/b.value;
 }
 
+FLOW.ComponentsFunction.getMousePosition = function(position) {
+    position.value = Amble.Input.mousePosition;
+}
+
+FLOW.ComponentsFunction.mouseToWorldPosition = function(position) {
+    var x = Amble.Input.mousePosition.x + Amble.app.mainCamera.camera.view.x;
+    var y = Amble.Input.mousePosition.y + Amble.app.mainCamera.camera.view.y;
+    position.value = new Amble.Math.Vector2({x: x, y: y});
+}
+
 FLOW.ComponentsFunction.branch  = function(condition) {
     if(condition.value) {
         return 0; //out node id first (true)
@@ -296,9 +315,27 @@ FLOW.ComponentsFunction.setVector2 = function(vec2In, x, y, vec2Out){
     return 0;
 }
 
+FLOW.ComponentsFunction.setVariable = function(variables, v, valueOut){
+
+    for(var i = 0; i < variables.value.length; i++) {
+        variables.value[i].value = v.value;
+        valueOut.value = v.value;
+    }
+
+    return 0;
+}
+
 FLOW.ComponentsFunction.getVector2 = function(vec2, x, y){
     x.value = vec2.value.x;
     y.value = vec2.value.y;
+}
+
+FLOW.ComponentsFunction.mathSin = function(a,b){
+    b.value = Math.sin(a.value);
+}
+
+FLOW.ComponentsFunction.mathCos = function(a,b){
+    b.value = Math.cos(a.value);
 }
 
 FLOW.ComponentsFunction.self = function(self, selfOut){
@@ -309,8 +346,7 @@ FLOW.ComponentsFunction.deltaTime = function(deltaOut) {
     deltaOut.value = Amble.Time.deltaTime;
 }
 
-FLOW.ComponentsFunction.getTransform = function(self, transform, position, size){
-    transform.value = self.value.transform;
+FLOW.ComponentsFunction.getTransform = function(self, position, size){
     position.value = self.value.transform.position;
     size.value = self.value.transform.size;
 }

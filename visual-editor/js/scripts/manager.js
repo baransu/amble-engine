@@ -484,6 +484,7 @@ Manager.prototype = {
             var value  = parent.componentData.value;
 
             variables.push({
+                name: parent.componentData.idName,
                 id: id,
                 value: value
             });

@@ -34,13 +34,14 @@ var menuFunctions = {
     },
 
     open: function(){
-        var path = dialog.showOpenDialog(mainWindow, { properties: [ 'openFile'], filters: [{ name: 'Amble Script', extensions: ['ascript'] }]});
-        if(typeof path != 'undefined') {
-            scriptFilePath = path[0];
-            mainWindow.setTitle(scriptFilePath);
-            var data = fs.readFileSync(scriptFilePath, 'utf8');
-            mainWindow.webContents.send('open-respond', data);
-        }
+        dialog.showOpenDialog(mainWindow, { properties: [ 'openFile'], filters: [{ name: 'Amble Script', extensions: ['ascript'] }]}, function(path){
+            if(typeof path != 'undefined') {
+                scriptFilePath = path[0];
+                mainWindow.setTitle(scriptFilePath);
+                var data = fs.readFileSync(scriptFilePath, 'utf8');
+                mainWindow.webContents.send('open-respond', data);
+            }
+        });
     },
 
     saveAs: function(){

@@ -72,6 +72,7 @@ var componentsFunctions = Flow.ComponentsFunction;
 var componentsArray = [];
 
 ipc.on('open-respond', function(data){
+    console.log('open');
     Amble.app.scene.children[1].getComponent('Manager').load(data);
 });
 
@@ -99,6 +100,7 @@ var menu = Menu.buildFromTemplate([
                 label: 'Open',
                 accelerator: 'Ctrl+O',
                 click: function(){
+                    console.log('open');
                     ipc.send('open-request');
                 }
             },
