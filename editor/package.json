@@ -1,0 +1,14 @@
+{
+  "name": "editor",
+  "version": "0.1.0",
+  "description": "Amble editor",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron-prebuilt": "^0.34.3"
+  }
+}
