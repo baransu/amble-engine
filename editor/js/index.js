@@ -10,7 +10,8 @@ var app = new Amble.Application({
     mainCamera: {
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view"
+            context: "scene-view",
+            color: "#616161"
         }},
         components: [
             { name: "Camera", args: {}}
@@ -49,6 +50,115 @@ var app = new Amble.Application({
 
     }
 });
+
+var watch = require('node-watch');
+
+var projectPath = '../project-folder';
+
+var projectStructure = processDir(projectPath);
+
+var list = document.getElementById("list");
+for(var i = 0; i < projectStructure.length; i++) {
+    list.appendChild(item(projectStructure[i]));
+}
+
+watch(projectPath, function(filename){
+    var projectStructure = processDir(projectPath);
+    var list = document.getElementById("list");
+    list.innerHTML = "";
+    for(var i = 0; i < projectStructure.length; i++) {
+        list.appendChild(item(projectStructure[i]));
+    }
+});
+
+function makeList(array) {
+
+    var list = document.createElement("div");
+    list.className = "list";
+
+    for(var i = 0; i < array.length; i++) {
+        list.appendChild(item(array[i]));
+    }
+
+    return list;
+}
+
+function item(item) {
+
+    var div = document.createElement("div");
+
+    div.className = "item"
+
+    var icon = document.createElement("i");
+    if(item.isDirectory) {
+        icon.className = "right triangle icon"
+    } else {
+        icon.className = "file icon"
+    }
+    div.appendChild(icon);
+
+    var content = document.createElement("div");
+    content.className = "content";
+    var header = document.createElement("div");
+    header.className = 'header';
+    header.innerHTML = item.name;
+    content.appendChild(header);
+
+    if(item.childs.length > 0) {
+        content.appendChild(makeList(item.childs));
+    }
+
+    div.appendChild(content);
+
+    //
+    // var divider = document.createElement("div");
+    // divider.className = "ui inverted divider";
+    // div.appendChild(divider);
+
+    return div;
+
+}
+
+function processDir(path) {
+
+    var files = [];
+
+    var abc = fs.readdirSync(path)
+
+    for(var i = 0; i < abc.length; i++) {
+
+        var file = {
+            isDirectory: fs.lstatSync(path + '/' + abc[i]).isDirectory(),
+            path: path + '/' + abc[i],
+            name: abc[i],
+            childs: []
+        }
+
+        if(file.isDirectory) {
+            file.childs = processDir(path + '/' + abc[i]);
+        }
+
+        files.push(file)
+    }
+
+    return files;
+
+}
+
+
+//files list
+// <!--  item -->
+// <!-- <div class="item"> -->
+//     <!-- <i class="folder icon"></i> -->
+//     <!-- <div class="content"> -->
+//         <!-- <div class="header">item list</div> -->
+//         <!-- <div class="description">my simple sescription</div> -->
+//     <!-- </div> -->
+// <!-- </div> -->
+
+
+
+
 
 /*
 

@@ -1,6 +1,6 @@
 var app = require('app');
-var BrowserWindow = require('browser-window');
-var ipc = require('ipc');
+const BrowserWindow = require('electron').BrowserWindow;
+const ipcMain = require('electron').ipcMain;
 var shell = require('shell');
 var dialog = require('dialog');
 var globalShortcut = require('global-shortcut');
@@ -16,7 +16,7 @@ app.on('ready', function(){
         'min-width': 800,
         'min-height': 600
     });
-    mainWindow.loadUrl('file://' + __dirname + '/index.html');
+    mainWindow.loadURL('file://' + __dirname + '/index.html');
     mainWindow.toggleDevTools();
 
     mainWindow.on('closed', function() {

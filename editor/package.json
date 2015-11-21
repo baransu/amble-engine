@@ -6,9 +6,12 @@
   "scripts": {
     "start": "electron ."
   },
-  "author": "",
+  "author": "Tomasz Cichocinski",
   "license": "MIT",
   "devDependencies": {
-    "electron-prebuilt": "^0.34.3"
+    "electron-prebuilt": "^0.35.1",
+    "gulp-less": "^3.0.5",
+    "gulp-minify-css": "^1.2.1",
+    "node-watch": "^0.3.4"
   }
 }

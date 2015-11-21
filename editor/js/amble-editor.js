@@ -50,7 +50,7 @@ window.Amble = (function(){
         this.height = this.mainCamera.camera.size.y || 600;
 
         //init all public game loop functions
-        var gameLoopFunctionsList = ['preload', 'start', 'preupdate', 'postupdate', 'postrender'];
+        var gameLoopFunctionsList = ['preload', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
         for(var i in gameLoopFunctionsList){
             this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
         }
@@ -65,12 +65,40 @@ window.Amble = (function(){
         };
 
         this.render = function(){
-            for(var i = 0; i < this.mainCamera.camera.layers.length; i++) {
-                this.mainCamera.camera.layers[i].layer.clear();
+
+            var camera = this.mainCamera.camera;
+
+            for(var i = 0; i < camera.layers.length; i++) {
+                camera.layers[i].layer.clear(camera.backgroundColor);
             }
-            //render all objects on scene
-            //z order sort
-            this.scene.render(this.mainCamera.camera);
+
+            var layer = camera.layer(0);
+            layer.strokeStyle('white').lineWidth(0.5);
+            layer.ctx.beginPath();
+
+            var lineSpacing = 200;
+
+            var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
+            var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
+            var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
+            var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
+
+            //vertical lines
+            for(var i = -2; i < verticalLinesCount; i++) {
+                layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
+                layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
+            }
+
+            //horizonala
+            for(var i = -2; i < horizontalLinesCount; i++) {
+                layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
+                layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
+            }
+
+            layer.ctx.stroke();
+
+
+            this.scene.render(camera);
         };
 
         /* setting loader */
@@ -126,6 +154,7 @@ window.Amble = (function(){
 
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
+        this.backgroundColor = args['color'] || "transparent";
         this.context = document.getElementById(args['context']) || document.body;
         this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
@@ -160,7 +189,7 @@ window.Amble = (function(){
         },
 
         update: function(){
-            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x, y:this.position.y - this.size.y});
+            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x/2, y:this.position.y - this.size.y/2});
             return this;
         }
     };
@@ -498,7 +527,7 @@ window.Amble = (function(){
             return this;
         },
 
-        // make real normalize
+        //normalize to do
 
         normalize: function(){
             return this;

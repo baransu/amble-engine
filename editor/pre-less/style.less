@@ -1,0 +1,104 @@
+@import "src/semantic";
+
+@font-face {
+    font-family: OpenSans;
+    src: url(../../fonts/OpenSans-Regular.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+canvas {
+    display: block;
+    cursor: default;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+    overflow: hidden;
+}
+
+@mainColor: #424242;
+
+#tools {
+    background-color: @mainColor;
+    color: white;
+    height: 5%;
+}
+
+#scene-view {
+    position: absolute;
+    top: 5%;
+    left: 0;
+    width: 55%;
+    height: 55%;
+}
+
+#hierarchy {
+    position: absolute;
+    top: 5%;
+    right: 25%;
+    height: 55%;
+    width: 20%;
+    background-color: @mainColor;
+}
+
+#project-view {
+    position: absolute;
+    top: 60%;
+    right: 25%;
+    height: 40%;
+    width: 20%;
+    background-color: @mainColor;
+    padding: 10px;
+    overflow: scroll;
+}
+
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+    width: 10px;
+    height: 10px;
+	background-color: #373737;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+    height: 5px;
+	background-color: #373737;
+}
+::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: #212121;
+}
+
+div#project-view:hover::-webkit-scrollbar {
+	width: 10px;
+    height: 10px;
+	background-color: transparent;
+}
+
+div#project-view:hover::-webkit-scrollbar-thumb {
+	border-radius: 2px;
+	background-color: #212121;
+}
+
+#inspector-view {
+    position: absolute;
+    right: 0;
+    top: 5%;
+    height: 65%;
+    width: 25%;
+    background-color: @mainColor;
+}
+
+#preview {
+    position: absolute;
+    right: 0;
+    top: 70%;
+    height: 30%;
+    width: 25%;
+    background-color: @mainColor;
+}
