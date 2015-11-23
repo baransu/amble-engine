@@ -97,7 +97,6 @@ window.Amble = (function(){
 
             layer.ctx.stroke();
 
-
             this.scene.render(camera);
         };
 

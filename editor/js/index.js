@@ -52,112 +52,130 @@ var app = new Amble.Application({
 });
 
 var watch = require('node-watch');
-
 var projectPath = '../project-folder';
 
-var projectStructure = processDir(projectPath);
+var projectView = {
+    projectStructure: [],
+    makeList: function(array) {
 
-var list = document.getElementById("list");
-for(var i = 0; i < projectStructure.length; i++) {
-    list.appendChild(item(projectStructure[i]));
-}
+        var list = document.createElement("ul");
+        list.className = "list";
 
-watch(projectPath, function(filename){
-    var projectStructure = processDir(projectPath);
-    var list = document.getElementById("list");
-    list.innerHTML = "";
-    for(var i = 0; i < projectStructure.length; i++) {
-        list.appendChild(item(projectStructure[i]));
-    }
-});
-
-function makeList(array) {
-
-    var list = document.createElement("div");
-    list.className = "list";
-
-    for(var i = 0; i < array.length; i++) {
-        list.appendChild(item(array[i]));
-    }
-
-    return list;
-}
-
-function item(item) {
-
-    var div = document.createElement("div");
-
-    div.className = "item"
-
-    var icon = document.createElement("i");
-    if(item.isDirectory) {
-        icon.className = "right triangle icon"
-    } else {
-        icon.className = "file icon"
-    }
-    div.appendChild(icon);
-
-    var content = document.createElement("div");
-    content.className = "content";
-    var header = document.createElement("div");
-    header.className = 'header';
-    header.innerHTML = item.name;
-    content.appendChild(header);
-
-    if(item.childs.length > 0) {
-        content.appendChild(makeList(item.childs));
-    }
-
-    div.appendChild(content);
-
-    //
-    // var divider = document.createElement("div");
-    // divider.className = "ui inverted divider";
-    // div.appendChild(divider);
-
-    return div;
-
-}
-
-function processDir(path) {
-
-    var files = [];
-
-    var abc = fs.readdirSync(path)
-
-    for(var i = 0; i < abc.length; i++) {
-
-        var file = {
-            isDirectory: fs.lstatSync(path + '/' + abc[i]).isDirectory(),
-            path: path + '/' + abc[i],
-            name: abc[i],
-            childs: []
+        for(var i = 0; i < array.length; i++) {
+            list.appendChild(this.item(array[i]));
         }
 
-        if(file.isDirectory) {
-            file.childs = processDir(path + '/' + abc[i]);
+        return list;
+    },
+
+    item: function(item) {
+        var div = document.createElement("li");
+
+        div.className = "item"
+
+        var icon = document.createElement("i");
+        if(item.isDirectory) {
+            icon.className = "right triangle icon no-clickable"
+        } else {
+            icon.className = "file icon no-clickable"
+        }
+        div.appendChild(icon);
+
+        var content = document.createElement("div");
+        content.className = "content";
+        var header = document.createElement("a");
+        header.href = "#!"
+        header.className = 'header';
+        header.innerHTML = item.name;
+        header.addEventListener('click', this.itemOnClick, false);
+        content.appendChild(header);
+
+        if(item.childs.length > 0) {
+            content.appendChild(this.makeList(item.childs));
         }
 
-        files.push(file)
+        div.appendChild(content);
+
+        return div;
+    },
+
+    itemOnClick: function(e) {
+        // var normal = 'header no-clickable';
+        // var highlighted = "header no-clickable item-highlighted";
+        // var contentClass = "content no-clickable"
+        // var header = null;
+        //
+        // console.log(e.target.childNodes)
+        //
+        // for(var i = 0; i < e.target.childNodes.length; i++) {
+        //     if(e.target.childNodes[i].className == contentClass) {
+        //         var content = e.target.childNodes[i];
+        //
+        //         if(content.childNodes[0].className == normal) {
+        //             content.childNodes[0].className = highlighted;
+        //         } else {
+        //             content.childNodes[0].className = normal;
+        //         }
+        //
+        //         break;
+        //     }
+        // }
+    },
+
+    processDir: function(path) {
+
+        var files = [];
+
+        var abc = fs.readdirSync(path)
+
+        for(var i = 0; i < abc.length; i++) {
+
+            var file = {
+                isDirectory: fs.lstatSync(path + '/' + abc[i]).isDirectory(),
+                path: path + '/' + abc[i],
+                name: abc[i],
+                childs: []
+            }
+
+            if(file.isDirectory) {
+                file.childs = this.processDir(path + '/' + abc[i]);
+            }
+
+            files.push(file)
+        }
+
+        return files;
+
+    },
+
+    watch: function(){
+
+        watch(projectView.projectPath, function(filename){
+            projectView.projectStructure = projectView.processDir(projectPath);
+            var list = document.getElementById("list");
+            list.innerHTML = "";
+            for(var i = 0; i < projectView.projectStructure.length; i++) {
+                list.appendChild(projectView.item(projectView.projectStructure[i]));
+            }
+        });
+
+    },
+
+    init: function(){
+
+        this.projectStructure = this.processDir(projectPath);
+
+        var list = document.getElementById("list");
+        for(var i = 0; i < this.projectStructure.length; i++) {
+            list.appendChild(this.item(this.projectStructure[i]));
+        }
+
+        this.watch();
+
     }
-
-    return files;
-
 }
 
-
-//files list
-// <!--  item -->
-// <!-- <div class="item"> -->
-//     <!-- <i class="folder icon"></i> -->
-//     <!-- <div class="content"> -->
-//         <!-- <div class="header">item list</div> -->
-//         <!-- <div class="description">my simple sescription</div> -->
-//     <!-- </div> -->
-// <!-- </div> -->
-
-
-
+projectView.init();
 
 
 /*

@@ -23,8 +23,22 @@ html, body {
 
 @mainColor: #424242;
 
-#tools {
+.no-clickable {
+    pointer-events:none;
+}
+
+.default {
     background-color: @mainColor;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.item-highlighted {
+    background-color: #676767;
+}
+
+#tools {
+    .default;
     color: white;
     height: 5%;
 }
@@ -37,22 +51,26 @@ html, body {
     height: 55%;
 }
 
+#debug-console {
+    .default;
+}
+
 #hierarchy {
+    .default;
     position: absolute;
     top: 5%;
     right: 25%;
     height: 55%;
     width: 20%;
-    background-color: @mainColor;
 }
 
 #project-view {
+    .default;
     position: absolute;
     top: 60%;
     right: 25%;
     height: 40%;
     width: 20%;
-    background-color: @mainColor;
     padding: 10px;
     overflow: scroll;
 }
@@ -86,19 +104,19 @@ div#project-view:hover::-webkit-scrollbar-thumb {
 }
 
 #inspector-view {
+    .default;
     position: absolute;
     right: 0;
     top: 5%;
     height: 65%;
     width: 25%;
-    background-color: @mainColor;
 }
 
 #preview {
+    .default;
     position: absolute;
     right: 0;
     top: 70%;
     height: 30%;
     width: 25%;
-    background-color: @mainColor;
 }
