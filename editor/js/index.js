@@ -71,55 +71,61 @@ var projectView = {
     item: function(item) {
         var div = document.createElement("li");
 
-        div.className = "item"
+        div.className = "list-item"
+
+        var header = document.createElement('div');
+        header.className = 'header';
 
         var icon = document.createElement("i");
-        if(item.isDirectory) {
-            icon.className = "right triangle icon no-clickable"
-        } else {
-            icon.className = "file icon no-clickable"
-        }
-        div.appendChild(icon);
 
-        var content = document.createElement("div");
-        content.className = "content";
-        var header = document.createElement("a");
-        header.href = "#!"
-        header.className = 'header';
-        header.innerHTML = item.name;
-        header.addEventListener('click', this.itemOnClick, false);
-        content.appendChild(header);
+        switch(item.type) {
+            case 'folder':
+
+                var arrow = document.createElement("i");
+                arrow.className = "fa fa-caret-right triangle-icon"
+                header.appendChild(arrow);
+                icon.className = "fa fa-folder no-clickable folder-icon"
+
+                break;
+            case 'file':
+
+                icon.className = "fa fa-file-text-o no-clickable file-icon"
+
+                break;
+
+        }
+
+        header.appendChild(icon);
+
+        var text = document.createElement("a");
+        text.href = "#"
+        text.className = 'list-item';
+        text.innerHTML = item.name;
+        text.addEventListener('click', this.itemOnClick, false);
+
+        header.appendChild(text);
+        div.appendChild(header);
 
         if(item.childs.length > 0) {
-            content.appendChild(this.makeList(item.childs));
+            div.appendChild(this.makeList(item.childs));
         }
-
-        div.appendChild(content);
 
         return div;
     },
 
     itemOnClick: function(e) {
-        // var normal = 'header no-clickable';
-        // var highlighted = "header no-clickable item-highlighted";
-        // var contentClass = "content no-clickable"
-        // var header = null;
-        //
-        // console.log(e.target.childNodes)
-        //
-        // for(var i = 0; i < e.target.childNodes.length; i++) {
-        //     if(e.target.childNodes[i].className == contentClass) {
-        //         var content = e.target.childNodes[i];
-        //
-        //         if(content.childNodes[0].className == normal) {
-        //             content.childNodes[0].className = highlighted;
-        //         } else {
-        //             content.childNodes[0].className = normal;
-        //         }
-        //
-        //         break;
-        //     }
-        // }
+        var normal = 'header';
+        var highlighted = "header-highlighted";
+
+        var parent = e.target.parentElement;
+        console.log(parent)
+
+        if(parent.className == normal) {
+            parent.className = highlighted;
+        } else {
+            parent.className = normal;
+        }
+
     },
 
     processDir: function(path) {
@@ -131,13 +137,13 @@ var projectView = {
         for(var i = 0; i < abc.length; i++) {
 
             var file = {
-                isDirectory: fs.lstatSync(path + '/' + abc[i]).isDirectory(),
+                type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
                 path: path + '/' + abc[i],
                 name: abc[i],
                 childs: []
             }
 
-            if(file.isDirectory) {
+            if(file.type == 'folder') {
                 file.childs = this.processDir(path + '/' + abc[i]);
             }
 
