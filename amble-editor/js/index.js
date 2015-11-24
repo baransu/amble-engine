@@ -82,14 +82,14 @@ var projectView = {
             case 'folder':
 
                 var arrow = document.createElement("i");
-                arrow.className = "fa fa-caret-right triangle-icon"
+                arrow.className = "fa fa-caret-right no-clickable triangle icon"
                 header.appendChild(arrow);
-                icon.className = "fa fa-folder no-clickable folder-icon"
+                icon.className = "fa fa-folder no-clickable folder icon"
 
                 break;
             case 'file':
 
-                icon.className = "fa fa-file-text-o no-clickable file-icon"
+                icon.className = "fa fa-file-text-o no-clickable file icon"
 
                 break;
 
@@ -115,7 +115,7 @@ var projectView = {
 
     itemOnClick: function(e) {
         var normal = 'header';
-        var highlighted = "header-highlighted";
+        var highlighted = "header highlighted";
 
         var parent = e.target.parentElement;
         console.log(parent)

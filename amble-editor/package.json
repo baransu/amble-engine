@@ -1,5 +1,5 @@
 {
-  "name": "editor",
+  "name": "amble-editor",
   "version": "0.1.0",
   "description": "Amble editor",
   "main": "main.js",

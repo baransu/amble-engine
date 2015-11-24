@@ -1,0 +1,193 @@
+// @import "semantic-src/semantic";
+@import "src/variables";
+
+@font-face {
+    font-family: Cantarell;
+    src: url(../../fonts/Cantarell-Regular.ttf);
+}
+
+canvas {
+    display: block;
+    cursor: default;
+}
+
+html, body {
+    font-family: Cantarell;
+    margin: 0;
+    padding: 0;
+	width: 100%;
+	height: 100%;
+    background-color: @globalBgColor;
+}
+
+.no-clickable {
+    pointer-events:none;
+}
+
+.default {
+    background-color: @mainColor;
+    -webkit-user-select: none;
+    user-select: none;
+    color: @fontColor;
+    position: absolute;
+}
+
+.list-container {
+    display: inline-block;
+    margin-left: -15px;
+}
+
+.list {
+
+    margin-left: -15px;
+    font-size: @fontSize;
+
+    ul {
+        list-style-type: none;
+        line-height: 25px;
+    }
+
+    ul > li {
+        padding-left: 15px;
+    }
+
+    li > ul {
+        padding-left: 15px;
+    }
+}
+
+.list-item {
+    color: @fontColor;
+    list-style-type: none;
+
+    .icon {
+        font-size: @fontSize;
+        padding-right: 6px;
+        &.file {
+            margin-left: 11px;
+        }
+
+        &.folder { }
+        &.triangle { }
+    }
+
+    a {
+        color: @fontColor;
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: @fontColor;
+    }
+
+    a:active {
+        color: @fontColor;
+    }
+
+    a:focus {
+        color: @fontColor;
+    }
+
+    a:visited {
+        color: @fontColor;
+    }
+}
+
+.header {
+    background-color: transparent;
+    width: 100%;
+    &.highlighted {
+        background-color: #676767;
+    }
+}
+
+#project-view {
+    .default;
+
+    left: calc(~'0% + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{viewMargin}');
+    width: calc(~'@{projectWidth} - @{viewMargin}');
+    height: calc(~'@{projectHeight} - 2*@{viewMargin}');
+
+    overflow: scroll;
+}
+
+#tools {
+    .default;
+    left: calc(~'0% + @{viewMargin}');
+    top: calc(~'0% + @{viewMargin}');
+    width: calc(~'@{toolsWidth} - 2*@{viewMargin}');
+    height: calc(~'@{toolsHeight} - @{viewMargin}');
+}
+
+#scene-view {
+    .default;
+    left: calc(~'@{projectWidth} + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{viewMargin}');
+    width: calc(~'@{sceneWidth} - @{viewMargin}');
+    height: calc(~'@{sceneWidth} - @{viewMargin}');
+
+    /*for canvas*/
+    margin: 0;
+    padding: 0;
+}
+
+#debug-console {
+    .default;
+    left: calc(~'@{projectWidth} + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{sceneHeight} + @{viewMargin}');
+    width: calc(~'@{debugWidth} - @{viewMargin}');
+    height: calc(~'@{debugHeight} - 2*@{viewMargin}');
+}
+
+#hierarchy {
+    .default;
+    right: calc(~'@{inspectorWidth} + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{viewMargin}');
+    width: calc(~'@{hierarchyWidth} - 2*@{viewMargin}');
+    height: calc(~'@{hierarchyHeight} - 2*@{viewMargin}');
+}
+
+#inspector-view {
+    .default;
+    right: calc(~'0% + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{viewMargin}');
+    width: calc(~'@{inspectorWidth} - @{viewMargin}');
+    height: calc(~'@{inspectorHeight} - @{viewMargin}');
+}
+
+#preview {
+    .default;
+    right: calc(~'0% + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{inspectorHeight} + @{viewMargin}');
+    width: calc(~'@{previewWidth} - @{viewMargin}');
+    height: calc(~'@{previewHeight} - 2*@{viewMargin}');
+}
+
+::-webkit-scrollbar-track {
+	border-radius: 10px;
+	background-color: @mainColor;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+    height: 5px;
+
+    background-color: @mainColor;
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: lighten(@mainColor, 10%);
+}
+
+div#project-view:hover::-webkit-scrollbar {
+	width: 10px;
+    height: 10px;
+	background-color: transparent;
+}
+
+div#project-view:hover::-webkit-scrollbar-thumb {
+	border-radius: 2px;
+    background-color: lighten(@mainColor, 10%);
+}
