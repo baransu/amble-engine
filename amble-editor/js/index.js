@@ -26,7 +26,7 @@ var app = new Amble.Application({
                 size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
             }},
             renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-                color: 'red'
+                color: '#1B5E20'
             }}
         };
 

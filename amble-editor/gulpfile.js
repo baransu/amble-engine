@@ -13,6 +13,7 @@ gulp.task('less', function(){
 
 gulp.task('watch', function(){
     gulp.watch('pre-less/*.less', ['less']);
+    gulp.watch('pre-less/src/*.less', ['less']);
 });
 
 gulp.task('default', ['less', 'watch']);

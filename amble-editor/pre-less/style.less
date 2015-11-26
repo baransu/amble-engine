@@ -32,6 +32,38 @@ html, body {
     position: absolute;
 }
 
+.button {
+
+    height: 100%;
+    display: inline-block;
+    text-align: center;
+
+    a {
+        display:inline-block;
+        cursor:pointer;
+        background-color: @primaryColor;
+        font-family: Cantarell;
+        text-shadow: 0px 1px 0px #2f6627;
+        text-decoration: none;
+        text-align: center;
+        color: @fontColor;
+
+        //calc padding to fit gap
+        padding: 5px;
+
+        &:hover, &:focus {
+            color: @fontColor;
+        }
+
+        &:active {
+            position:relative;
+            top:1px;
+            color: @fontColor;
+            background-color: darken(@primaryColor, 3%);
+        }
+    }
+}
+
 .list-container {
     display: inline-block;
     margin-left: -15px;
@@ -57,6 +89,7 @@ html, body {
 }
 
 .list-item {
+    .no-clickable;
     color: @fontColor;
     list-style-type: none;
 
@@ -114,6 +147,8 @@ html, body {
 
 #tools {
     .default;
+    background-color: transparent;
+    position: absolute;
     left: calc(~'0% + @{viewMargin}');
     top: calc(~'0% + @{viewMargin}');
     width: calc(~'@{toolsWidth} - 2*@{viewMargin}');
