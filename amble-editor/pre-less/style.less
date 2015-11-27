@@ -92,8 +92,10 @@ html, body {
     .no-clickable;
     color: @fontColor;
     list-style-type: none;
+    white-space: nowrap;
 
     .icon {
+
         font-size: @fontSize;
         padding-right: 6px;
         &.file {
@@ -142,7 +144,6 @@ html, body {
     width: calc(~'@{projectWidth} - @{viewMargin}');
     height: calc(~'@{projectHeight} - 2*@{viewMargin}');
 
-    overflow: scroll;
 }
 
 #tools {
@@ -183,6 +184,10 @@ html, body {
     height: calc(~'@{hierarchyHeight} - 2*@{viewMargin}');
 }
 
+.search {
+    width: 100%;
+}
+
 #inspector-view {
     .default;
     right: calc(~'0% + @{viewMargin}');
@@ -197,6 +202,11 @@ html, body {
     top: calc(~'@{toolsHeight} + @{inspectorHeight} + @{viewMargin}');
     width: calc(~'@{previewWidth} - @{viewMargin}');
     height: calc(~'@{previewHeight} - 2*@{viewMargin}');
+}
+
+.scroll {
+    overflow: scroll;
+    height: 100%;
 }
 
 ::-webkit-scrollbar-track {
@@ -216,13 +226,13 @@ html, body {
 	background-color: lighten(@mainColor, 10%);
 }
 
-div#project-view:hover::-webkit-scrollbar {
+div.scroll:hover::-webkit-scrollbar {
 	width: 10px;
     height: 10px;
 	background-color: transparent;
 }
 
-div#project-view:hover::-webkit-scrollbar-thumb {
+div.scroll:hover::-webkit-scrollbar-thumb {
 	border-radius: 2px;
     background-color: lighten(@mainColor, 10%);
 }

@@ -10,7 +10,7 @@
         <div id="tools">
 
             <!-- list? nav?-->
-            <div class="button">
+            <!-- <div class="button">
                 <a href="#">Button1</a>
             </div>
 
@@ -24,11 +24,11 @@
 
             <div class="button">
                 <a href="#">Button4</a>
-            </div>
+            </div> -->
 
         </div>
 
-        <div id="project-view">
+        <div id="project-view" class="scroll">
             <div class="list-container">
                 <ul id="list" class="list"></ul>
             </div>
@@ -38,7 +38,16 @@
 
         <div id="debug-console">debug</div>
 
-        <div id="hierarchy">hierarchy</div>
+        <div id="hierarchy">
+            <div class="search">
+                <input type="text" name="name" value="" placeholder="search">
+            </div>
+            <div class="scroll">
+                <div class="list-container">
+                    <ul id="hierarchy-list" class="list"></ul>
+                </div>
+            </div>
+        </div>
 
 
         <div id="inspector-view">inspector</div>

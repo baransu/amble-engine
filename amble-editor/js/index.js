@@ -1,57 +1,9 @@
 var fs = require('fs');
-// var Amble = require('../core/amble.js');
+var watch = require('node-watch');
+
 var Amble = require('./js/amble-editor.js');
 var Camera = require('./js/camera.js');
 
-var app = new Amble.Application({
-
-    resize: true,
-
-    mainCamera: {
-        camera: { name: "Amble.Camera", args: {
-            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view",
-            color: "#616161"
-        }},
-        components: [
-            { name: "Camera", args: {}}
-        ],
-    },
-
-    preload: function(){
-
-        var obj = {
-            transform: { name: "Amble.Transform", args: {
-                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
-            }},
-            renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-                color: '#1B5E20'
-            }}
-        };
-
-        this.scene.instantiate(obj);
-
-    },
-
-    start: function(){
-
-    },
-
-    preupdate: function(){
-
-    },
-
-    postupdate: function(){
-
-    },
-
-    postrender: function(){
-
-    }
-});
-
-var watch = require('node-watch');
 var projectPath = '../project-folder';
 
 var projectView = {
@@ -183,6 +135,94 @@ var projectView = {
 
 projectView.init();
 
+var hierarchyView = {
+
+    item: function(child) {
+
+        var li = document.createElement('li');
+        li.className = 'list-item'
+        var item = document.createElement("a");
+
+        if(child.name) {
+            item.innerHTML = child.name;
+
+        } else {
+            item.innerHTML = "unnamed object";
+        }
+
+        li.appendChild(item);
+
+        return li;
+    },
+
+    printList: function(children){
+        var hierarchy = document.getElementById("hierarchy-list");
+        hierarchy.innerHTML = "";
+        for(var i = 0; i < children.length; i++) {
+            hierarchy.appendChild(this.item(children[i]));
+        }
+    },
+
+    addObjectCallback: function(children){
+        console.log(children)
+
+        hierarchyView.printList(children)
+    }
+}
+
+var app = new Amble.Application({
+
+    resize: true,
+
+    mainCamera: {
+        camera: { name: "Amble.Camera", args: {
+            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+            context: "scene-view",
+            color: "#616161"
+        }},
+        components: [
+            { name: "Camera", args: {}}
+        ],
+    },
+
+    preload: function(){
+
+        var obj = {
+            name: 'object',
+            transform: { name: "Amble.Transform", args: {
+                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+            }},
+            renderer: {name: 'Amble.Graphics.RectRenderer', args: {
+                color: '#1B5E20'
+            }}
+        };
+
+
+        for(var i = 0; i < 100; i++) {
+            var o = this.scene.instantiate(obj, hierarchyView.addObjectCallback);
+            o.transform.position.x += i*10;
+            o.transform.position.y += i*10;
+        }
+
+    },
+
+    start: function(){
+
+    },
+
+    preupdate: function(){
+
+    },
+
+    postupdate: function(){
+
+    },
+
+    postrender: function(){
+
+    }
+});
 
 /*
 

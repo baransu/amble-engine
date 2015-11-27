@@ -277,16 +277,16 @@ window.Amble = (function(){
 
     Amble.Scene.prototype = {
 
-        instantiate: function(obj){
+        instantiate: function(obj, callback){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
             for(var i in clone) {
                 actor[i] = clone[i];
             }
-            return this.add(actor);
+            return this.add(actor, callback);
         },
 
-        add: function(object) {
+        add: function(object, callback) {
             if(object.components != 'undefined') {
                 for(var i in object.components) {
                     var _component = object.components[i].body;
@@ -297,13 +297,16 @@ window.Amble = (function(){
             }
 
             this.children.push(object);
+            if(callback) callback(this.children);
             return object;
         },
 
-        remove: function(object){
+        remove: function(object, callback){
             var index = this.children.indexOf(object);
-            if(index != -1)
+            if(index != -1) {
                 this.children.splice(index, 1);
+                if(callback) callback(this.children);
+            }
         },
 
         awake: function(){
