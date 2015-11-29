@@ -38,19 +38,15 @@ window.Amble = (function(){
 
         this.scene = new Amble.Scene();
 
-        var mainCamera = {
-            cam: { name: "Amble.Camera", args: {
-                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                }
-            }
-        }
-        this.mainCamera = this.scene.instantiate(args['mainCamera'] || mainCamera);
+        this.mainCamera = this.scene.instantiate(args['sceneCamera']);
+
+        this.scene.instantiate(args['mainCamera'], hierarchyView.addEventListener);
 
         this.width = this.mainCamera.camera.size.x || 800;
         this.height = this.mainCamera.camera.size.y || 600;
 
         //init all public game loop functions
-        var gameLoopFunctionsList = ['preload', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
+        var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
         for(var i in gameLoopFunctionsList){
             this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
         }
@@ -196,6 +192,12 @@ window.Amble = (function(){
     /* Utils */
     Amble.Utils = {
 
+        generateID: function() {
+            return Math.floor((1 + Math.random()) * (new Date().getTime()))
+              .toString(16)
+              .substring(1);
+        },
+
         makeFunction: function(obj) {
             if(obj instanceof Object) {
                 if(obj.hasOwnProperty('name')) {
@@ -277,6 +279,24 @@ window.Amble = (function(){
 
     Amble.Scene.prototype = {
 
+        getActorByName: function(name) {
+            return this.children.find(c => c.name === name)
+        },
+
+        getActorByTag: function(tag) {
+            return this.children.find(c => tag === tag);
+        },
+
+        getActorsByTag: function(tag) {
+            return this.children.filter(c => tag === tag);
+        },
+
+        //get by tag array?
+
+        getActorByID: function(id){
+            return this.children.find(c => c.sceneID === id);
+        },
+
         instantiate: function(obj, callback){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
@@ -287,6 +307,9 @@ window.Amble = (function(){
         },
 
         add: function(object, callback) {
+
+            object.sceneID = Amble.Utils.generateID();
+
             if(object.components != 'undefined') {
                 for(var i in object.components) {
                     var _component = object.components[i].body;
@@ -405,8 +428,7 @@ window.Amble = (function(){
     Amble.Transform = function(args) {
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.size = args['size'] || new Amble.Math.Vector2({});
-        //scale?
-        //rotation?
+        this.rotation = args['rotation'] || 0;
     };
 
     /* Graphics */
@@ -529,9 +551,24 @@ window.Amble = (function(){
             return this;
         },
 
-        //normalize to do
+        dot: function(other) {
+            return this.x * other.x + this.y * other.y;
+        },
+
+        length2: function(){
+            return this.dot(this);
+        },
+
+        length: function() {
+            return Math.sqrt(this.length2());
+        },
 
         normalize: function(){
+            var l = this.length();
+            if(l > 0) {
+                this.x = this.x / l;
+                this.y = this.y / l;
+            }
             return this;
         }
     }
@@ -565,9 +602,25 @@ window.Amble = (function(){
             return this;
         },
 
-        //make real normalize
+        dot: function(other) {
+            return this.x * other.x + this.y * other.y + this.z * other.z;
+        },
+
+        length2: function(){
+            return this.dot(this);
+        },
+
+        length: function() {
+            return Math.sqrt(this.length2());
+        },
 
         normalize: function(){
+            var l = this.length();
+            if(l > 0) {
+                this.x = this.x / l;
+                this.y = this.y / l;
+                this.z = this.z / l;
+            }
             return this;
         }
     }

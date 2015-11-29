@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html ng-app>
     <head>
         <meta charset="utf-8">
         <title>editor</title>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/>
+        <script src="js/angular.min.js" charset="utf-8"></script>
     </head>
     <body>
         <div id="tools">
@@ -42,15 +43,67 @@
             <div class="search">
                 <input type="text" name="name" value="" placeholder="search">
             </div>
-            <div class="scroll">
+            <div class="scroll hierarchy">
                 <div class="list-container">
                     <ul id="hierarchy-list" class="list"></ul>
                 </div>
             </div>
         </div>
 
+        <div id="inspector-view">
+            <div class="scroll inspector" id="inspector-components">
 
-        <div id="inspector-view">inspector</div>
+                <div class="inspector-info">
+                    <!-- <label for=actor-name>{{actorName}}</label> -->
+                    <input id="actor-name" type="text" ng-model="actorName" name="name">
+
+                    <!-- <select id="inspector-tag">
+                      <option value="volvo">Volvo</option>
+                      <option value="saab">Saab</option>
+                      <option value="mercedes">Mercedes</option>
+                      <option value="audi">Audi</option>
+                    </select> -->
+
+                </div>
+
+                <!--  transform -->
+                <div class="tranform">
+                    <div class="row">
+                        <div class="col left">
+                            <label for="transform-x">x</label>
+                            <input id="transform-x" type="number" name="x" value="0">
+                        </div>
+                        <div class="col right">
+                            <label for="transform-y">y</label>
+                            <input id="transform-y" type="number" name="y" value="0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col left">
+                            <label for="transform-width">width</label>
+                            <input id="transform-width" type="number" name="x" value="0">
+                        </div>
+                        <div class="col right">
+                            <label for="transform-height">height</label>
+                            <input id="transform-height" type="number" name="y" value="0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <label for="transform-rotation">rotation</label>
+                        <input id="transform-rotation" type="number" name="rotation" value="0">
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+
+
+                <!--  other components -->
+
+            </div>
+        </div>
         <div id="preview">preview</div>
 
         <script src="js/index.js" charset="utf-8"></script>
