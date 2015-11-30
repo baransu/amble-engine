@@ -303,12 +303,14 @@ window.Amble = (function(){
             for(var i in clone) {
                 actor[i] = clone[i];
             }
-            return this.add(actor, callback);
+            return this.add(actor, obj, callback);
         },
 
-        add: function(object, callback) {
+        add: function(object, prefab, callback) {
 
             object.sceneID = Amble.Utils.generateID();
+
+            object.prefab = prefab;
 
             if(object.components != 'undefined') {
                 for(var i in object.components) {
@@ -509,7 +511,7 @@ window.Amble = (function(){
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){
         this.color = args['color'] || 'pink';
-        this.layer = args['layer'] || 0
+        this.layer = args['layer'] || 0;
     };
 
     /* Amble.Graphics.Renderer functions */

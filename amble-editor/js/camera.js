@@ -34,6 +34,28 @@ Camera.prototype = {
         }
     },
 
+    onkeydown: function(e) {
+
+        var player = {
+            name: 'myobjectlol',
+            tag: ['object', 'player'],
+            options: {},
+            transform: { name: "Amble.Transform", args: {
+                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+            }},
+            renderer: {name: 'Amble.Graphics.RectRenderer', args: {
+                color: 'red'
+            }}
+        };
+
+        // Amble.app.scene.instantiate(player);
+
+
+        // console.log(Amble.app.scene.children.length);
+
+    },
+
     onresize: function(self) {
 
         var width = parseInt(self.camera.context.offsetWidth);

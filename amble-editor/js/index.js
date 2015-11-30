@@ -139,6 +139,51 @@ var projectView = {
 
 projectView.init();
 
+var ambleEditor = angular.module('ambleEditor', []);
+ambleEditor.controller('inspectorController', function() {
+
+    var inspector = this;
+
+    inspector.actorName = 'some name';
+
+});
+
+ambleEditor.controller('hierarchyController', function($scope){
+
+    var hierarchy = this;
+
+    hierarchy.actors = Amble.app.scene.children;
+
+    //
+    // console.log(Amble.app.scene.children.length);
+    //
+    // $scope.he = function(o){
+    //
+    //     hierarchy.actors = $scope.actors = o;
+    //
+    // }
+    //
+    // $scope.he(Amble.app.scene.children);
+    //
+    // $scope.$watchCollection('actors', function(current, original) {
+    //     // console.log(current);
+    //     // console.log(original);
+    //
+    //     $scope.he(current);
+    //
+    //     // console.log(current);
+    //     // console.log(original);
+    //     // if(current !== original) {
+    //     //     console.log('asdasd')
+    //     //     // hierarchy.actors = Amble.app.scene.children;
+    //     // }
+    //     // console.log(current)
+    //
+    //
+    // });
+
+});
+
 var inspectorView = {
 
     printActor: function(actor) {
@@ -252,7 +297,7 @@ var hierarchyView = {
     },
 
     printList: function(children){
-        var hierarchy = document.getElementById("hierarchy-list");
+        // var hierarchy = document.getElementById("hierarchy-list");
         hierarchy.innerHTML = "";
         for(var i = 0; i < children.length; i++) {
             if(!children[i].options.hideInHierarchy) {
@@ -314,7 +359,7 @@ var app = new Amble.Application({
             }}
         };
 
-        var p = this.scene.instantiate(player, hierarchyView.addObjectCallback);
+        var p = this.scene.instantiate(player)//, hierarchyView.addObjectCallback);
         p.transform.position.x -= 100;
 
         var obj = {
@@ -331,7 +376,7 @@ var app = new Amble.Application({
         };
 
         for(var i = 0; i < 100; i++) {
-            var o = this.scene.instantiate(obj, hierarchyView.addObjectCallback);
+            var o = this.scene.instantiate(obj)//, hierarchyView.addObjectCallback);
             o.transform.position.x += i*10;
             o.transform.position.y += i*10;
         }
