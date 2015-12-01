@@ -7,7 +7,7 @@
         <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/>
         <script src="js/angular.min.js" charset="utf-8"></script>
     </head>
-    <body>
+    <body ng-controller="editorController as editor">
         <div id="tools">
 
             <!-- list? nav?-->
@@ -39,16 +39,16 @@
 
         <div id="debug-console">debug</div>
 
-        <div id="hierarchy" ng-controller="hierarchyController as hierarchy">
+        <div id="hierarchy" >
             <div class="search">
-                <input type="text" name="name" value="" placeholder="search">
+                <input type="text" ng-model="changer" name="name" value="" placeholder="search">
             </div>
             <div class="scroll hierarchy">
                 <div class="list-container">
-                    <ul id="hierarchy-list" class="list" ng-repeat="actor in hierarchy.actors">
+                    <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors">
 
                         <li class="list-item">
-                            <a href="#" class="hierarchy-item">{{actor.name}}</a>
+                            <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
                         </li>
 
                     </ul>
@@ -56,12 +56,11 @@
             </div>
         </div>
 
-        <div id="inspector-view" ng-controller="inspectorController as inspector">
+        <div id="inspector-view">
             <div class="scroll inspector" id="inspector-components">
 
                 <div class="inspector-info">
-                    <label for=actor-name>{{inspector.actorName}}</label>
-                    <input id="actor-name" type="text" ng-model="inspector.actorName" name="name">
+                    <input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
 
                     <!-- <select id="inspector-tag">
                       <option value="volvo">Volvo</option>
@@ -77,28 +76,28 @@
                     <div class="row">
                         <div class="col left">
                             <label for="transform-x">x</label>
-                            <input id="transform-x" type="number" name="x" value="0">
+                            <input id="transform-x" type="number" name="x" ng-model="editor.actor.transform.position.y">
                         </div>
                         <div class="col right">
                             <label for="transform-y">y</label>
-                            <input id="transform-y" type="number" name="y" value="0">
+                            <input id="transform-y" type="number" name="y" ng-model="editor.actor.transform.position.x">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col left">
                             <label for="transform-width">width</label>
-                            <input id="transform-width" type="number" name="x" value="0">
+                            <input id="transform-width" type="number" name="x" ng-model="editor.actor.transform.size.x">
                         </div>
                         <div class="col right">
                             <label for="transform-height">height</label>
-                            <input id="transform-height" type="number" name="y" value="0">
+                            <input id="transform-height" type="number" name="y" ng-model="editor.actor.transform.size.y">
                         </div>
                     </div>
 
                     <div class="row">
                         <label for="transform-rotation">rotation</label>
-                        <input id="transform-rotation" type="number" name="rotation" value="0">
+                        <input id="transform-rotation" type="number" name="rotation" ng-model="editor.actor.transform.rotation">
                     </div>
                 </div>
 

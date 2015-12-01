@@ -40,7 +40,7 @@ window.Amble = (function(){
 
         this.mainCamera = this.scene.instantiate(args['sceneCamera']);
 
-        this.scene.instantiate(args['mainCamera'], hierarchyView.addEventListener);
+        this.scene.instantiate(args['mainCamera']);
 
         this.width = this.mainCamera.camera.size.x || 800;
         this.height = this.mainCamera.camera.size.y || 600;
@@ -275,6 +275,7 @@ window.Amble = (function(){
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
+        this.shortArray = [];
     };
 
     Amble.Scene.prototype = {
@@ -308,7 +309,8 @@ window.Amble = (function(){
 
         add: function(object, prefab, callback) {
 
-            object.sceneID = Amble.Utils.generateID();
+            var sceneID = Amble.Utils.generateID();
+            object.sceneID = sceneID;
 
             object.prefab = prefab;
 
@@ -322,6 +324,13 @@ window.Amble = (function(){
             }
 
             this.children.push(object);
+
+            this.shortArray.push({
+                name: object.name,
+                sceneID: sceneID,
+                selected: false
+            });
+
             if(callback) callback(this.children);
             return object;
         },
@@ -518,15 +527,34 @@ window.Amble = (function(){
     Amble.Graphics.RectRenderer.prototype = {
 
         render: function(self, camera){
-            camera.layer(this.layer)
-                .fillStyle(this.color)
-                .fillRect(self.transform.position.x - camera.view.x - self.transform.size.x/2, self.transform.position.y - camera.view.y - self.transform.size.y/2, self.transform.size.x, self.transform.size.y);
+
+            var layer = camera.layer(this.layer);
+
+            var width = self.transform.size.x;
+            var height = self.transform.size.y;
+            var x = self.transform.position.x - camera.view.x;
+            var y = self.transform.position.y - camera.view.y;
+
+            layer.ctx.save();
+
+            // move origin to object origin
+            layer.ctx.translate(x, y);
+
+            // rotation in radians
+            layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+            // draw
+            layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
+
+            layer.ctx.restore();
         }
 
     };
 
     /* Math */
     Amble.Math = {};
+
+    Amble.Math.TO_RADIANS = Math.PI/180;
 
     Amble.Math.Vector2 = function(args){
         this.x = args['x'] || 0;

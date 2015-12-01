@@ -140,176 +140,33 @@ var projectView = {
 projectView.init();
 
 var ambleEditor = angular.module('ambleEditor', []);
-ambleEditor.controller('inspectorController', function() {
+ambleEditor.controller('editorController', function() {
 
-    var inspector = this;
+    var editor = this;
 
-    inspector.actorName = 'some name';
+    editor.previousActor = null;
 
-});
+    editor.actor = {};
 
-ambleEditor.controller('hierarchyController', function($scope){
+    editor.actors = Amble.app.scene.children;
 
-    var hierarchy = this;
+    editor.actorSelected = function(actor, $event) {
 
-    hierarchy.actors = Amble.app.scene.children;
+        $event.preventDefault();
 
-    //
-    // console.log(Amble.app.scene.children.length);
-    //
-    // $scope.he = function(o){
-    //
-    //     hierarchy.actors = $scope.actors = o;
-    //
-    // }
-    //
-    // $scope.he(Amble.app.scene.children);
-    //
-    // $scope.$watchCollection('actors', function(current, original) {
-    //     // console.log(current);
-    //     // console.log(original);
-    //
-    //     $scope.he(current);
-    //
-    //     // console.log(current);
-    //     // console.log(original);
-    //     // if(current !== original) {
-    //     //     console.log('asdasd')
-    //     //     // hierarchy.actors = Amble.app.scene.children;
-    //     // }
-    //     // console.log(current)
-    //
-    //
-    // });
-
-});
-
-var inspectorView = {
-
-    printActor: function(actor) {
-
-        var name = document.getElementById('actor-name');
-        var x = document.getElementById('transform-x');
-        var y = document.getElementById('transform-y');
-        var width = document.getElementById('transform-width');
-        var height = document.getElementById('transform-height');
-        var rotation = document.getElementById('transform-rotation');
-
-        console.log(actor);
-
-        name.value = actor.name;
-
-        if(actor.name != 'MainCamera') {
-            x.value = actor.transform.position.x;
-            y.value = actor.transform.position.y;
-            width.value = actor.transform.size.x;
-            height.value = actor.transform.size.y;
-
-        } else {
-            x.value = 0;
-            y.value = 0;
-            width.value = 0;
-            height.value = 0;
-        }
-    }
-}
-
-var hierarchyView = {
-
-    selectedItems: [],
-
-    item: function(child) {
-
-        var li = document.createElement('li');
-        li.className = 'list-item'
-        var item = document.createElement("a");
-
-        item.className = "hierarchy-item"
-
-        if(child.name) {
-            item.innerHTML = child.name;
-
-        } else {
-            item.innerHTML = "unnamed object";
-        }
-
-        item.sceneID = child.sceneID;
-
-        item.href = "#";
-        item.addEventListener('click', this.itemListener, false);
-
-        li.appendChild(item);
-
-        return li;
-    },
-
-    itemListener: function(e){
-        e.preventDefault();
+        editor.actor = Amble.app.scene.getActorByID(actor.sceneID);
 
         var normal = 'hierarchy-item';
         var highlighted = "hierarchy-item highlighted";
 
-        if(e.ctrlKey) {
-
-            // if(e.target.className == normal) {
-            //     e.target.className = highlighted;
-            //
-            //     hierarchyView.selectedItems.push(e.target);
-            //
-            // } else {
-            //     e.target.className = normal;
-            //
-            //     var index = hierarchyView.selectedItems.indexOf(e.target);
-            //     hierarchyView.selectedItems.splice(index, 1);
-            // }
-
-        } else {
-
-            var ID = e.target.sceneID;
-
-            for(var i = 0; i < hierarchyView.selectedItems.length; i++) {
-                hierarchyView.selectedItems[i].className = normal;
-            }
-
-            hierarchyView.selectedItems = [];
-
-            var actor = Amble.app.scene.getActorByID(ID);
-
-            if(e.target.className == normal) {
-                e.target.className = highlighted;
-
-                actor.renderer.selected = true;
-
-                hierarchyView.selectedItems.push(e.target);
-
-            } else {
-                e.target.className = normal;
-
-                actor.renderer.selected = false;
-
-                hierarchyView.selectedItems = [];
-            }
-
-            inspectorView.printActor(actor);
-
-
+        $event.target.className = highlighted;
+        if(editor.previousActor) {
+            editor.previousActor.className = normal;
         }
-    },
-
-    printList: function(children){
-        // var hierarchy = document.getElementById("hierarchy-list");
-        hierarchy.innerHTML = "";
-        for(var i = 0; i < children.length; i++) {
-            if(!children[i].options.hideInHierarchy) {
-                hierarchy.appendChild(this.item(children[i]));
-            }
-        }
-    },
-
-    addObjectCallback: function(children){
-        hierarchyView.printList(children)
+        editor.previousActor = $event.target;
     }
-}
+
+});
 
 //aplikacja
 var app = new Amble.Application({
