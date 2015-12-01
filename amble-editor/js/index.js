@@ -144,6 +144,8 @@ ambleEditor.controller('editorController', function() {
 
     var editor = this;
 
+    editor.hierarchy = {};
+
     editor.previousActor = null;
 
     editor.actor = {};

@@ -41,11 +41,11 @@
 
         <div id="hierarchy" >
             <div class="search">
-                <input type="text" ng-model="changer" name="name" value="" placeholder="search">
+                <input type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
             </div>
             <div class="scroll hierarchy">
                 <div class="list-container">
-                    <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors">
+                    <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
 
                         <li class="list-item">
                             <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
