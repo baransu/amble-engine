@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="renderer-component">
+
+	<style>
+
+    .title {
+
+    }
+
+    .content {
+
+    }
+
+	</style>
+
+	<template>
+
+        <div class="tranform">
+            <div class="title" on-click="hide">
+                Renderer
+            </div>
+            <div class="content" hidden$="{{hideConent}}">
+                <div class="row">
+                    <label for="layer">layer</label>
+                    <input id="layer" type="number" step="1" value="{{actor.renderer.layer::input}}">
+                </div>
+
+                <div class="row">
+
+					<select>
+						<template id="componentsList" is="dom-repeat" items="{{ sprites }}" as="sprite">
+							<option value="{{sprite.path}}" >
+								{{sprite.path}}
+							</option>
+						</template>
+					</select>
+
+                    <label for="sprite">sprite</label>
+                    <input id="sprite" type="text" value="{{actor.renderer.sprite::input}}">
+				</div>
+
+				<!-- anchor -->
+            </div>
+        </div>
+
+		<div class="divider"></div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'renderer-component',
+
+		properties: {
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				observer: 'refreshActor'
+			},
+			sprites: [],
+			hideConent: {
+				type: Boolean,
+				value: false
+			}
+		},
+
+		refreshActor: function() {
+			// console.log(this.actor)
+			if(this.actor.sceneID) {
+				var sceneID = this.actor.sceneID;
+				this.actor = Amble.app.scene.getActorByID(sceneID);
+				console.log(this.actor)
+			}
+
+			// var types =;
+			this.sprites = Amble.app.loader.cache.filter(c => c.type === 'image');
+			// console.log(this.sprites);
+
+		},
+
+		hide: function(){
+			this.hideConent = !this.hideConent;
+		}
+
+	});
+
+</script>

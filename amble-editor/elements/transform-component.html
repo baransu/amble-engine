@@ -1,0 +1,92 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="transform-component">
+
+	<style>
+
+    .title {
+
+    }
+
+    .content {
+
+    }
+
+	</style>
+
+	<template>
+
+        <div class="tranform">
+            <div class="title" on-click="hide">
+                Transform
+            </div>
+            <div class="content" hidden$="{{hideConent}}">
+                <div class="row">
+                    <div class="col left">
+                        <label for="transform-x">x</label>
+                        <input id="transform-x" type="number" step="0.1" value="{{actor.transform.position.y::input}}">
+                    </div>
+                    <div class="col right">
+                        <label for="transform-y">y</label>
+                        <input id="transform-y" type="number" step="0.1" value="{{actor.transform.position.x::input}}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col left">
+                        <label for="transform-width">scale x</label>
+                        <input id="transform-width" type="number" step="0.01" value="{{actor.transform.scale.x::input}}">
+                    </div>
+                    <div class="col right">
+                        <label for="transform-height">scale y</label>
+                        <input id="transform-height" type="number" step="0.01" value="{{actor.transform.scale.y::input}}">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label for="transform-rotation">rotation</label>
+                    <input id="transform-rotation" type="number" step="0.01" value="{{actor.transform.rotation::input}}">
+                </div>
+            </div>
+        </div>
+
+		<div class="divider"></div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'transform-component',
+
+		properties: {
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				observer: 'refreshActor'
+			},
+			hideConent: {
+				type: Boolean,
+				value: false
+			}
+		},
+
+		refreshActor: function() {
+			// console.log(this.actor)
+			if(this.actor.sceneID) {
+				var sceneID = this.actor.sceneID;
+				this.actor = Amble.app.scene.getActorByID(sceneID);
+				console.log(this.actor)
+			}
+		},
+
+		hide: function(){
+			this.hideConent = !this.hideConent;
+		}
+
+	});
+
+</script>

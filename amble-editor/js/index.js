@@ -146,9 +146,15 @@ ambleEditor.controller('editorController', function() {
 
     editor.hierarchy = {};
 
+    editor.inspector = {};
+
+    editor.inspector.transformShow = true;
+
     editor.previousActor = null;
 
     editor.actor = {};
+
+    editor.sceneID = null
 
     editor.actors = Amble.app.scene.children;
 
@@ -156,16 +162,25 @@ ambleEditor.controller('editorController', function() {
 
         $event.preventDefault();
 
+        editor.sceneID = actor.sceneID;
+        // console.log(typeof editor.sceneID);
         editor.actor = Amble.app.scene.getActorByID(actor.sceneID);
 
         var normal = 'hierarchy-item';
         var highlighted = "hierarchy-item highlighted";
 
         $event.target.className = highlighted;
+
         if(editor.previousActor) {
             editor.previousActor.className = normal;
         }
+
         editor.previousActor = $event.target;
+
+
+        //add compoennts to inspector?
+        //or make it angular style
+
     }
 
 });
@@ -211,10 +226,10 @@ var app = new Amble.Application({
             options: {},
             transform: { name: "Amble.Transform", args: {
                 position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
             }},
-            renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-                color: 'red'
+            renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
+                sprite: 'data/me.jpg'
             }}
         };
 
@@ -226,11 +241,12 @@ var app = new Amble.Application({
             tag: ['object'],
             options: {},
             transform: { name: "Amble.Transform", args: {
-                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+                position: { name: "Amble.Math.Vector2", args: {x:500 ,y:0}},
+                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
             }},
             renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-                color: '#1B5E20'
+                color: '#1B5E20',
+                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}}
             }}
         };
 
@@ -240,6 +256,10 @@ var app = new Amble.Application({
             o.transform.position.y += i*10;
         }
 
+        var data = fs.readdirSync('data')
+        for(var i = 0; i < data.length; i++) {
+            this.loader.load('image', 'data/' + data[i]);
+        }
     },
 
     //process scripts int engine and load objects

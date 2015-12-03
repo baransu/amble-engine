@@ -184,8 +184,10 @@ html, body {
 
 .hierarchy-item {
 
+    padding: 5px;
+
     &.highlighted {
-        background-color: #ccc;
+        background-color: darken(@mainColor, 10%);;
     }
 }
 
@@ -201,6 +203,10 @@ html, body {
         width: 100%;
         border: none;
     }
+}
+
+.inspector-info {
+    margin-bottom:5%;
 }
 
 #inspector-view {

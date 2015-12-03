@@ -255,8 +255,6 @@ window.Amble = (function(){
     Amble.Actor = function(args) {
 
         //transform is basic actro component
-        this.transform = {};
-
 
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
@@ -438,8 +436,10 @@ window.Amble = (function(){
     /* Transform */
     Amble.Transform = function(args) {
         this.position = args['position'] || new Amble.Math.Vector2({});
-        this.size = args['size'] || new Amble.Math.Vector2({});
         this.rotation = args['rotation'] || 0;
+
+        //move size to other component -> there rename to scale
+        this.scale = args['scale'] || new Amble.Math.Vector2({x: 1, y: 1});
     };
 
     /* Graphics */
@@ -517,10 +517,66 @@ window.Amble = (function(){
 
     };
 
+    Amble.Graphics.SpriteRenderer = function(args) {
+        this.sprite = args['sprite'];
+        this.layer = args['layer'] || 0;
+
+        this._sprite = new Image();
+
+        //to implement
+        this.anchor = new Amble.Math.Vector2({});
+    }
+
+    Amble.Graphics.SpriteRenderer.prototype = {
+
+        render: function(self, camera) {
+            var layer = camera.layer(this.layer);
+
+            // console.log(Amble.app.loader.isDone())
+            // console.log(this._sprite.src != this.sprite)
+
+            if(this._sprite) {
+
+                if(this._sprite.src != this.sprite && Amble.app.loader.isDone()) {
+                    this._sprite = Amble.app.loader.getAsset(this.sprite);
+                    if(!this._sprite) return;
+                }
+
+                var width = this._sprite.width;
+                var height = this._sprite.height;
+                var x = self.transform.position.x - camera.view.x;
+                var y = self.transform.position.y - camera.view.y;
+
+                layer.ctx.save();
+
+                // move origin to object origin
+                layer.ctx.translate(x, y);
+
+                //scale
+                layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+
+                // rotation in radians
+                layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+                // draw
+                // layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
+                if(this._sprite.src)
+                    layer.ctx.drawImage(this._sprite, -width/2, -height/2);
+
+                layer.ctx.restore();
+            } else {
+                this._sprite = Amble.app.loader.getAsset(this.sprite);
+            }
+        }
+    };
+
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){
         this.color = args['color'] || 'pink';
         this.layer = args['layer'] || 0;
+        this.size = args['size'];
+        //to implement
+        this.anchor = new Amble.Math.Vector2({});
     };
 
     /* Amble.Graphics.Renderer functions */
@@ -530,8 +586,8 @@ window.Amble = (function(){
 
             var layer = camera.layer(this.layer);
 
-            var width = self.transform.size.x;
-            var height = self.transform.size.y;
+            var width = this.size.x;
+            var height = this.size.y;
             var x = self.transform.position.x - camera.view.x;
             var y = self.transform.position.y - camera.view.y;
 
@@ -539,6 +595,9 @@ window.Amble = (function(){
 
             // move origin to object origin
             layer.ctx.translate(x, y);
+
+            //scale
+            layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
             // rotation in radians
             layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
@@ -805,13 +864,17 @@ window.Amble = (function(){
         },
 
         getAsset: function(path){
-            return this.cache[path];
+            var a =  this.cache.find(c => c.path == path);
+            if(a) return a.data;
+            else return undefined;
         },
 
         loadAll: function(callback){
+
             if(this.queue.length == 0){
                 callback();
             }
+
             for(var i = 0; i < this.queue.length; i++){
                 var that = this;
                 switch(this.types[i]){
@@ -819,22 +882,26 @@ window.Amble = (function(){
                     case 'image':
                         var imgPath = this.queue[i];
 
-
                         var img = new Image();
+
                         img.addEventListener('load', function(){
                             that.successCount++;
-                            if(that.isDone()){
-                                callback();
-                            }
+                            if(that.isDone()) callback();
                         }, false);
+
                         img.addEventListener('error', function(){
                             that.errorCount++;
-                            if(that.isDone()){
-                                callback();
-                            }
+                            if(that.isDone()) callback();
                         }, false);
+
                         img.src = imgPath;
-                        this.cache[imgPath] = img;
+
+                        this.cache.push({
+                            data: img,
+                            type: 'image',
+                            path: imgPath
+                        });
+
                     break;
                     /* loading json file */
                     case 'json':
@@ -847,20 +914,32 @@ window.Amble = (function(){
                         xobj.addEventListener("load", function(e){
                             var path = e.srcElement.responseURL.toString();
                             var href = window.location.href.toString();
-                            that.cache[path.split(href).pop()] = e.srcElement.responseText;
+
+                            var path = path.split(href).pop();
+                            that.cache.push({
+                                data: e.srcElement.responseText,
+                                type: 'json',
+                                path: path
+                            });
+
                             that.successCount++;
-                            if(that.isDone()){
-                                callback();
-                            }
+                            if(that.isDone()) callback();
                         }, false);
+
                         xobj.addEventListener("error", function(e){
                             var path = e.srcElement.responseURL.toString();
                             var href = window.location.href.toString();
-                            that.cache[path.split(href).pop()] = e.srcElement.responseText;
+
+                            var path = path.split(href).pop();
+
+                            that.cache.push({
+                                data: e.srcElement.responseText,
+                                type: 'json',
+                                path: path
+                            });
+
                             that.errorCount++;
-                            if(that.isDone()){
-                                callback();
-                            }
+                            if(that.isDone()) callback();
                         }, false);
                         xobj.send(null);
 
