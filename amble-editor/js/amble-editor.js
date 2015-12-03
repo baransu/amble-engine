@@ -40,7 +40,7 @@ window.Amble = (function(){
 
         this.mainCamera = this.scene.instantiate(args['sceneCamera']);
 
-        this.scene.instantiate(args['mainCamera']);
+        // this.scene.instantiate(args['mainCamera']);
 
         this.width = this.mainCamera.camera.size.x || 800;
         this.height = this.mainCamera.camera.size.y || 600;
@@ -65,7 +65,7 @@ window.Amble = (function(){
             var camera = this.mainCamera.camera;
 
             for(var i = 0; i < camera.layers.length; i++) {
-                camera.layers[i].layer.clear(camera.backgroundColor);
+                camera.layers[i].layer.clear();
             }
 
             var layer = camera.layer(0);
@@ -149,7 +149,6 @@ window.Amble = (function(){
 
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
-        this.backgroundColor = args['color'] || "transparent";
         this.context = document.getElementById(args['context']) || document.body;
         this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
@@ -160,10 +159,13 @@ window.Amble = (function(){
     Amble.Camera.prototype = {
 
         layer: function(index){
-            if(index < 0) throw "Z-index cannot be negative!"
+            if(index < 0) {
+                index = 0;
+                throw "Z-index cannot be negative!"
+            }
             var layer = this.layers.find(l => l.index == index);
             if(!layer) {
-                return this.addLayer(index).layer //add
+                return this.addLayer(index).layer;
             } else {
                 return layer.layer;
             }
@@ -184,7 +186,7 @@ window.Amble = (function(){
         },
 
         update: function(){
-            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x/2, y:this.position.y - this.size.y/2});
+            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x/2, y: this.position.y - this.size.y/2});
             return this;
         }
     };
@@ -238,7 +240,7 @@ window.Amble = (function(){
 
         stringToFunction: function(str) {
             var arr = str.split(".");
-            var fn = (window || this);
+            var fn = window || this;
             for (var i = 0, len = arr.length; i < len; i++) {
                 fn = fn[arr[i]];
             }
@@ -249,7 +251,6 @@ window.Amble = (function(){
 
             return  fn;
         }
-
     };
 
     Amble.Actor = function(args) {
@@ -373,7 +374,6 @@ window.Amble = (function(){
                     this.children[i].renderer.render(this.children[i], camera)
                 }
             }
-
         },
 
         //input events
@@ -515,11 +515,14 @@ window.Amble = (function(){
             return this;
         }
 
+        //more canvas methods
+
     };
 
     Amble.Graphics.SpriteRenderer = function(args) {
         this.sprite = args['sprite'];
         this.layer = args['layer'] || 0;
+        this.l = args['layer'] || 0;
 
         this._sprite = new Image();
 
@@ -530,10 +533,10 @@ window.Amble = (function(){
     Amble.Graphics.SpriteRenderer.prototype = {
 
         render: function(self, camera) {
+
             var layer = camera.layer(this.layer);
 
-            // console.log(Amble.app.loader.isDone())
-            // console.log(this._sprite.src != this.sprite)
+            layer.ctx.save();
 
             if(this._sprite) {
 
@@ -547,26 +550,18 @@ window.Amble = (function(){
                 var x = self.transform.position.x - camera.view.x;
                 var y = self.transform.position.y - camera.view.y;
 
-                layer.ctx.save();
-
-                // move origin to object origin
                 layer.ctx.translate(x, y);
-
-                //scale
                 layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
-                // rotation in radians
                 layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
 
-                // draw
-                // layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
                 if(this._sprite.src)
                     layer.ctx.drawImage(this._sprite, -width/2, -height/2);
 
-                layer.ctx.restore();
             } else {
                 this._sprite = Amble.app.loader.getAsset(this.sprite);
             }
+
+            layer.ctx.restore();
         }
     };
 

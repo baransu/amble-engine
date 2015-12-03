@@ -198,8 +198,7 @@ var app = new Amble.Application({
         },
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view",
-            color: "#616161"
+            context: "scene-view"
         }},
         components: [
             { name: "Camera", args: {}}
@@ -212,8 +211,7 @@ var app = new Amble.Application({
         options: {},
         camera: { name: "Amble.Camera", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view",
-            color: "#616161"
+            context: "scene-view"
         }},
         components: []
     },

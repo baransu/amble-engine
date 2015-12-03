@@ -10,6 +10,7 @@ Camera = function(args){
         minZoom: 2,
         translate: new Amble.Math.Vector2({})
     };
+    this.zoom = 0;
 };
 
 Camera.prototype = {
@@ -52,7 +53,7 @@ Camera.prototype = {
         var zoomToX = self.camera.size.x/2;
         var zoomToY = self.camera.size.y/2;
         var wheel = e.wheelDelta/120;
-        var zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
+        this.zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
 
         for(var i = 0; i < self.camera.layers.length; i++) {
             self.camera.layers[i].layer.ctx.translate(
@@ -61,7 +62,7 @@ Camera.prototype = {
             );
         }
 
-        var nextScale = self.camera.scale * zoom
+        var nextScale = self.camera.scale * this.zoom
 
         if(nextScale > this.variables.minZoom) {
             nextScale = this.variables.minZoom;
@@ -69,10 +70,10 @@ Camera.prototype = {
             nextScale = this.variables.maxZoom;
         }
 
-        zoom = nextScale/self.camera.scale;
+        this.zoom = nextScale/self.camera.scale;
 
         for(var i = 0; i < self.camera.layers.length; i++) {
-            self.camera.layers[i].layer.ctx.scale(zoom,zoom);
+            self.camera.layers[i].layer.ctx.scale(this.zoom,this.zoom);
             self.camera.layers[i].layer.ctx.translate(
                 -( zoomToX / self.camera.scale + this.variables.origin.x - zoomToX / nextScale ),
                 -( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale )
@@ -85,7 +86,7 @@ Camera.prototype = {
         this.variables.origin.x = ( zoomToX / self.camera.scale + this.variables.origin.x - zoomToX / nextScale );
         this.variables.origin.y = ( zoomToY / self.camera.scale + this.variables.origin.y - zoomToY / nextScale );
 
-        self.camera.scale *= zoom;
+        self.camera.scale *= this.zoom;
     }
 }
 
