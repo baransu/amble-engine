@@ -18,7 +18,6 @@ Camera = function(args){
     this.actorToMove = null;
 
     this.editor = null;
-
 };
 
 Camera.prototype = {
