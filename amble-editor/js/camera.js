@@ -18,7 +18,6 @@ Camera = function(args){
     this.actorToMove = null;
 
     this.editor = null;
-
 };
 
 Camera.prototype = {
@@ -96,8 +95,6 @@ Camera.prototype = {
 
     onmouseup: function(self, e) {
         if(this.actorToMove) {
-            // document.querySelector('transform-component').actor = this.actorToMove;
-            // document.querySelector('renderer-component').actor = this.actorToMove;
             this.actorToMove = null;
         }
     },
