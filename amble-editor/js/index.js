@@ -140,7 +140,7 @@ var projectView = {
 projectView.init();
 
 var ambleEditor = angular.module('ambleEditor', []);
-ambleEditor.controller('editorController', function() {
+ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     var editor = this;
 
@@ -152,43 +152,93 @@ ambleEditor.controller('editorController', function() {
 
     editor.previousActor = null;
 
-    editor.actor = {};
-
     editor.sceneID = null
 
     editor.actors = Amble.app.scene.children;
 
-    editor.actorSelected = function(actor, $event) {
+    editor.actor = {}
 
-        $event.preventDefault();
+    var cameraScript = Amble.app.scene.getActorByName('SceneCamera').getComponent('Camera');
+    cameraScript.editor = this;
 
-        editor.sceneID = actor.sceneID;
+    angular.element(window).on('keydown', function(e) {
+        switch(e.which) {
+            case 27: //esc
+
+                if(editor.actor.selected) {
+                    editor.actor.selected = false;
+                }
+
+                if(editor.previousActor) {
+                    editor.previousActor.className = 'hierarchy-item';
+                }
+
+            break;
+            case 70: // f
+
+                if(e.shiftKey && editor.actor.transform) {
+                    Amble.app.mainCamera.camera.position.x = editor.actor.transform.position.x;
+                    Amble.app.mainCamera.camera.position.y = editor.actor.transform.position.y;
+                }
+
+            break;
+
+            // default:
+            //     break;
+        }
+    });
+
+    editor.refresh = function(){
+        $scope.$apply();
+    };
+
+    editor.actorSelected = function(_actor, $e) {
+
+        if(editor.actor) {
+            editor.actor.selected = false;
+        }
+
+        editor.sceneID = _actor.sceneID;
+
         // console.log(typeof editor.sceneID);
-        editor.actor = Amble.app.scene.getActorByID(actor.sceneID);
+
+        editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
+
+        // editor.actor.selected = true;
 
         var normal = 'hierarchy-item';
         var highlighted = "hierarchy-item highlighted";
 
-        $event.target.className = highlighted;
+        // $e.target.className = highlighted;
 
         if(editor.previousActor) {
             editor.previousActor.className = normal;
         }
 
-        editor.previousActor = $event.target;
 
+        if($e) {
+            $e.preventDefault();
+            $e.target.className = highlighted;
+            editor.previousActor = $e.target;
+        }
+
+        if(editor.actor.selected) {
+            editor.actor.selected = false;
+        } else {
+            editor.actor.selected = true;
+        }
 
         //add compoennts to inspector?
         //or make it angular style
 
-    }
-
-});
+    };
+}]);
 
 //aplikacja
 var app = new Amble.Application({
 
     resize: true,
+    //implement post LD34 stuff
 
     sceneCamera: {
         name: 'SceneCamera',
@@ -218,6 +268,9 @@ var app = new Amble.Application({
 
     preload: function(){
 
+        // console.log()
+
+        //load all objects from json
         var player = {
             name: 'player',
             tag: ['object', 'player'],
@@ -231,7 +284,7 @@ var app = new Amble.Application({
             }}
         };
 
-        var p = this.scene.instantiate(player)//, hierarchyView.addObjectCallback);
+        var p = this.scene.instantiate(player)
         p.transform.position.x -= 100;
 
         var obj = {
@@ -249,7 +302,7 @@ var app = new Amble.Application({
         };
 
         for(var i = 0; i < 100; i++) {
-            var o = this.scene.instantiate(obj)//, hierarchyView.addObjectCallback);
+            var o = this.scene.instantiate(obj)
             o.transform.position.x += i*10;
             o.transform.position.y += i*10;
         }

@@ -39,9 +39,9 @@
 
         <div id="debug-console">debug</div>
 
-        <div id="hierarchy" >
+        <div id="hierarchy">
             <div class="search">
-                <input type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
+                <input id="hierarchySearch" type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
             </div>
             <div class="scroll hierarchy">
                 <div class="list-container">
@@ -60,16 +60,14 @@
             <div class="scroll inspector" id="inspector-components">
 
                 <div class="inspector-info">
-                    <input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
-
-                </div>
+        			<input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
+        		</div>
 
                 <transform-component actor="{{editor.actor}}"></transform-component>
                 <renderer-component actor="{{editor.actor}}"></renderer-component>
 
-
-
-                <!--  other components -->
+                <!--  camera -->
+                <!--  list of components -->
 
             </div>
         </div>

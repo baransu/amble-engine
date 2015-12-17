@@ -26,12 +26,12 @@ window.Amble = (function(){
                 var width = parseInt(camera.context.offsetWidth);
                 var height = parseInt(camera.context.offsetHeight);
 
-                for(var i = 0; i > Amble.app.mainCamera.camera.layers.length; i++) {
+                for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
                     Amble.app.width = camera.layers[i].layer.canvas.width = width;
                     Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
@@ -92,6 +92,7 @@ window.Amble = (function(){
             }
 
             layer.ctx.stroke();
+
 
             this.scene.render(camera);
         };
@@ -259,7 +260,7 @@ window.Amble = (function(){
 
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
-        this.renderer = {};
+        // this.renderer = {};
         this.components = {};
     };
 
@@ -473,6 +474,7 @@ window.Amble = (function(){
         },
 
         clear: function(color){
+
             this.ctx.save();
             this.ctx.setTransform(1,0,0,1,0,0);
             if (color) {
@@ -481,6 +483,7 @@ window.Amble = (function(){
             } else {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             }
+
             this.ctx.restore();
             return this;
         },
@@ -526,6 +529,8 @@ window.Amble = (function(){
 
         this._sprite = new Image();
 
+        this.size = new Amble.Math.Vector2({})
+
         //to implement
         this.anchor = new Amble.Math.Vector2({});
     }
@@ -545,8 +550,8 @@ window.Amble = (function(){
                     if(!this._sprite) return;
                 }
 
-                var width = this._sprite.width;
-                var height = this._sprite.height;
+                var width = this.size.x = this._sprite.width;
+                var height = this.size.y = this._sprite.height;
                 var x = self.transform.position.x - camera.view.x;
                 var y = self.transform.position.y - camera.view.y;
 
@@ -554,8 +559,23 @@ window.Amble = (function(){
                 layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
                 layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
 
-                if(this._sprite.src)
+                if(this._sprite.src) {
                     layer.ctx.drawImage(this._sprite, -width/2, -height/2);
+                    if(self.selected) {
+                        layer.ctx.save();
+                        layer.strokeStyle(
+                            'magenta'
+                        ).lineWidth(
+                            3
+                        ).strokeRect(
+                            -width/2,
+                            -height/2,
+                            width,
+                            height
+                        )
+                        layer.ctx.restore();
+                    }
+                }
 
             } else {
                 this._sprite = Amble.app.loader.getAsset(this.sprite);
@@ -567,7 +587,7 @@ window.Amble = (function(){
 
     /* Amble.Graphics.Renderer constructor */
     Amble.Graphics.RectRenderer = function(args){
-        this.color = args['color'] || 'pink';
+        this.color = args['color'];
         this.layer = args['layer'] || 0;
         this.size = args['size'];
         //to implement
@@ -599,6 +619,34 @@ window.Amble = (function(){
 
             // draw
             layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
+
+            layer.ctx.save();
+            layer.strokeStyle(
+                'black'
+            ).lineWidth(
+                1
+            ).strokeRect(
+                -width/2,
+                -height/2,
+                width,
+                height
+            )
+            layer.ctx.restore();
+
+            if(self.selected) {
+                layer.ctx.save();
+                layer.strokeStyle(
+                    'magenta'
+                ).lineWidth(
+                    3
+                ).strokeRect(
+                    -width/2,
+                    -height/2,
+                    width,
+                    height
+                )
+                layer.ctx.restore();
+            }
 
             layer.ctx.restore();
         }

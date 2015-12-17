@@ -11,15 +11,25 @@ Camera = function(args){
         translate: new Amble.Math.Vector2({})
     };
     this.zoom = 0;
+
+    this.mouse = new Amble.Math.Vector2({});
+    this.selectedActor = null;
+    this.modifier = new Amble.Math.Vector2({});
+    this.actorToMove = null;
+
+    this.editor = null;
+
 };
 
 Camera.prototype = {
 
-    start: function(self) {
-
-    },
+    start: function(self) { },
 
     update: function(self) {
+
+        this.mouse.x = (Amble.Input.mousePosition.x/self.camera.scale - this.variables.translate.x) + self.camera.view.x;
+        this.mouse.y = (Amble.Input.mousePosition.y/self.camera.scale - this.variables.translate.y) + self.camera.view.y;
+
         if(Amble.Input.isMousePressed(3)) {
             if(!this.variables.done) {
                 this.variables.done = true;
@@ -32,6 +42,12 @@ Camera.prototype = {
             this.variables.lastMousePos.copy(Amble.Input.mousePosition);
         } else {
             this.variables.done = false
+        }
+
+        if(Amble.Input.isMousePressed(1) && this.actorToMove) {
+            this.actorToMove.transform.position.x = this.mouse.x + this.modifier.x;
+            this.actorToMove.transform.position.y = this.mouse.y + this.modifier.y;
+            this.editor.refresh();
         }
     },
 
@@ -46,6 +62,44 @@ Camera.prototype = {
 
         this.variables.maxZoom *= sizeDifference;
         this.variables.minZoom *= sizeDifference;
+    },
+
+    onmousedown: function(self, e) {
+        switch(e.which) {
+            case 1:
+                for(var i = Amble.app.scene.children.length - 1; i >= 0; i--) {
+                    var obj = Amble.app.scene.children[i];
+                    if(obj.renderer) {
+                        var width = obj.renderer.size.x;
+                        var height = obj.renderer.size.y;
+                        var x = obj.transform.position.x;
+                        var y = obj.transform.position.y;
+
+                        if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
+
+                            this.modifier.x = obj.transform.position.x - this.mouse.x;
+                            this.modifier.y = obj.transform.position.y - this.mouse.y;
+
+                            this.actorToMove = obj;
+
+                            document.getElementById('id_' + obj.sceneID).click();
+                            location.href = "#id_" + obj.sceneID;
+
+                            break;
+                        }
+                    }
+                }
+
+            break;
+        }
+    },
+
+    onmouseup: function(self, e) {
+        if(this.actorToMove) {
+            // document.querySelector('transform-component').actor = this.actorToMove;
+            // document.querySelector('renderer-component').actor = this.actorToMove;
+            this.actorToMove = null;
+        }
     },
 
     onmousewheel: function(self, e){

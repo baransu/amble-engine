@@ -5,7 +5,7 @@
 	<style>
 
     .title {
-
+		/*color: red;*/
     }
 
     .content {
@@ -17,30 +17,56 @@
 	<template>
 
         <div class="tranform">
-            <div class="title" on-click="hide">
+            <div class="title" on-click="hideComponent">
                 Renderer
             </div>
-            <div class="content" hidden$="{{hideConent}}">
-                <div class="row">
-                    <label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" value="{{actor.renderer.layer::input}}">
-                </div>
+            <div class="content" hidden$="{{hideContent}}">
 
-                <div class="row">
+				<!-- rect renderer -->
+                <div class="row" hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
 
-					<select>
-						<template id="componentsList" is="dom-repeat" items="{{ sprites }}" as="sprite">
-							<option value="{{sprite.path}}" >
+					<label for="layer">layer</label>
+                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+
+					<label for="color">color</label>
+                    <input id="color" type="text" value="{{actor.renderer.color::input}}">
+
+				</div>
+
+				<!-- sprite renderer -->
+				<div class="row" hidden$="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
+
+					<label for="layer">layer</label>
+                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+
+					<label for="sprite">sprite</label>
+					<select id="sprite" on-change="spriteChange">
+						<template id="spriteList" is="dom-repeat" items="{{ sprites }}" as="sprite">
+							<option value="{{sprite.path}}" selected$="{{selected(sprite.path, actor.renderer.sprite)}}">
+								{{sprite.path}}
+							</option>
+						</template>
+					</select>
+				</div>
+
+				<!-- animation renderer -->
+				<div class="row" hidden$="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
+
+					<label for="layer">layer</label>
+                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+
+					<label for="sprite">sprite</label>
+					<select id="sprite" on-change="spriteChange">
+						<template id="spriteList" is="dom-repeat" items="{{ sprites }}" as="sprite">
+							<option value="{{sprite.path}}" selected$="{{selected(sprite.path, actor.renderer.sprite)}}">
 								{{sprite.path}}
 							</option>
 						</template>
 					</select>
 
-                    <label for="sprite">sprite</label>
-                    <input id="sprite" type="text" value="{{actor.renderer.sprite::input}}">
 				</div>
 
-				<!-- anchor -->
+				<!-- anchor? -->
             </div>
         </div>
 
@@ -63,28 +89,68 @@
 				observer: 'refreshActor'
 			},
 			sprites: [],
-			hideConent: {
+			hideContent: {
 				type: Boolean,
-				value: false
+				value: true
+			}
+		},
+
+		ready: function(){
+			this.isRendererPresent();
+		},
+
+		typeofRenderer: function(type, current) {
+			if(Amble.Graphics[type] && (current instanceof Amble.Graphics[type])) {
+				return false;
+			} else {
+				return true;
+			}
+		},
+
+		isRendererPresent: function(){
+			if(this.actor.renderer) {
+				this.hideContent = false;
+			} else {
+				this.hideContent = true;
 			}
 		},
 
 		refreshActor: function() {
-			// console.log(this.actor)
+
+			this.sprites = Amble.app.loader.cache.filter(c => c.type === 'image');
+
 			if(this.actor.sceneID) {
 				var sceneID = this.actor.sceneID;
 				this.actor = Amble.app.scene.getActorByID(sceneID);
-				console.log(this.actor)
+
+				this.isRendererPresent();
+
+				// var a = this.sprites.find(s => s.path == this.actor.renderer.sprite);
+				// // console.log(a)
+				// if(a) {
+				// 	var index = this.sprites.indexOf(a);
+				// 	this.splice('sprites', index, 1)
+				// 	this.unshift('sprites', a);
+				// 	//to fix set selected
+				// }
 			}
-
-			// var types =;
-			this.sprites = Amble.app.loader.cache.filter(c => c.type === 'image');
-		// console.log(this.sprites);
-
 		},
 
-		hide: function(){
-			this.hideConent = !this.hideConent;
+		selected: function(item, type){
+			return type == item;
+		},
+
+		spriteChange: function(e){
+			if(this.actor instanceof Amble.Actor) {
+				this.actor.renderer.sprite = e.target.value;
+			}
+		},
+
+		hideComponent: function(){
+			if(this.actor.renderer) {
+				this.hideContent = !this.hideContent;
+			}
+			// this.isRendererPresent();
 		}
 
 	});
