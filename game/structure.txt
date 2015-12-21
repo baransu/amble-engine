@@ -1,0 +1,10 @@
+style.css
+index.html
+assets
+    |- img(folder) -> img resources
+    |- sounds(folder) -> sounds resources
+    |- json(folder) -> user json resources
+        |- classes.json -> user classes
+js
+    |- amble.js -> browser version
+    |- index.js -> load assets, scene, scripts etc

@@ -4,6 +4,10 @@ var watch = require('node-watch');
 var Amble = require('./js/amble-editor.js');
 var Camera = require('./js/camera.js');
 
+require('./js/src/vec2.js');
+
+require('./js/player.js');
+
 var projectPath = '../project-folder';
 
 var projectView = {
@@ -268,7 +272,7 @@ var app = new Amble.Application({
 
     preload: function(){
 
-        // console.log()
+        //load scene/project file
 
         //load all objects from json
         var player = {
@@ -281,7 +285,8 @@ var app = new Amble.Application({
             }},
             renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
                 sprite: 'data/me.jpg'
-            }}
+            }},
+            components: [],
         };
 
         var p = this.scene.instantiate(player)

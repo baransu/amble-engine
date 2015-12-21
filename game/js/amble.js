@@ -10,32 +10,23 @@ window.Amble = (function(){
 
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
 
-        //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
 
                 var camera = Amble.app.mainCamera.camera;
-                var width = parseInt(camera.context.offsetWidth);
-                var height = parseInt(camera.context.offsetHeight);
-
-                for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
-                    Amble.app.width = camera.layers[i].layer.canvas.width = width;
-                    Amble.app.height = camera.layers[i].layer.canvas.height = height;
+                for(var i = 0; i < camera.layers.length; i++) {
+                    camera.layers[i].layer.resize();
                 }
-
-                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
 
+        this.fullscreen = args['fullscreen'] || false;
+        this.width = args['width'] || 640;
+        this.height = args['height'] || 480;
+
         this.scene = new Amble.Scene();
-
-        this.mainCamera = this.scene.instantiate(args['sceneCamera']);
-
-        // this.scene.instantiate(args['mainCamera']);
-
-        this.width = this.mainCamera.camera.size.x || 800;
-        this.height = this.mainCamera.camera.size.y || 600;
+        this.mainCamera = this.scene.instantiate(args['mainCamera']);
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -59,32 +50,6 @@ window.Amble = (function(){
             for(var i = 0; i < camera.layers.length; i++) {
                 camera.layers[i].layer.clear();
             }
-
-            var layer = camera.layer(0);
-            layer.strokeStyle('white').lineWidth(0.5);
-            layer.ctx.beginPath();
-
-            var lineSpacing = 200;
-
-            var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
-            var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
-            var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
-            var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
-
-            //vertical lines
-            for(var i = -2; i < verticalLinesCount; i++) {
-                layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
-                layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
-            }
-
-            //horizonala
-            for(var i = -2; i < horizontalLinesCount; i++) {
-                layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
-                layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
-            }
-
-            layer.ctx.stroke();
-
 
             this.scene.render(camera);
         };
@@ -164,7 +129,6 @@ window.Amble = (function(){
             setTimeout(function(){
                 clearInterval(that.loadingInterval);
                 Amble.Input._setListeners();
-
 
                 Amble.app.loader.audioCache = [];
                 // that.scene.start();
@@ -326,6 +290,8 @@ window.Amble = (function(){
     Amble._classes = [];
     Amble.Class = function(obj){
 
+
+        //adapt to load
         this.makeArg = function(name, arg) {
 
             var a = {
@@ -420,12 +386,6 @@ window.Amble = (function(){
         //convert script to my prefab?
         // Amble.script.push(obj);
     };
-
-    Amble.Class.prototype = {
-        makeArg: function(args) {
-            // var args =
-        },
-    }
 
     /* Scene */
     Amble.Scene = function(){
@@ -596,6 +556,17 @@ window.Amble = (function(){
                     }
                 }
             }
+        },
+
+        ontouchstart: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchstart == 'function'){
+                        _component.ontouchstart(this.children[i], e);
+                    }
+                }
+            }
         }
     };
 
@@ -618,6 +589,27 @@ window.Amble = (function(){
         this.canvas.style.position = 'absolute';
         this.canvas.style.zIndex = index.toString() || '0';
         this.ctx = this.canvas.getContext('2d');
+
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.mozImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.msImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+
+        //scale to fullscreen
+        this.resize = function() {
+            // console.log('resize-layer')
+            // if(Amble.app.fullscreen) {
+                var scaleX = window.innerWidth / this.canvas.width;
+                var scaleY = window.innerHeight / this.canvas.height;
+
+                var scaleToFit = Math.min(scaleX, scaleY);
+                var scaleToCover = Math.max(scaleX, scaleY);
+
+                this.canvas.style.transformOrigin = "0 0"; //scale from top left
+                this.canvas.style.transform = "scale(" + scaleToFit + ")";
+            // }
+        }
+        this.resize();
     };
 
     Amble.Graphics.Layer.prototype = {
@@ -681,11 +673,115 @@ window.Amble = (function(){
         lineWidth: function(width){
             this.ctx.lineWidth = width;
             return this;
+        },
+
+        font: function(font) {
+            this.ctx.font = font;
+            return this;
+        },
+
+        textAlign: function(align) {
+            this.ctx.textAlign = align;
+            return this;
+        },
+
+        fillText: function(text, x, y) {
+            this.ctx.fillText(text, x, y);
+            return this;
         }
 
-        //more canvas methods
+        //to add more canvas methods
 
     };
+
+    Amble.Graphics.AnimationRenderer = function(args) {
+        this.sprite = args['sprite'];
+        this.layer = args['layer'] || 0;
+        this.updatesPerFrame = 1/60 * args['updatesPerFrame'] || 1;
+        this.frames = args['frames'] || 1;
+
+        this.loop = args['loop'] || true;
+
+        this._currentFrame = 0;
+        this._updates = 0;
+
+        this._sprite = new Image();
+
+        this._frameTimer = 0;
+
+        this.size = new Amble.Math.Vector2({x: 0, y: 0})
+
+        this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
+
+    };
+
+    Amble.Graphics.AnimationRenderer.prototype = {
+
+        render: function(self, camera) {
+
+            var layer = camera.layer(this.layer);
+
+            layer.ctx.save();
+
+            if(this._sprite) {
+
+                if(this._sprite.src != this.sprite && Amble.app.loader.isDone()) {
+                    this._sprite = Amble.app.loader.getAsset(this.sprite);
+                    if(!this._sprite) return;
+                }
+
+                if(this.anchor.x < 0) this.anchor.x = 0;
+                if(this.anchor.x > 1) this.anchor.x = 1;
+
+                if(this.anchor.y < 0) this.anchor.y = 0;
+                if(this.anchor.y > 1) this.anchor.y = 1;
+
+                var width = (this._sprite.width/this.frames) | 0;
+                var height = this._sprite.height;
+                this.size.x = width;
+                this.size.y = height;
+                var x = (self.transform.position.x - camera.view.x)// | 0;
+                var y = (self.transform.position.y - camera.view.y)// | 0;
+
+                layer.ctx.translate(x, y);
+
+                if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+                    layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+                }
+
+                if(self.transform.rotation != 0) {
+                    layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+                }
+
+                if(this._sprite.src) {
+                    layer.ctx.drawImage(
+                        this._sprite,
+                        this._currentFrame * width,
+                        0,
+                        width,
+                        height,
+                        (-width * this.anchor.x) | 0,
+                        (-height * this.anchor.y) | 0,
+                        width,
+                        height
+                    );
+                }
+
+            } else {
+                this._sprite = Amble.app.loader.getAsset(this.sprite);
+            }
+
+            layer.ctx.restore();
+
+            this._updates += Amble.Time.deltaTime;
+        	if(this._updates > this.updatesPerFrame) {
+        		this._updates = 0;
+        		if(this._currentFrame < this.frames - 1) this._currentFrame++;
+        		else if(this.loop) this._currentFrame = 0;
+        	}
+        }
+    };
+
 
     Amble.Graphics.SpriteRenderer = function(args) {
         this.sprite = args['sprite'];
@@ -717,12 +813,22 @@ window.Amble = (function(){
 
                 var width = this.size.x = this._sprite.width;
                 var height = this.size.y = this._sprite.height;
+
+                this.size.x = width * self.transform.scale.x;
+                this.size.y = height * self.transform.scale.y;
+
                 var x = self.transform.position.x - camera.view.x;
                 var y = self.transform.position.y - camera.view.y;
 
                 layer.ctx.translate(x, y);
-                layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-                layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+                if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+                    layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+                }
+
+                if(self.transform.rotation != 0) {
+                    layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+                }
 
                 if(this._sprite.src) {
                     layer.ctx.drawImage(this._sprite, -width/2, -height/2);
