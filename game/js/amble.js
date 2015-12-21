@@ -738,10 +738,12 @@ window.Amble = (function(){
 
                 var width = (this._sprite.width/this.frames) | 0;
                 var height = this._sprite.height;
-                this.size.x = width;
-                this.size.y = height;
-                var x = (self.transform.position.x - camera.view.x)// | 0;
-                var y = (self.transform.position.y - camera.view.y)// | 0;
+
+                this.size.x = width * self.transform.scale.x;
+                this.size.y = height * self.transform.scale.y;
+
+                var x = (self.transform.position.x - camera.view.x)// | 0 <- round for optymalization
+                var y = (self.transform.position.y - camera.view.y)// | 0 <- round for optymalization
 
                 layer.ctx.translate(x, y);
 
