@@ -16,7 +16,7 @@
 
 	<template>
 
-        <div class="tranform">
+        <div class="tranform"  hidden$="{{hideRenderer}}">
             <div class="title" on-click="hideComponent">
                 Renderer
             </div>
@@ -25,11 +25,23 @@
 				<!-- rect renderer -->
                 <div class="row" hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
 
+					<div class="row">
+	                    <div class="col left">
+	                        <label for="size-x">size x</label>
+	                        <input id="size-x" type="number" step="1" value="{{actor.renderer.size.x::input}}">
+	                    </div>
+	                    <div class="col right">
+	                        <label for="size-y">size y</label>
+	                        <input id="size-y" type="number" step="1" value="{{actor.renderer.size.y::input}}">
+	                    </div>
+	                </div>
+
 					<label for="layer">layer</label>
                     <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
 
 					<label for="color">color</label>
                     <input id="color" type="text" value="{{actor.renderer.color::input}}">
+
 
 				</div>
 
@@ -47,6 +59,7 @@
 							</option>
 						</template>
 					</select>
+
 				</div>
 
 				<!-- animation renderer -->
@@ -68,9 +81,11 @@
 
 				<!-- anchor? -->
             </div>
+
+			<div class="divider"></div>
+
         </div>
 
-		<div class="divider"></div>
 
 	</template>
 
@@ -92,6 +107,10 @@
 			hideContent: {
 				type: Boolean,
 				value: true
+			},
+			hideRenderer: {
+				type: Boolean,
+				value: true
 			}
 		},
 
@@ -110,8 +129,10 @@
 		isRendererPresent: function(){
 			if(this.actor.renderer) {
 				this.hideContent = false;
+				this.hideRenderer = false;
 			} else {
 				this.hideContent = true;
+				this.hideRenderer = true;
 			}
 		},
 
@@ -124,15 +145,6 @@
 				this.actor = Amble.app.scene.getActorByID(sceneID);
 
 				this.isRendererPresent();
-
-				// var a = this.sprites.find(s => s.path == this.actor.renderer.sprite);
-				// // console.log(a)
-				// if(a) {
-				// 	var index = this.sprites.indexOf(a);
-				// 	this.splice('sprites', index, 1)
-				// 	this.unshift('sprites', a);
-				// 	//to fix set selected
-				// }
 			}
 		},
 

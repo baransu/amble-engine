@@ -43,6 +43,7 @@
             <div class="search">
                 <input id="hierarchySearch" type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
             </div>
+            <button class="add-button" ng-click="editor.addActor()">Add actor</button>
             <div class="scroll hierarchy">
                 <div class="list-container">
                     <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
@@ -57,6 +58,7 @@
         </div>
 
         <div id="inspector-view">
+            <button class="add-button" ng-click="editor.showComponentAdder()">Add component</button>
             <div class="scroll inspector" id="inspector-components">
 
                 <div class="inspector-info">
@@ -73,7 +75,23 @@
         </div>
         <div id="preview">preview</div>
 
-        
+        <div id="component-select" ng-hide="editor.hideComponentAdder">
+            <div class="search">
+                <input id="hierarchySearch" type="text" ng-model="editor.componentAdd.search" name="name" value="" placeholder="search">
+            </div>
+            <div class="scroll hierarchy">
+                <div class="list-container">
+                    <ul id="hierarchy-list" class="list" ng-repeat="component in editor.componentsToAdd | filter: { name: editor.componentAdd.search }">
+
+                        <li class="list-item">
+                            <a href="#" class="hierarchy-item" ng-click="editor.addComponent(component, $event)">{{component.name}}</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
 
         <script src="js/index.js" charset="utf-8"></script>
         <script src="bower_components/webcomponentsjs/webcomponents.js" charset="utf-8"></script>

@@ -207,7 +207,6 @@ window.Amble = (function(){
         }
     };
 
-    /* Utils */
     Amble.Utils = {
 
         generateID: function() {
@@ -225,13 +224,52 @@ window.Amble = (function(){
                     }
                     var func = Amble.Utils.stringToFunction(obj.name)
                     return new func(args);
-
                 } else {
                     return obj;
                 }
             } else {
                 return obj;
             }
+        },
+
+        getArgs: function(p) {
+
+            // console.log(typeof p.args[0]);
+            // console.log(p.args[0]);
+            if(p.args.length == 1){
+                if(typeof p.args[0] == 'number' || typeof p.args[0] == "string" || typeof p.args[0] == 'boolean') {
+                    return p.args[0];
+                } else if(p.args[0].name == "Array") {
+                    var a = [];
+                    for(var i in p.args[0].args) {
+                        a.push(this.getArgs(p.args[0].args[i]));
+                    }
+                    return a;
+                } else {
+                    var func = Amble.Utils.stringToFunction(p.args[0].name)
+                    var arg = [];
+                    for(var i in p.args[0].args) {
+                        arg.push(this.getArgs(p.args[0].args[i]));
+                    }
+                    return new func(arg);
+                }
+            }
+        },
+
+        makeClass: function(obj) {
+            var o = {};
+            for(var i in obj) {
+                if(i == 'name') continue;
+                if(typeof obj[i] === 'function') {
+                    o[i] = obj[i];
+                } else if(i == 'properties') {
+                    o[i] = {};
+                    for(var j in obj[i]) {
+                        o[i][obj[i][j].name] = this.getArgs(obj[i][j]);
+                    }
+                }
+            }
+            return o;
         },
 
         clone: function(obj) {
@@ -241,9 +279,19 @@ window.Amble = (function(){
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
-                            copy[attr][i] = {
-                                id: obj[attr][i].name,
-                                body: Amble.Utils.makeFunction(obj[attr][i])
+
+                            var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+
+                            if(cl) {
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: this.makeClass(cl)
+                                }
+                            } else {
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: Amble.Utils.makeFunction(obj[attr][i])
+                                }
                             }
                         }
                     } else {
@@ -251,6 +299,7 @@ window.Amble = (function(){
                     }
                 }
             }
+            // console.log(copy)
             return copy;
         },
 
@@ -794,7 +843,7 @@ window.Amble = (function(){
 
         this.size = new Amble.Math.Vector2({})
 
-        //to implement
+        // ???
         this.anchor = new Amble.Math.Vector2({});
     }
 

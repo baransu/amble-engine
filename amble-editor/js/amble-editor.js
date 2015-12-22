@@ -261,13 +261,50 @@ window.Amble = (function(){
                     }
                     var func = Amble.Utils.stringToFunction(obj.name)
                     return new func(args);
-
                 } else {
                     return obj;
                 }
             } else {
                 return obj;
             }
+        },
+
+        getArgs: function(p) {
+
+            if(p.args.length == 1){
+                if(typeof p.args[0] == 'number' || typeof p.args[0] == "string" || typeof p.args[0] == 'boolean') {
+                    return p.args[0];
+                } else if(p.args[0].name == "Array") {
+                    var a = [];
+                    for(var i in p.args[0].args) {
+                        a.push(this.getArgs(p.args[0].args[i]));
+                    }
+                    return a;
+                } else {
+                    var func = Amble.Utils.stringToFunction(p.args[0].name)
+                    var arg = [];
+                    for(var i in p.args[0].args) {
+                        arg.push(this.getArgs(p.args[0].args[i]));
+                    }
+                    return new func(arg);
+                }
+            }
+        },
+
+        makeClass: function(obj) {
+            var o = {};
+            for(var i in obj) {
+                if(i == 'name') continue;
+                if(typeof obj[i] === 'function') {
+                    o[i] = obj[i];
+                } else if(i == 'properties') {
+                    // o[i] = {};
+                    for(var j in obj[i]) {
+                        o[obj[i][j].name] = this.getArgs(obj[i][j]);
+                    }
+                }
+            }
+            return o;
         },
 
         clone: function(obj) {
@@ -277,9 +314,23 @@ window.Amble = (function(){
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
-                            copy[attr][i] = {
-                                id: obj[attr][i].name,
-                                body: Amble.Utils.makeFunction(obj[attr][i])
+                            if(obj[attr][i].type != 'noneditor') {
+                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+
+                                if(cl) {
+                                    copy[attr][i] = {
+                                        id: obj[attr][i].name,
+                                        body: this.makeClass(cl)
+                                    }
+                                } else {
+                                    copy[attr][i] = {
+                                        id: obj[attr][i].name,
+                                        body: Amble.Utils.makeFunction(obj[attr][i])
+                                    }
+                                }
+
+                            } else {
+                                continue;
                             }
                         }
                     } else {
@@ -287,6 +338,7 @@ window.Amble = (function(){
                     }
                 }
             }
+            // console.log(copy)
             return copy;
         },
 
@@ -333,21 +385,23 @@ window.Amble = (function(){
                 args: []
             }
 
-            var n = arg.constructor.name;
-            if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
-                var b = {
-                    name: n,
-                    args: []
-                }
-                for(var i in arg) {
-                    if(typeof arg[i] !== 'function') {
-                        b.args.push(this.makeArg(i, arg[i]));
+            if(arg != null) {
+                var n = arg.constructor.name;
+                if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
+                    var b = {
+                        name: n,
+                        args: []
                     }
-                }
+                    for(var i in arg) {
+                        if(typeof arg[i] !== 'function') {
+                            b.args.push(this.makeArg(i, arg[i]));
+                        }
+                    }
 
-                a.args.push(b)
-            } else {
-                a.args.push(arg);
+                    a.args.push(b)
+                } else {
+                    a.args.push(arg);
+                }
             }
 
             return a;
@@ -363,20 +417,21 @@ window.Amble = (function(){
 
         var c = {
             name: obj.name,
-            propertires: [],
+            properties: [],
         }
 
-        for(var i in obj.propertires) {
-            var p = this.makeArg(i, obj.propertires[i])
-            c.propertires.push(p)
+        for(var i in obj.properties) {
+            var p = this.makeArg(i, obj.properties[i])
+            c.properties.push(p)
         }
 
         for(var i in obj) {
-            if(i != 'name' && i != 'propertires' && typeof obj[i] === 'function') { //add extends and whatever
+            if(i != 'name' && i != 'properties' && typeof obj[i] === 'function') { //add extends and whatever
                 c[i] = obj[i];
             }
         }
 
+        console.log(c);
         Amble._classes.push(c);
 
         /*
@@ -453,36 +508,27 @@ window.Amble = (function(){
             return this.children.find(c => c.sceneID === id);
         },
 
-        instantiate: function(obj, callback){
+        instantiate: function(obj){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
             for(var i in clone) {
                 actor[i] = clone[i];
             }
 
-            //set args
+            actor.prefab = obj;
 
-            for(var i in obj.components) {
-                for(var j in obj.components[i].args) {
-                    console.log(obj.components[i].args[j])
-                }
-            }
-
-
-            return this._add(actor, obj, callback);
+            return this._add(actor);
         },
 
-        _add: function(object, prefab, callback) {
+        _add: function(object, prefab) {
 
             var sceneID = Amble.Utils.generateID();
             object.sceneID = sceneID;
 
-            object.prefab = prefab;
-
             if(object.components != 'undefined') {
                 for(var i in object.components) {
                     var _component = object.components[i].body;
-                    if(typeof _component.update == 'function'){
+                    if(typeof _component.start == 'function'){
                         _component.start(object);
                     }
                 }
@@ -496,15 +542,13 @@ window.Amble = (function(){
                 selected: false
             });
 
-            if(callback) callback(this.children);
             return object;
         },
 
-        remove: function(object, callback){
+        remove: function(object){
             var index = this.children.indexOf(object);
             if(index != -1) {
                 this.children.splice(index, 1);
-                if(callback) callback(this.children);
             }
         },
 
