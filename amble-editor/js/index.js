@@ -44,7 +44,12 @@ var componentsToAdd = [
     {
         name: 'AnimationRenderer',
         type: 'renderer',
-        body: {}
+        body: { name: 'Amble.Graphics.AnimationRenderer', args: {
+            sprite: 'data/me.jpg',
+            frames: 1,
+            updatesPerFrame: 1,
+            layer: 0
+        }}
     }
 ]
 
@@ -210,19 +215,35 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     cameraScript.editor = this;
 
     angular.element(window).on('keydown', function(e) {
+        console.log(e.which);
         switch(e.which) {
             case 27: //esc
 
                 editor.hideComponentAdder = true;
                 editor.refresh();
 
-                if(editor.actor.selected) {
+                if(editor.actor && editor.actor.selected) {
                     editor.actor.selected = false;
                 }
 
                 if(editor.previousActor) {
                     editor.previousActor.className = 'hierarchy-item';
                 }
+
+            break;
+            case 46: //del
+
+                if(editor.actor) {
+
+                    Amble.app.scene.remove(editor.actor)
+
+                    editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
+                    editor.actor = null;
+
+                    editor.refresh();
+
+                }
+
 
             break;
             case 70: // f
@@ -261,11 +282,13 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 }
             }
 
-            if(this.actor.renderer) {
-                this.componentsToAdd = componentsToAdd.filter(c => c.type != 'renderer');
-            } else {
-                this.componentsToAdd = componentsToAdd;
-            }
+            // if(this.actor.renderer) {
+            //     this.componentsToAdd = componentsToAdd.filter(c => c.type != 'renderer');
+            // } else {
+            // }
+
+            this.componentsToAdd = componentsToAdd;
+
             this.hideComponentAdder = false;
         }
     };
@@ -303,6 +326,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
                 scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
             }},
+            renderer: { name: 'Amble.Graphics.EngineRenderer', args: {}},
             components: []
         };
 
@@ -353,6 +377,7 @@ var aPrefabs = [
         transform: { name: "Amble.Transform", args: {
             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
             scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
+            rotation: 0
         }},
         renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
             sprite: 'data/me.jpg'
@@ -367,7 +392,8 @@ var aPrefabs = [
         options: {},
         transform: { name: "Amble.Transform", args: {
             position: { name: "Amble.Math.Vector2", args: {x:500 ,y:0}},
-            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
+            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
+            rotation: 0
         }},
         renderer: {name: 'Amble.Graphics.RectRenderer', args: {
             color: '#1B5E20',

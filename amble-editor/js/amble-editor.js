@@ -470,8 +470,6 @@ window.Amble = (function(){
         // };
 
 
-
-
         //convert script to my prefab?
         // Amble.script.push(obj);
     };
@@ -725,10 +723,213 @@ window.Amble = (function(){
         lineWidth: function(width){
             this.ctx.lineWidth = width;
             return this;
+        },
+
+        font: function(font) {
+            this.ctx.font = font;
+            return this;
+        },
+
+        textAlign: function(align) {
+            this.ctx.textAlign = align;
+            return this;
+        },
+
+        fillText: function(text, x, y) {
+            this.ctx.fillText(text, x, y);
+            return this;
+        },
+
+        strokeText: function(text, x, y) {
+            this.ctx.strokeText(text, x, y);
+            return this;
         }
 
         //more canvas methods
 
+    };
+
+    Amble.Graphics.AnimationRenderer = function(args) {
+        this.sprite = args['sprite'];
+        this.layer = args['layer'] || 0;
+        this.updatesPerFrame = 1/60 * args['updatesPerFrame'] || 1;
+        this.frames = args['frames'] || 1;
+
+        this.loop = args['loop'] || true;
+
+        this._currentFrame = 0;
+        this._updates = 0;
+
+        this._sprite = new Image();
+
+        this._frameTimer = 0;
+
+        this.size = new Amble.Math.Vector2({x: 0, y: 0})
+
+        this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
+
+        this.type = "animation";
+    };
+
+    Amble.Graphics.AnimationRenderer.prototype = {
+
+        render: function(self, camera) {
+
+            var layer = camera.layer(this.layer);
+
+            layer.ctx.save();
+
+            if(this._sprite) {
+
+                if(this._sprite.src != this.sprite && Amble.app.loader.isDone()) {
+                    this._sprite = Amble.app.loader.getAsset(this.sprite);
+                    if(!this._sprite) return;
+                }
+
+                if(this.anchor.x < 0) this.anchor.x = 0;
+                if(this.anchor.x > 1) this.anchor.x = 1;
+
+                if(this.anchor.y < 0) this.anchor.y = 0;
+                if(this.anchor.y > 1) this.anchor.y = 1;
+
+                var width = (this._sprite.width/this.frames) | 0;
+                var height = this._sprite.height;
+
+                this.size.x = width * self.transform.scale.x;
+                this.size.y = height * self.transform.scale.y;
+
+                var x = (self.transform.position.x - camera.view.x)// | 0 <- round for optymalization
+                var y = (self.transform.position.y - camera.view.y)// | 0 <- round for optymalization
+
+                layer.ctx.translate(x, y);
+
+                if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+                    layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+                }
+
+                if(self.transform.rotation != 0) {
+                    layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+                }
+
+                if(this._sprite.src) {
+                    layer.ctx.drawImage(
+                        this._sprite,
+                        this._currentFrame * width,
+                        0,
+                        width,
+                        height,
+                        (-width * this.anchor.x) | 0,
+                        (-height * this.anchor.y) | 0,
+                        width,
+                        height
+                    );
+
+                    if(self.selected) {
+                        layer.ctx.save();
+                        layer.strokeStyle(
+                            'magenta'
+                        ).lineWidth(
+                            3
+                        ).strokeRect(
+                            -width/2,
+                            -height/2,
+                            width,
+                            height
+                        )
+                        layer.ctx.restore();
+                    }
+                }
+
+            } else {
+                this._sprite = Amble.app.loader.getAsset(this.sprite);
+            }
+
+            layer.ctx.restore();
+
+            // this._updates += Amble.Time.deltaTime;
+            // if(this._updates > this.updatesPerFrame) {
+            //     this._updates = 0;
+            //     if(this._currentFrame < this.frames - 1) this._currentFrame++;
+            //     else if(this.loop) this._currentFrame = 0;
+            // }
+        }
+    };
+
+
+    Amble.Graphics.EngineRenderer = function(args) {
+
+        this.layer = args['layer'] || 0;
+        this.size = new Amble.Math.Vector2({});
+
+        this.type = "engine";
+    };
+
+    Amble.Graphics.EngineRenderer.prototype = {
+
+        render: function(self, camera) {
+
+            var layer = camera.layer(this.layer);
+
+            layer.ctx.save();
+
+            var x = self.transform.position.x - camera.view.x;
+            var y = self.transform.position.y - camera.view.y;
+
+            layer.font('30px Arial');
+
+            this.size.x = layer.ctx.measureText(self.name || 'Actor').width * 2;
+            this.size.y = 60;
+
+            layer.ctx.translate(x, y);
+
+            //scale
+            layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+
+            // rotation in radians
+            layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+            layer.fillStyle('green')
+            layer.ctx.beginPath();
+            layer.ctx.arc(
+                0,
+                0,
+                5,
+                0,
+                2*Math.PI
+            );
+            layer.ctx.fill();
+
+            layer.textAlign(
+                'center'
+            ).fillStyle(
+                'transparent'
+            ).fillRect(
+                -this.size.x/2,
+                -this.size.y/2,
+                this.size.x,
+                this.size.y
+            ).fillStyle(
+                'white'
+            ).fillText(
+                self.name || 'Actor',
+                0,
+                -15
+            );
+
+            if(self.selected) {
+                layer.strokeStyle(
+                    'magenta'
+                ).lineWidth(
+                    1
+                ).strokeText(
+                    self.name || 'Actor',
+                    0,
+                    -15
+                )
+            }
+
+            layer.ctx.restore();
+        }
     };
 
     Amble.Graphics.SpriteRenderer = function(args) {
@@ -742,6 +943,8 @@ window.Amble = (function(){
 
         //to implement
         this.anchor = new Amble.Math.Vector2({});
+
+        this.type = "sprite";
     }
 
     Amble.Graphics.SpriteRenderer.prototype = {
@@ -801,6 +1004,8 @@ window.Amble = (function(){
         this.size = args['size'];
         //to implement
         this.anchor = new Amble.Math.Vector2({});
+
+        this.type = "rect";
     };
 
     /* Amble.Graphics.Renderer functions */
