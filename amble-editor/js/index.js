@@ -215,7 +215,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     cameraScript.editor = this;
 
     angular.element(window).on('keydown', function(e) {
-        console.log(e.which);
+        // console.log(e.which);
         switch(e.which) {
             case 27: //esc
 
@@ -241,9 +241,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                     editor.actor = null;
 
                     editor.refresh();
-
                 }
-
 
             break;
             case 70: // f
@@ -383,7 +381,7 @@ var aPrefabs = [
             sprite: 'data/me.jpg'
         }},
         components: [
-            {type:'editor', name: 'Player', args: {}}
+            { type:'editor', name: 'Player', properties: {}}
         ],
     },
     {
@@ -438,9 +436,13 @@ var app = new Amble.Application({
     preload: function(){
 
         //load scene/project file
-
         //load all objects from project file
         for(var i in aPrefabs) {
+            for(var x in aPrefabs[i].components) {
+                var p = Amble._classes.find(c => c.name == aPrefabs[i].components[x].name).properties;
+                aPrefabs[i].components[x].properties = p;
+            }
+
             this.scene.instantiate(aPrefabs[i]);
         }
 
@@ -449,6 +451,7 @@ var app = new Amble.Application({
         for(var i = 0; i < data.length; i++) {
             this.loader.load('image', 'data/' + data[i]);
         }
+
     },
 
     //process scripts int engine and load objects

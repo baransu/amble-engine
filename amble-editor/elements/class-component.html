@@ -1,0 +1,272 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="class-component">
+
+	<style>
+
+    .title {
+		/*color: red;*/
+    }
+
+    .content {
+
+    }
+
+	</style>
+
+	<template>
+
+        <div class="tranform"  hidden$="{{hideAll}}">
+
+			<template id="class-list" is="dom-repeat" items="{{ actor.prefab.components }}" as="component">
+	            <div class="title">{{component.name}} - script</div>
+	            <div class="content">
+
+					<template id="class-list" is="dom-repeat" items="{{ props }}" as="p">
+
+						<!-- simple properties -->
+						<div class="row" hidden$="{{hideProperty('simple-number' ,p)}}">
+							<label for="property">{{p.name}}</label>
+							<input id="property" type="number" value="{{p.value::input}}"></br>
+						</div>
+
+						<div class="row" hidden$="{{hideProperty('simple-bool' ,p)}}">
+							<label for="property">{{p.name}}</label>
+							<input id="property" type="checkbox" value="{{p.value::input}}"></br>
+						</div>
+
+						<div class="row" hidden$="{{hideProperty('simple-string' ,p)}}">
+							<label for="property">{{p.name}}</label>
+							<input id="property" type="text" value="{{p.value::input}}"></br>
+						</div>
+
+						<!-- vector -->
+						<div class="row" hidden$="{{hideProperty('vec2', p)}}">
+
+							<div class="row">
+								{{p.name}}</br>
+			                    <div class="col left">
+			                        <label for="x">x</label>
+			                        <input id="x" type="number" value="{{p.value.value[0].value::input}}">
+			                    </div>
+			                    <div class="col right">
+			                        <label for="y">y</label>
+			                        <input id="y" type="number" value="{{p.value.value[1].value::input}}">
+			                    </div>
+			                </div>
+
+						</div>
+
+						<!-- array of simple -->
+						<div class="row" hidden$="{{hideProperty('array', p)}}">
+							{{p.name}}</br>
+							<template is="dom-repeat" items="{{ p.values }}" as="v">
+								<label for="v">{{v.name}}</label>
+								<input id="v" type="text" value="{{v.value::input}}"></br>
+							</template>
+
+						</div>
+
+						<!-- array of vec2 -->
+						<div class="row" hidden$="{{hideProperty('vec2-array', p)}}">
+							<template is="dom-repeat" items="{{ p.values }}" as="v">
+								<div class="row">
+									{{v.name}}</br>
+				                    <div class="col left">
+				                        <label for="x">x</label>
+				                        <input id="x" type="number" value="{{v.value[0].value::input}}">
+				                    </div>
+				                    <div class="col right">
+				                        <label for="y">y</label>
+				                        <input id="y" type="number" value="{{v.value[1].value::input}}">
+				                    </div>
+				                </div>
+							</template>
+						</div>
+
+					</template>
+
+					<div class="divider"></div>
+	            </div>
+
+			</template>
+        </div>
+
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'class-component',
+
+		properties: {
+
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				observer: 'refreshActor'
+			},
+
+			hideAll: {
+				type: Boolean,
+				value: true
+			},
+
+			props: {
+				type: Array,
+				value: []
+			}
+
+		},
+
+		hideProperty: function(type, p) {
+
+			switch(type) {
+
+				case 'simple-number':
+					return !(typeof p.value == 'number')
+				break;
+
+				case 'simple-bool':
+					return !(typeof p.value == 'boolean')
+				break;
+
+				case 'simple-string':
+					return !(typeof p.value == 'string')
+				break;
+
+				case 'array':
+					return !(Array.isArray(p.values) && typeof p.values[0].value != 'object');
+				break;
+
+				case 'vec2-array':
+					return !(Array.isArray(p.values) && typeof p.values[0].value == 'object');
+				break;
+
+				case 'vec2':
+
+					if(p.value && p.value.type && p.value.type === 'Vec2')
+						console.log(p.value.value[0].value)
+					return !(p.value && p.value.type && p.value.type === 'Vec2');
+				break;
+
+				default:
+				return true;
+				break;
+			}
+
+		},
+
+		// valuesChange: function() {
+		// 	//apply object changes to prefab
+		// 	if(this.actor) {
+		//
+		// 		//layer
+		// 		this.actor.prefab.renderer.args.layer = this.actor.renderer.layer;
+		//
+		// 		switch(this.actor.renderer.type) {
+		// 			case 'sprite':
+		//
+		// 				//sprite
+		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+		//
+		// 			break;
+		// 			case 'animation':
+		//
+		// 				//sprite
+		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+		//
+		// 				//frames
+		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+		//
+		// 				//ups
+		// 				this.actor.prefab.renderer.args.updatesPerFrame = this.actor.renderer.updatesPerFrame;
+		//
+		// 				//play
+		// 				this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
+		//
+		// 			break;
+		// 			case 'rect':
+		//
+		// 				//color
+		// 				this.actor.prefab.renderer.args.color = this.actor.renderer.color;
+		//
+		// 				//size
+		// 				this.actor.prefab.renderer.args.size.args.x = this.actor.renderer.size.x;
+		// 				this.actor.prefab.renderer.args.size.args.y = this.actor.renderer.size.y;
+		//
+		// 			break;
+		// 		}
+		// 	}
+		// },
+
+		ready: function () { },
+
+		decodeProperties: function(obj) {
+
+			var o = {}
+			for(var i in obj.args) {
+
+				o.name = obj.name;
+
+				if(typeof obj.args[i] == 'number' || typeof obj.args[i] == 'boolean' || typeof obj.args[i] == 'string') {
+
+					o.value = obj.args[i];
+
+				} else if(obj.args[i].name == 'Array') { //array
+
+					o.values = [];
+					for(var x in obj.args[i].args) {
+						o.values.push(this.decodeProperties(obj.args[i].args[x]));
+					}
+
+				} else if(obj.args[i].name == "Vec2") { //object - for now vec2 only
+
+					o.value = {
+						type: 'Vec2',
+						value: [
+							{
+								name: 'x',
+								value: obj.args[i].args[0].args[0]
+							},
+							{
+								name: 'y',
+								value: obj.args[i].args[1].args[0]
+							}
+						]
+					}
+				}
+			}
+			return o;
+		},
+
+		refreshActor: function() {
+
+			if(this.actor.sceneID) {
+				var sceneID = this.actor.sceneID;
+				this.actor = Amble.app.scene.getActorByID(sceneID);
+
+				this.hideAll = !(this.actor.components.length > 0);
+
+				this.props = [];
+				for(var i in this.actor.prefab.components) {
+
+					var o = {};
+					var c = this.actor.prefab.components[i];
+					for(var x in c.properties) {
+						var a = this.decodeProperties(c.properties[x]);
+						this.props.push(a);
+					}
+				}
+
+				console.log(this.props)
+			}
+		},
+
+	});
+
+</script>

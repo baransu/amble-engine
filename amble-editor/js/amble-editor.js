@@ -291,16 +291,21 @@ window.Amble = (function(){
             }
         },
 
-        makeClass: function(obj) {
+        makeClass: function(obj, properties) {
             var o = {};
             for(var i in obj) {
                 if(i == 'name') continue;
                 if(typeof obj[i] === 'function') {
                     o[i] = obj[i];
                 } else if(i == 'properties') {
-                    // o[i] = {};
-                    for(var j in obj[i]) {
-                        o[obj[i][j].name] = this.getArgs(obj[i][j]);
+                    if(properties != undefined) {
+                        for(var x in properties) {
+                            o[properties[x].name] = this.getArgs(properties[x]);
+                        }
+                    } else {
+                        for(var j in obj[i]) {
+                            o[obj[i][j].name] = this.getArgs(obj[i][j]);
+                        }
                     }
                 }
             }
@@ -315,18 +320,22 @@ window.Amble = (function(){
                         copy[attr] = [];
                         for(var i in obj[attr]) {
                             if(obj[attr][i].type != 'noneditor') {
-                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
 
+                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
                                 if(cl) {
+
                                     copy[attr][i] = {
                                         id: obj[attr][i].name,
-                                        body: this.makeClass(cl)
-                                    }
+                                        body: this.makeClass(cl, obj[attr][i].properties)
+                                    };
+
                                 } else {
+
                                     copy[attr][i] = {
                                         id: obj[attr][i].name,
                                         body: Amble.Utils.makeFunction(obj[attr][i])
                                     }
+
                                 }
 
                             } else {
@@ -338,7 +347,7 @@ window.Amble = (function(){
                     }
                 }
             }
-            // console.log(copy)
+            console.log(copy)
             return copy;
         },
 
@@ -431,7 +440,7 @@ window.Amble = (function(){
             }
         }
 
-        console.log(c);
+        // console.log(c);
         Amble._classes.push(c);
 
         /*
@@ -752,8 +761,10 @@ window.Amble = (function(){
     Amble.Graphics.AnimationRenderer = function(args) {
         this.sprite = args['sprite'];
         this.layer = args['layer'] || 0;
-        this.updatesPerFrame = 1/60 * args['updatesPerFrame'] || 1;
+        this.updatesPerFrame = args['updatesPerFrame'] || 1;
         this.frames = args['frames'] || 1;
+
+        this.play = args['play'] || false;
 
         this.loop = args['loop'] || true;
 
@@ -846,12 +857,14 @@ window.Amble = (function(){
 
             layer.ctx.restore();
 
-            // this._updates += Amble.Time.deltaTime;
-            // if(this._updates > this.updatesPerFrame) {
-            //     this._updates = 0;
-            //     if(this._currentFrame < this.frames - 1) this._currentFrame++;
-            //     else if(this.loop) this._currentFrame = 0;
-            // }
+            if(this.play) {
+                this._updates++;
+                if(this._updates > this.updatesPerFrame) {
+                    this._updates = 0;
+                    if(this._currentFrame < this.frames - 1) this._currentFrame++;
+                    else if(this.loop) this._currentFrame = 0;
+                }
+            }
         }
     };
 
