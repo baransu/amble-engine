@@ -23,7 +23,7 @@ var componentsToAdd = [
     {
         name: 'Player',
         type: 'class',
-        body: { type:'noneditor', name: 'Player', args: {}}
+        body: { type:'noneditor', name: 'Player', properties: {}}
     },
     {
         name: 'SpriteRenderer',
@@ -267,16 +267,23 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
             //updated componentsToAdd
             for(var i in Amble._classes) {
+                var p = Amble._classes[i].properties
+                console.log(p);
                 var cl = {
                     name: Amble._classes[i].name,
                     tyle: 'class',
                     body: {
-                        name: Amble._classes[i].name, args: {}
+                        name: Amble._classes[i].name,
+                        properties: p
                     }
                 }
                 var c = componentsToAdd.find(c => c.name == cl.name)
                 if(!c) {
+                    console.log('add')
                     componentsToAdd.push(cl);
+                } else {
+                    console.log('update')
+                    c.body.properties = Amble._classes[i].properties
                 }
             }
 
@@ -286,6 +293,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             // }
 
             this.componentsToAdd = componentsToAdd;
+
+            console.log(this.componentsToAdd);
 
             this.hideComponentAdder = false;
         }
@@ -298,6 +307,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         if(component.type == 'renderer') {
             editor.actor.prefab.renderer = component.body;
         } else if(component.type == 'class'){
+            console.log(editor.actor.prefab);
+
             editor.actor.prefab.components.push(component.body);
         }
 
@@ -396,7 +407,8 @@ var aPrefabs = [
         renderer: {name: 'Amble.Graphics.RectRenderer', args: {
             color: '#1B5E20',
             size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}}
-        }}
+        }},
+        components: []
     },
 
 ]

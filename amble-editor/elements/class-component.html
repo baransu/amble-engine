@@ -5,7 +5,9 @@
 	<style>
 
     .title {
-		/*color: red;*/
+		color: magenta;
+		font-size: 20px;
+		text-align: center;
     }
 
     .content {
@@ -18,11 +20,11 @@
 
         <div class="tranform"  hidden$="{{hideAll}}">
 
-			<template id="class-list" is="dom-repeat" items="{{ actor.prefab.components }}" as="component">
+			<template id="class-list" is="dom-repeat" items="{{ components }}" as="component">
 	            <div class="title">{{component.name}} - script</div>
 	            <div class="content">
 
-					<template id="class-list" is="dom-repeat" items="{{ props }}" as="p">
+					<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
 
 						<!-- simple properties -->
 						<div class="row" hidden$="{{hideProperty('simple-number' ,p)}}">
@@ -116,7 +118,7 @@
 				value: true
 			},
 
-			props: {
+			components: {
 				type: Array,
 				value: []
 			}
@@ -148,9 +150,6 @@
 				break;
 
 				case 'vec2':
-
-					if(p.value && p.value.type && p.value.type === 'Vec2')
-						console.log(p.value.value[0].value)
 					return !(p.value && p.value.type && p.value.type === 'Vec2');
 				break;
 
@@ -250,20 +249,26 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = Amble.app.scene.getActorByID(sceneID);
 
-				this.hideAll = !(this.actor.components.length > 0);
+				this.hideAll = !(this.actor.prefab.components.length > 0);
+				// 
+				// var lc = this.components.length;
+				// this.splice('components', 0, lc);
+				this.components = [];
 
-				this.props = [];
 				for(var i in this.actor.prefab.components) {
-
-					var o = {};
 					var c = this.actor.prefab.components[i];
+					var p = [];
 					for(var x in c.properties) {
 						var a = this.decodeProperties(c.properties[x]);
-						this.props.push(a);
+						p.push(a);
 					}
+					this.push('components', {
+						name: c.name,
+						props: p
+					});
 				}
 
-				console.log(this.props)
+				console.log(this.components)
 			}
 		},
 
