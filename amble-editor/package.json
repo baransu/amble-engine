@@ -1,7 +1,7 @@
 {
   "name": "amble-editor",
   "version": "0.1.0",
-  "description": "Amble editor",
+  "description": "JavaScript game engine - Amble editor",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -10,6 +10,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron-prebuilt": "^0.35.1",
+    "gulp": "^3.9.0",
+    "gulp-concat": "^2.6.0",
     "gulp-less": "^3.0.5",
     "gulp-minify-css": "^1.2.1",
     "node-watch": "^0.3.4"

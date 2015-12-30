@@ -16,7 +16,7 @@
 
 	<template>
 
-        <div class="tranform">
+        <div class="tranform"  hidden$="{{hideRenderer}}">
             <div class="title" on-click="hideComponent">
                 Renderer
             </div>
@@ -25,11 +25,22 @@
 				<!-- rect renderer -->
                 <div class="row" hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
 
+					<div class="row">
+	                    <div class="col left">
+	                        <label for="size-x">size x</label>
+	                        <input id="size-x" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
+	                    </div>
+	                    <div class="col right">
+	                        <label for="size-y">size y</label>
+	                        <input id="size-y" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
+	                    </div>
+	                </div></br>
+
 					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
 
 					<label for="color">color</label>
-                    <input id="color" type="text" value="{{actor.renderer.color::input}}">
+                    <input id="color" type="text" on-change="valuesChange" value="{{actor.renderer.color::input}}"></br>
 
 				</div>
 
@@ -37,7 +48,7 @@
 				<div class="row" hidden$="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
 
 					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
 
 					<label for="sprite">sprite</label>
 					<select id="sprite" on-change="spriteChange">
@@ -46,14 +57,24 @@
 								{{sprite.path}}
 							</option>
 						</template>
-					</select>
+					</select></br>
+
 				</div>
 
 				<!-- animation renderer -->
 				<div class="row" hidden$="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
 
+					<label for="play">play</label>
+					<input id="play" type="checkbox" on-change="valuesChange"></br>
+
 					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" value="{{actor.renderer.layer::input}}">
+                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+
+					<label for="frames">frames</label>
+					<input id="frames" type="number" step="1" min="1" on-change="valuesChange" value="{{actor.renderer.frames::input}}"></br>
+
+					<label for="updatesPerFrame">updatesPerFrame</label>
+					<input id="updatesPerFrame" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.updatesPerFrame::input}}"></br>
 
 					<label for="sprite">sprite</label>
 					<select id="sprite" on-change="spriteChange">
@@ -62,15 +83,17 @@
 								{{sprite.path}}
 							</option>
 						</template>
-					</select>
+					</select></br>
 
 				</div>
 
 				<!-- anchor? -->
             </div>
+
+			<div class="divider"></div>
+
         </div>
 
-		<div class="divider"></div>
 
 	</template>
 
@@ -92,6 +115,53 @@
 			hideContent: {
 				type: Boolean,
 				value: true
+			},
+			hideRenderer: {
+				type: Boolean,
+				value: true
+			}
+		},
+
+		valuesChange: function() {
+			//apply object changes to prefab
+			if(this.actor) {
+
+				//layer
+				this.actor.prefab.renderer.args.layer = this.actor.renderer.layer;
+
+				switch(this.actor.renderer.type) {
+					case 'sprite':
+
+						//sprite
+						this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+
+					break;
+					case 'animation':
+
+						//sprite
+						this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+
+						//frames
+						this.actor.prefab.renderer.args.frames = this.actor.renderer.frames;
+
+						//ups
+						this.actor.prefab.renderer.args.updatesPerFrame = this.actor.renderer.updatesPerFrame;
+
+						//play
+						this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
+
+					break;
+					case 'rect':
+
+						//color
+						this.actor.prefab.renderer.args.color = this.actor.renderer.color;
+
+						//size
+						this.actor.prefab.renderer.args.size.args.x = this.actor.renderer.size.x;
+						this.actor.prefab.renderer.args.size.args.y = this.actor.renderer.size.y;
+
+					break;
+				}
 			}
 		},
 
@@ -108,10 +178,12 @@
 		},
 
 		isRendererPresent: function(){
-			if(this.actor.renderer) {
+			if(this.actor.renderer && !(this.actor.renderer instanceof Amble.Graphics.EngineRenderer)) {
 				this.hideContent = false;
+				this.hideRenderer = false;
 			} else {
 				this.hideContent = true;
+				this.hideRenderer = true;
 			}
 		},
 
@@ -123,16 +195,8 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = Amble.app.scene.getActorByID(sceneID);
 
+				this.valuesChange();
 				this.isRendererPresent();
-
-				// var a = this.sprites.find(s => s.path == this.actor.renderer.sprite);
-				// // console.log(a)
-				// if(a) {
-				// 	var index = this.sprites.indexOf(a);
-				// 	this.splice('sprites', index, 1)
-				// 	this.unshift('sprites', a);
-				// 	//to fix set selected
-				// }
 			}
 		},
 
@@ -143,6 +207,7 @@
 		spriteChange: function(e){
 			if(this.actor instanceof Amble.Actor) {
 				this.actor.renderer.sprite = e.target.value;
+				this.valuesChange();
 			}
 		},
 

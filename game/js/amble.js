@@ -8,34 +8,26 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
-        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
+        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : true;
+        this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
-        //wrap this things up
         if(this.resize) {
             window.addEventListener('resize', function(){
-
+                console.log('resize')
                 var camera = Amble.app.mainCamera.camera;
-                var width = parseInt(camera.context.offsetWidth);
-                var height = parseInt(camera.context.offsetHeight);
-
-                for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
-                    Amble.app.width = camera.layers[i].layer.canvas.width = width;
-                    Amble.app.height = camera.layers[i].layer.canvas.height = height;
+                for(var i = 0; i < camera.layers.length; i++) {
+                    camera.layers[i].layer.resize();
                 }
-
-                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
 
+        this.fullscreen = args['fullscreen'] || false;
+        this.width = args['width'] || 640;
+        this.height = args['height'] || 480;
+
         this.scene = new Amble.Scene();
-
-        this.mainCamera = this.scene.instantiate(args['sceneCamera']);
-
-        // this.scene.instantiate(args['mainCamera']);
-
-        this.width = this.mainCamera.camera.size.x || 800;
-        this.height = this.mainCamera.camera.size.y || 600;
+        this.mainCamera = this.scene.instantiate(args['mainCamera']);
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -52,39 +44,15 @@ window.Amble = (function(){
             //priorytet sort?
         };
 
+        this.defaultBgColor = args['defaultBgColor'] || 'transparent';
+
         this.render = function(){
 
             var camera = this.mainCamera.camera;
-
             for(var i = 0; i < camera.layers.length; i++) {
-                camera.layers[i].layer.clear();
+                if(i == 0) camera.layers[i].layer.clear(this.defaultBgColor);
+                else camera.layers[i].layer.clear();
             }
-
-            var layer = camera.layer(0);
-            layer.strokeStyle('white').lineWidth(0.5);
-            layer.ctx.beginPath();
-
-            var lineSpacing = 200;
-
-            var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
-            var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
-            var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
-            var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
-
-            //vertical lines
-            for(var i = -2; i < verticalLinesCount; i++) {
-                layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
-                layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
-            }
-
-            //horizonala
-            for(var i = -2; i < horizontalLinesCount; i++) {
-                layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
-                layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
-            }
-
-            layer.ctx.stroke();
-
 
             this.scene.render(camera);
         };
@@ -165,9 +133,9 @@ window.Amble = (function(){
                 clearInterval(that.loadingInterval);
                 Amble.Input._setListeners();
 
-
                 Amble.app.loader.audioCache = [];
                 // that.scene.start();
+                that.loaded();
                 that.start();
                 Amble.Time._lastTime = Date.now()
                 gameLoop();
@@ -202,7 +170,7 @@ window.Amble = (function(){
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.context = document.getElementById(args['context']) || document.body;
-        this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
+        this.size = new Amble.Math.Vector2({x: Amble.app.width, y: Amble.app.height});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
         this.layers = [];
@@ -243,7 +211,6 @@ window.Amble = (function(){
         }
     };
 
-    /* Utils */
     Amble.Utils = {
 
         generateID: function() {
@@ -347,7 +314,6 @@ window.Amble = (function(){
                     }
                 }
             }
-            console.log(copy)
             return copy;
         },
 
@@ -441,22 +407,7 @@ window.Amble = (function(){
         }
 
         Amble._classes.push(c);
-
-        /*
-        flow order:
-
-        - every class is registered in engine and can be extended?
-        - user can create custom classes which are not engine default
-
-        */
-
     };
-
-    Amble.Class.prototype = {
-        makeArg: function(args) {
-            // var args =
-        },
-    }
 
     /* Scene */
     Amble.Scene = function(){
@@ -465,16 +416,6 @@ window.Amble = (function(){
     };
 
     Amble.Scene.prototype = {
-
-        createSceneFile: function(){
-
-            var data = []
-            for(var i = 1; i < this.children.length; i++) {
-                data.push(this.children[i].prefab);
-            }
-
-            return JSON.stringify(data);
-        },
 
         getActorByName: function(name) {
             return this.children.find(c => c.name === name)
@@ -494,27 +435,36 @@ window.Amble = (function(){
             return this.children.find(c => c.sceneID === id);
         },
 
-        instantiate: function(obj){
+        instantiate: function(obj, callback){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
             for(var i in clone) {
                 actor[i] = clone[i];
             }
 
-            actor.prefab = obj;
+            //set args
 
-            return this._add(actor);
+            for(var i in obj.components) {
+                for(var j in obj.components[i].args) {
+                    console.log(obj.components[i].args[j])
+                }
+            }
+
+
+            return this._add(actor, obj, callback);
         },
 
-        _add: function(object, prefab) {
+        _add: function(object, prefab, callback) {
 
             var sceneID = Amble.Utils.generateID();
             object.sceneID = sceneID;
 
+            object.prefab = prefab;
+
             if(object.components != 'undefined') {
                 for(var i in object.components) {
                     var _component = object.components[i].body;
-                    if(typeof _component.start == 'function'){
+                    if(typeof _component.update == 'function'){
                         _component.start(object);
                     }
                 }
@@ -528,13 +478,15 @@ window.Amble = (function(){
                 selected: false
             });
 
+            if(callback) callback(this.children);
             return object;
         },
 
-        remove: function(object){
+        remove: function(object, callback){
             var index = this.children.indexOf(object);
             if(index != -1) {
                 this.children.splice(index, 1);
+                if(callback) callback(this.children);
             }
         },
 
@@ -626,6 +578,28 @@ window.Amble = (function(){
                     }
                 }
             }
+        },
+
+        ontouchstart: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchstart == 'function'){
+                        _component.ontouchstart(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        oncontextmenu: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.oncontextmenu == 'function'){
+                        _component.oncontextmenu(this.children[i], e);
+                    }
+                }
+            }
         }
     };
 
@@ -648,6 +622,27 @@ window.Amble = (function(){
         this.canvas.style.position = 'absolute';
         this.canvas.style.zIndex = index.toString() || '0';
         this.ctx = this.canvas.getContext('2d');
+
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.mozImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.msImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+
+        //scale to fullscreen
+        this.resize = function() {
+            // console.log('resize-layer')
+            // if(Amble.app.fullscreen) {
+                var scaleX = window.innerWidth / this.canvas.width;
+                var scaleY = window.innerHeight / this.canvas.height;
+
+                var scaleToFit = Math.min(scaleX, scaleY);
+                var scaleToCover = Math.max(scaleX, scaleY);
+
+                this.canvas.style.transformOrigin = "0 0"; //scale from top left
+                this.canvas.style.transform = "scale(" + scaleToFit + ")";
+            // }
+        }
+        this.resize();
     };
 
     Amble.Graphics.Layer.prototype = {
@@ -726,14 +721,9 @@ window.Amble = (function(){
         fillText: function(text, x, y) {
             this.ctx.fillText(text, x, y);
             return this;
-        },
-
-        strokeText: function(text, x, y) {
-            this.ctx.strokeText(text, x, y);
-            return this;
         }
 
-        //more canvas methods
+        //to add more canvas methods
 
     };
 
@@ -757,8 +747,6 @@ window.Amble = (function(){
         this.size = new Amble.Math.Vector2({x: 0, y: 0})
 
         this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
-
-        this.type = "animation";
     };
 
     Amble.Graphics.AnimationRenderer.prototype = {
@@ -813,21 +801,6 @@ window.Amble = (function(){
                         width,
                         height
                     );
-
-                    if(self.selected) {
-                        layer.ctx.save();
-                        layer.strokeStyle(
-                            'magenta'
-                        ).lineWidth(
-                            3
-                        ).strokeRect(
-                            -width/2,
-                            -height/2,
-                            width,
-                            height
-                        )
-                        layer.ctx.restore();
-                    }
                 }
 
             } else {
@@ -836,93 +809,15 @@ window.Amble = (function(){
 
             layer.ctx.restore();
 
-            if(this.play) {
-                this._updates++;
-                if(this._updates > this.updatesPerFrame) {
-                    this._updates = 0;
-                    if(this._currentFrame < this.frames - 1) this._currentFrame++;
-                    else if(this.loop) this._currentFrame = 0;
-                }
-            }
+            this._updates++;
+        	if(this._updates > this.updatesPerFrame) {
+        		this._updates = 0;
+        		if(this._currentFrame < this.frames - 1) this._currentFrame++;
+        		else if(this.loop) this._currentFrame = 0;
+        	}
         }
     };
 
-
-    Amble.Graphics.EngineRenderer = function(args) {
-
-        this.layer = args['layer'] || 0;
-        this.size = new Amble.Math.Vector2({});
-
-        this.type = "engine";
-    };
-
-    Amble.Graphics.EngineRenderer.prototype = {
-
-        render: function(self, camera) {
-
-            var layer = camera.layer(this.layer);
-
-            layer.ctx.save();
-
-            var x = self.transform.position.x - camera.view.x;
-            var y = self.transform.position.y - camera.view.y;
-
-            layer.font('30px Arial');
-
-            this.size.x = layer.ctx.measureText(self.name || 'Actor').width * 2;
-            this.size.y = 60;
-
-            layer.ctx.translate(x, y);
-
-            //scale
-            layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
-            // rotation in radians
-            layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
-
-            layer.fillStyle('green')
-            layer.ctx.beginPath();
-            layer.ctx.arc(
-                0,
-                0,
-                5,
-                0,
-                2*Math.PI
-            );
-            layer.ctx.fill();
-
-            layer.textAlign(
-                'center'
-            ).fillStyle(
-                'transparent'
-            ).fillRect(
-                -this.size.x/2,
-                -this.size.y/2,
-                this.size.x,
-                this.size.y
-            ).fillStyle(
-                'white'
-            ).fillText(
-                self.name || 'Actor',
-                0,
-                -15
-            );
-
-            if(self.selected) {
-                layer.strokeStyle(
-                    'magenta'
-                ).lineWidth(
-                    1
-                ).strokeText(
-                    self.name || 'Actor',
-                    0,
-                    -15
-                )
-            }
-
-            layer.ctx.restore();
-        }
-    };
 
     Amble.Graphics.SpriteRenderer = function(args) {
         this.sprite = args['sprite'];
@@ -933,10 +828,8 @@ window.Amble = (function(){
 
         this.size = new Amble.Math.Vector2({})
 
-        //to implement
+        // ???
         this.anchor = new Amble.Math.Vector2({});
-
-        this.type = "sprite";
     }
 
     Amble.Graphics.SpriteRenderer.prototype = {
@@ -956,12 +849,22 @@ window.Amble = (function(){
 
                 var width = this.size.x = this._sprite.width;
                 var height = this.size.y = this._sprite.height;
+
+                this.size.x = width * self.transform.scale.x;
+                this.size.y = height * self.transform.scale.y;
+
                 var x = self.transform.position.x - camera.view.x;
                 var y = self.transform.position.y - camera.view.y;
 
                 layer.ctx.translate(x, y);
-                layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-                layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+                if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+                    layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+                }
+
+                if(self.transform.rotation != 0) {
+                    layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+                }
 
                 if(this._sprite.src) {
                     layer.ctx.drawImage(this._sprite, -width/2, -height/2);
@@ -996,8 +899,6 @@ window.Amble = (function(){
         this.size = args['size'];
         //to implement
         this.anchor = new Amble.Math.Vector2({});
-
-        this.type = "rect";
     };
 
     /* Amble.Graphics.Renderer functions */
@@ -1247,6 +1148,11 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.z = e.deltaZ;
 
             Amble.app.scene.onmousewheel(e);
+        },
+
+        contextmenu: function(e) {
+            e.preventDefault();
+            Amble.app.scene.oncontextmenu(e);
         }
     }
 
@@ -1259,6 +1165,7 @@ window.Amble = (function(){
         element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
         element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
         element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        element.addEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         //touch start
         //touch end
@@ -1276,6 +1183,7 @@ window.Amble = (function(){
             element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
             element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
             element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.removeEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         } else if (document.detachEvent) { // For IE 8 and earlier versions
 
@@ -1285,6 +1193,7 @@ window.Amble = (function(){
             element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
             element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
             element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.detachEvent("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         }
     }
@@ -1295,12 +1204,11 @@ window.Amble = (function(){
     Amble.Data.Loader = function(){
         this.queue = [];
         this.types = [];
+        this.names = [];
         this.successCount = 0;
         this.errorCount = 0;
         this.cache = [];
-        this.names = [];
     };
-
 
     Amble.Data.Loader.prototype = {
         /* Supported types: image, json */
@@ -1406,5 +1314,3 @@ window.Amble = (function(){
     return Amble;
 
 }());
-
-module.exports = window.Amble;

@@ -1,8 +1,78 @@
 var fs = require('fs');
 var watch = require('node-watch');
 
+const electron = require('electron');
+const remote = electron.remote;
+const Menu = remote.Menu;
+const ipcRenderer = electron.ipcRenderer;
+
+var menu = Menu.buildFromTemplate([
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Build',
+                accelerator: 'Ctrl+B',
+                click: function(){
+                    //create scene json file
+                    var data = Amble.app.scene.createSceneFile();
+                    ipcRenderer.send('build-respond', data);
+                }
+            },
+            {
+                type: 'separator'
+            }
+        ]
+    }
+]);
+
+Menu.setApplicationMenu(menu);
+
+ipcRenderer.on('build-request', function(){
+    //create scene json file
+    var data = Amble.app.scene.createSceneFile();
+    ipcRenderer.send('build-respond', data);
+});
+
 var Amble = require('./js/amble-editor.js');
-var Camera = require('./js/camera.js');
+var scripts = [
+    './js/camera.js',
+    './js/src/user/player.js',
+    './js/src/user/gunHolder.js'
+]
+
+for(var i in scripts) {
+    require(scripts[i]);
+}
+
+var componentsToAdd = [
+    {
+        name: 'SpriteRenderer',
+        type: 'renderer',
+        body: { name: 'Amble.Graphics.SpriteRenderer', args: {
+            sprite: 'me.jpg'
+        }}
+    },
+    {
+        name: 'RectRenderer',
+        type: 'renderer',
+        body: { name: 'Amble.Graphics.RectRenderer', args: {
+            color: '#1B5E20',
+            size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+            layer: 0
+        }}
+    },
+    {
+        name: 'AnimationRenderer',
+        type: 'renderer',
+        body: { name: 'Amble.Graphics.AnimationRenderer', args: {
+            sprite: 'me.jpg',
+            frames: 1,
+            updatesPerFrame: 1,
+            layer: 0
+        }}
+    }
+]
 
 var projectPath = '../project-folder';
 
@@ -154,23 +224,44 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.sceneID = null
 
-    editor.actors = Amble.app.scene.children;
+    editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
 
-    editor.actor = {}
+    editor.actor = null;
+
+    editor.hideComponentAdder = true;
+
+    editor.componentsToAdd = [];
 
     var cameraScript = Amble.app.scene.getActorByName('SceneCamera').getComponent('Camera');
     cameraScript.editor = this;
 
     angular.element(window).on('keydown', function(e) {
+        // console.log(e.which);
         switch(e.which) {
             case 27: //esc
 
-                if(editor.actor.selected) {
+                editor.hideComponentAdder = true;
+                editor.refresh();
+
+                if(editor.actor && editor.actor.selected) {
                     editor.actor.selected = false;
                 }
 
                 if(editor.previousActor) {
                     editor.previousActor.className = 'hierarchy-item';
+                }
+
+            break;
+            case 46: //del
+
+                if(editor.actor) {
+
+                    Amble.app.scene.remove(editor.actor)
+
+                    editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
+                    editor.actor = null;
+
+                    editor.refresh();
                 }
 
             break;
@@ -183,16 +274,98 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
             break;
 
-            // default:
-            //     break;
         }
     });
 
-    editor.refresh = function(){
+    editor.refresh = function() {
         $scope.$apply();
     };
 
+    editor.showComponentAdder = function() {
+        if(this.actor) {
+
+            //updated componentsToAdd
+            for(var i in Amble._classes) {
+                var p = Amble._classes[i].properties
+                console.log(p);
+                var cl = {
+                    name: Amble._classes[i].name,
+                    type: 'class',
+                    body: {
+                        name: Amble._classes[i].name,
+                        properties: p
+                    }
+                }
+                var c = componentsToAdd.find(c => c.name == cl.name)
+                if(!c) {
+                    console.log('add')
+                    componentsToAdd.push(cl);
+                } else {
+                    console.log('update')
+                    c.body.properties = Amble._classes[i].properties
+                }
+            }
+
+            // if(this.actor.renderer) {
+            //     this.componentsToAdd = componentsToAdd.filter(c => c.type != 'renderer');
+            // } else {
+            // }
+
+            this.componentsToAdd = componentsToAdd;
+
+            console.log(this.componentsToAdd);
+
+            this.hideComponentAdder = false;
+        }
+    };
+
+    editor.addComponent = function(component, $e) {
+        console.log(component);
+
+        //add to prefab
+        if(component.type == 'renderer') {
+            editor.actor.prefab.renderer = component.body;
+        } else if(component.type == 'class'){
+            console.log(editor.actor.prefab);
+
+            editor.actor.prefab.components.push(component.body);
+        }
+
+        var sceneID = editor.actor.sceneID;
+        var prefab = editor.actor.prefab;
+
+        Amble.app.scene.remove(this.actor);
+        editor.actor = Amble.app.scene.instantiate(prefab);
+
+        editor.actor.selected = true;
+        editor.actor.sceneID = sceneID;
+
+        editor.hideComponentAdder = true;
+    };
+
+    editor.addActor = function() {
+        editor.hideComponentAdder = true;
+
+        var obj = {
+            name: 'actor',
+            tag: ['actor'],
+            options: {},
+            transform: { name: "Amble.Transform", args: {
+                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
+            }},
+            renderer: { name: 'Amble.Graphics.EngineRenderer', args: {}},
+            components: []
+        };
+
+        aPrefabs.push(obj);
+        Amble.app.scene.instantiate(obj);
+
+        editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
+    };
+
     editor.actorSelected = function(_actor, $e) {
+        editor.hideComponentAdder = true;
 
         if(editor.actor) {
             editor.actor.selected = false;
@@ -200,21 +373,14 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.sceneID = _actor.sceneID;
 
-        // console.log(typeof editor.sceneID);
-
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
-
-        // editor.actor.selected = true;
 
         var normal = 'hierarchy-item';
         var highlighted = "hierarchy-item highlighted";
 
-        // $e.target.className = highlighted;
-
         if(editor.previousActor) {
             editor.previousActor.className = normal;
         }
-
 
         if($e) {
             $e.preventDefault();
@@ -227,12 +393,44 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         } else {
             editor.actor.selected = true;
         }
-
-        //add compoennts to inspector?
-        //or make it angular style
-
     };
 }]);
+
+//temporary
+var aPrefabs = [
+    {
+        name: 'player',
+        tag: ['object', 'player'],
+        options: {},
+        transform: { name: "Amble.Transform", args: {
+            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
+            rotation: 0
+        }},
+        renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
+            sprite: 'me.jpg'
+        }},
+        components: [
+            { type:'editor', name: 'Player', properties: {}}
+        ],
+    },
+    {
+        name: 'object',
+        tag: ['object'],
+        options: {},
+        transform: { name: "Amble.Transform", args: {
+            position: { name: "Amble.Math.Vector2", args: {x:500 ,y:0}},
+            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
+            rotation: 0
+        }},
+        renderer: {name: 'Amble.Graphics.RectRenderer', args: {
+            color: '#1B5E20',
+            size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}}
+        }},
+        components: []
+    },
+
+]
 
 //aplikacja
 var app = new Amble.Application({
@@ -251,66 +449,40 @@ var app = new Amble.Application({
             context: "scene-view"
         }},
         components: [
-            { name: "Camera", args: {}}
+            { type:'editor', name: "Camera", args: {}}
         ]
     },
 
-    mainCamera: {
-        name: 'MainCamera',
-        tag: ['mainCamera'],
-        options: {},
-        camera: { name: "Amble.Camera", args: {
-            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view"
-        }},
-        components: []
-    },
+    // mainCamera: {
+    //     name: 'MainCamera',
+    //     tag: ['mainCamera'],
+    //     options: {},
+    //     camera: { name: "Amble.Camera", args: {
+    //         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+    //         context: "scene-view"
+    //     }},
+    //     components: []
+    // },
 
     preload: function(){
 
-        // console.log()
+        //load scene/project file
+        //load all objects from project file
+        for(var i in aPrefabs) {
+            for(var x in aPrefabs[i].components) {
+                var p = Amble._classes.find(c => c.name == aPrefabs[i].components[x].name).properties;
+                aPrefabs[i].components[x].properties = p;
+            }
 
-        //load all objects from json
-        var player = {
-            name: 'player',
-            tag: ['object', 'player'],
-            options: {},
-            transform: { name: "Amble.Transform", args: {
-                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-            }},
-            renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
-                sprite: 'data/me.jpg'
-            }}
-        };
-
-        var p = this.scene.instantiate(player)
-        p.transform.position.x -= 100;
-
-        var obj = {
-            name: 'object',
-            tag: ['object'],
-            options: {},
-            transform: { name: "Amble.Transform", args: {
-                position: { name: "Amble.Math.Vector2", args: {x:500 ,y:0}},
-                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
-            }},
-            renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-                color: '#1B5E20',
-                size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}}
-            }}
-        };
-
-        for(var i = 0; i < 100; i++) {
-            var o = this.scene.instantiate(obj)
-            o.transform.position.x += i*10;
-            o.transform.position.y += i*10;
+            this.scene.instantiate(aPrefabs[i]);
         }
 
+        //load all images listed in proejct file
         var data = fs.readdirSync('data')
         for(var i = 0; i < data.length; i++) {
-            this.loader.load('image', 'data/' + data[i]);
+            this.loader.load('image', 'data/' + data[i], data[i]);
         }
+
     },
 
     //process scripts int engine and load objects

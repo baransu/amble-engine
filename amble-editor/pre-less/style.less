@@ -134,6 +134,15 @@ html, body {
     }
 }
 
+#component-select {
+    border: 1px solid black;
+    .default;
+    right: calc(~'0% + @{viewMargin}');
+    top: calc(~'@{toolsHeight} + @{viewMargin}');
+    width: 25%;
+    height: 50%;
+}
+
 #project-view {
     .default;
 
@@ -191,10 +200,18 @@ html, body {
     }
 }
 
+.add-button {
+    // border: none;
+    color: white;
+    width: 100%;
+    text-align: center;
+    background-color: lighten(@mainColor, 10%);
+    height: @searchHeight;
+}
+
 .search {
     width: 100%;
     margin: 0 auto;
-
     height: @searchHeight;
 
     input {
@@ -262,7 +279,7 @@ html, body {
     height: 100%;
 
     &.hierarchy {
-        height: 100% - @searchHeight;
+        height: 100% - 2*@searchHeight;
     }
 
     &.inspector {
