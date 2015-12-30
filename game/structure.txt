@@ -4,7 +4,8 @@ assets
     |- img(folder) -> img resources
     |- sounds(folder) -> sounds resources
     |- json(folder) -> user json resources
-        |- classes.json -> user classes
+        |- scene.json -> game scene (all objects)
+    |- js(folder) -> assets scripts
 js
     |- amble.js -> browser version
     |- index.js -> load assets, scene, scripts etc

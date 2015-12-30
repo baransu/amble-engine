@@ -40,8 +40,8 @@ Amble.Class({
         }
 
         if(Amble.Input.isMousePressed(1) && this.actorToMove) {
-            this.actorToMove.transform.position.x = this.mouse.x + this.modifier.x;
-            this.actorToMove.transform.position.y = this.mouse.y + this.modifier.y;
+            this.actorToMove.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+            this.actorToMove.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
             this.editor.refresh();
         }
     },

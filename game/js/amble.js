@@ -8,11 +8,12 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
-        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
+        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : true;
+        this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
         if(this.resize) {
             window.addEventListener('resize', function(){
-
+                console.log('resize')
                 var camera = Amble.app.mainCamera.camera;
                 for(var i = 0; i < camera.layers.length; i++) {
                     camera.layers[i].layer.resize();
@@ -43,12 +44,14 @@ window.Amble = (function(){
             //priorytet sort?
         };
 
+        this.defaultBgColor = args['defaultBgColor'] || 'transparent';
+
         this.render = function(){
 
             var camera = this.mainCamera.camera;
-
             for(var i = 0; i < camera.layers.length; i++) {
-                camera.layers[i].layer.clear();
+                if(i == 0) camera.layers[i].layer.clear(this.defaultBgColor);
+                else camera.layers[i].layer.clear();
             }
 
             this.scene.render(camera);
@@ -132,6 +135,7 @@ window.Amble = (function(){
 
                 Amble.app.loader.audioCache = [];
                 // that.scene.start();
+                that.loaded();
                 that.start();
                 Amble.Time._lastTime = Date.now()
                 gameLoop();
@@ -166,7 +170,7 @@ window.Amble = (function(){
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.context = document.getElementById(args['context']) || document.body;
-        this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
+        this.size = new Amble.Math.Vector2({x: Amble.app.width, y: Amble.app.height});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
         this.layers = [];
@@ -234,8 +238,6 @@ window.Amble = (function(){
 
         getArgs: function(p) {
 
-            // console.log(typeof p.args[0]);
-            // console.log(p.args[0]);
             if(p.args.length == 1){
                 if(typeof p.args[0] == 'number' || typeof p.args[0] == "string" || typeof p.args[0] == 'boolean') {
                     return p.args[0];
@@ -256,16 +258,21 @@ window.Amble = (function(){
             }
         },
 
-        makeClass: function(obj) {
+        makeClass: function(obj, properties) {
             var o = {};
             for(var i in obj) {
                 if(i == 'name') continue;
                 if(typeof obj[i] === 'function') {
                     o[i] = obj[i];
                 } else if(i == 'properties') {
-                    o[i] = {};
-                    for(var j in obj[i]) {
-                        o[i][obj[i][j].name] = this.getArgs(obj[i][j]);
+                    if(properties != undefined) {
+                        for(var x in properties) {
+                            o[properties[x].name] = this.getArgs(properties[x]);
+                        }
+                    } else {
+                        for(var j in obj[i]) {
+                            o[obj[i][j].name] = this.getArgs(obj[i][j]);
+                        }
                     }
                 }
             }
@@ -279,19 +286,27 @@ window.Amble = (function(){
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
+                            if(obj[attr][i].type != 'noneditor') {
 
-                            var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+                                if(cl) {
 
-                            if(cl) {
-                                copy[attr][i] = {
-                                    id: obj[attr][i].name,
-                                    body: this.makeClass(cl)
+                                    copy[attr][i] = {
+                                        id: obj[attr][i].name,
+                                        body: this.makeClass(cl, obj[attr][i].properties)
+                                    };
+
+                                } else {
+
+                                    copy[attr][i] = {
+                                        id: obj[attr][i].name,
+                                        body: Amble.Utils.makeFunction(obj[attr][i])
+                                    }
+
                                 }
+
                             } else {
-                                copy[attr][i] = {
-                                    id: obj[attr][i].name,
-                                    body: Amble.Utils.makeFunction(obj[attr][i])
-                                }
+                                continue;
                             }
                         }
                     } else {
@@ -299,7 +314,6 @@ window.Amble = (function(){
                     }
                 }
             }
-            // console.log(copy)
             return copy;
         },
 
@@ -339,8 +353,6 @@ window.Amble = (function(){
     Amble._classes = [];
     Amble.Class = function(obj){
 
-
-        //adapt to load
         this.makeArg = function(name, arg) {
 
             var a = {
@@ -348,21 +360,23 @@ window.Amble = (function(){
                 args: []
             }
 
-            var n = arg.constructor.name;
-            if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
-                var b = {
-                    name: n,
-                    args: []
-                }
-                for(var i in arg) {
-                    if(typeof arg[i] !== 'function') {
-                        b.args.push(this.makeArg(i, arg[i]));
+            if(arg != null) {
+                var n = arg.constructor.name;
+                if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
+                    var b = {
+                        name: n,
+                        args: []
                     }
-                }
+                    for(var i in arg) {
+                        if(typeof arg[i] !== 'function') {
+                            b.args.push(this.makeArg(i, arg[i]));
+                        }
+                    }
 
-                a.args.push(b)
-            } else {
-                a.args.push(arg);
+                    a.args.push(b)
+                } else {
+                    a.args.push(arg);
+                }
             }
 
             return a;
@@ -378,62 +392,21 @@ window.Amble = (function(){
 
         var c = {
             name: obj.name,
-            propertires: [],
+            properties: [],
         }
 
-        for(var i in obj.propertires) {
-            var p = this.makeArg(i, obj.propertires[i])
-            c.propertires.push(p)
+        for(var i in obj.properties) {
+            var p = this.makeArg(i, obj.properties[i])
+            c.properties.push(p)
         }
 
         for(var i in obj) {
-            if(i != 'name' && i != 'propertires' && typeof obj[i] === 'function') { //add extends and whatever
+            if(i != 'name' && i != 'properties' && typeof obj[i] === 'function') { //add extends and whatever
                 c[i] = obj[i];
             }
         }
 
         Amble._classes.push(c);
-
-        /*
-        flow order:
-
-        - script as object in A.Script function
-        - script parsed and saved to json style object
-        - game start -> script back script
-        - every class is registered in engine and can be extended?
-        - user can create custom classes which are not engine default
-
-        */
-
-        // copy simple values
-        // get type of object and store in substring
-        // get args ob type of object and store in string (args)
-        // get copy functions
-
-        // var player = {
-        //     name: 'player',
-        //     tag: ['object', 'player'],
-        //     options: {},
-        //     transform: { name: "Amble.Transform", args: {
-        //         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        //         scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-        //     }},
-        //     renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
-        //         sprite: 'data/me.jpg'
-        //     }},
-        //     components: [
-        //         { name: "Amble.Transform", args: {
-        //             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        //             scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-        //         }}
-        //     ],
-        // };
-
-
-
-
-        //convert script to my prefab?
-        // Amble.script.push(obj);
     };
 
     /* Scene */
@@ -616,6 +589,17 @@ window.Amble = (function(){
                     }
                 }
             }
+        },
+
+        oncontextmenu: function(e){
+            for(var i in this.children){
+                for(var j in this.children[i].components){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.oncontextmenu == 'function'){
+                        _component.oncontextmenu(this.children[i], e);
+                    }
+                }
+            }
         }
     };
 
@@ -746,8 +730,10 @@ window.Amble = (function(){
     Amble.Graphics.AnimationRenderer = function(args) {
         this.sprite = args['sprite'];
         this.layer = args['layer'] || 0;
-        this.updatesPerFrame = 1/60 * args['updatesPerFrame'] || 1;
+        this.updatesPerFrame = args['updatesPerFrame'] || 1;
         this.frames = args['frames'] || 1;
+
+        this.play = args['play'] || false;
 
         this.loop = args['loop'] || true;
 
@@ -761,7 +747,6 @@ window.Amble = (function(){
         this.size = new Amble.Math.Vector2({x: 0, y: 0})
 
         this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
-
     };
 
     Amble.Graphics.AnimationRenderer.prototype = {
@@ -824,7 +809,7 @@ window.Amble = (function(){
 
             layer.ctx.restore();
 
-            this._updates += Amble.Time.deltaTime;
+            this._updates++;
         	if(this._updates > this.updatesPerFrame) {
         		this._updates = 0;
         		if(this._currentFrame < this.frames - 1) this._currentFrame++;
@@ -1163,6 +1148,11 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.z = e.deltaZ;
 
             Amble.app.scene.onmousewheel(e);
+        },
+
+        contextmenu: function(e) {
+            e.preventDefault();
+            Amble.app.scene.oncontextmenu(e);
         }
     }
 
@@ -1175,6 +1165,7 @@ window.Amble = (function(){
         element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
         element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
         element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        element.addEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         //touch start
         //touch end
@@ -1192,6 +1183,7 @@ window.Amble = (function(){
             element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
             element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
             element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.removeEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         } else if (document.detachEvent) { // For IE 8 and earlier versions
 
@@ -1201,6 +1193,7 @@ window.Amble = (function(){
             element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
             element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
             element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.detachEvent("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         }
     }
@@ -1211,6 +1204,7 @@ window.Amble = (function(){
     Amble.Data.Loader = function(){
         this.queue = [];
         this.types = [];
+        this.names = [];
         this.successCount = 0;
         this.errorCount = 0;
         this.cache = [];
@@ -1219,9 +1213,10 @@ window.Amble = (function(){
     Amble.Data.Loader.prototype = {
         /* Supported types: image, json */
 
-        load: function(type, path){
+        load: function(type, path, name){
             this.queue.push(path);
             this.types.push(type);
+            this.names.push(name);
         },
 
         isDone: function(){
@@ -1244,8 +1239,10 @@ window.Amble = (function(){
                 var that = this;
                 switch(this.types[i]){
                     /* loading image */
+                    case 'img':
                     case 'image':
                         var imgPath = this.queue[i];
+                        var name = this.names[i];
 
                         var img = new Image();
 
@@ -1264,7 +1261,7 @@ window.Amble = (function(){
                         this.cache.push({
                             data: img,
                             type: 'image',
-                            path: imgPath
+                            path: name
                         });
 
                     break;
@@ -1317,5 +1314,3 @@ window.Amble = (function(){
     return Amble;
 
 }());
-
-module.exports = window.Amble;

@@ -3,6 +3,7 @@ Amble.Class({
     name: 'Player',
 
     properties: {
+        position: new Vec2(),
         age: 0,
         year: 1000,
         dead: false,
@@ -13,18 +14,19 @@ Amble.Class({
         ],
         pp: [
             44444,
-            44,
-            20323
+            true,
+            'red'
         ],
-        position: new Vec2(),
         color: "red"
     },
 
-    start: function(self) { },
+    start: function(self) {
+        console.log(this.age)
+
+    },
 
     update: function(self) {
 
-        // console.log('player-update')
 
     }
 

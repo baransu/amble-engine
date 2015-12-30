@@ -26,47 +26,58 @@
 
 					<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
 
-						<!-- simple properties -->
-						<div class="row" hidden$="{{hideProperty('simple-number' ,p)}}">
-							<label for="property">{{p.name}}</label>
-							<input id="property" type="number" value="{{p.value::input}}"></br>
-						</div>
-
-						<div class="row" hidden$="{{hideProperty('simple-bool' ,p)}}">
-							<label for="property">{{p.name}}</label>
-							<input id="property" type="checkbox" value="{{p.value::input}}"></br>
-						</div>
-
-						<div class="row" hidden$="{{hideProperty('simple-string' ,p)}}">
-							<label for="property">{{p.name}}</label>
-							<input id="property" type="text" value="{{p.value::input}}"></br>
-						</div>
-
 						<!-- vector -->
 						<div class="row" hidden$="{{hideProperty('vec2', p)}}">
-
 							<div class="row">
 								{{p.name}}</br>
-			                    <div class="col left">
-			                        <label for="x">x</label>
-			                        <input id="x" type="number" value="{{p.value.value[0].value::input}}">
-			                    </div>
-			                    <div class="col right">
-			                        <label for="y">y</label>
-			                        <input id="y" type="number" value="{{p.value.value[1].value::input}}">
-			                    </div>
-			                </div>
+								<template id="class-list" is="dom-repeat" items="{{ p.value.value }}" as="v">
+				                    <div class="col left">
+				                        <label>{{v.name}}</label>
+				                        <input type="number" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{v.value}}">
+				                    </div>
+								</template>
+				            </div>
 
+						</div>
+
+
+						<!-- simple properties -->
+						<div class="row" hidden$="{{hideProperty('simple-number', p)}}">
+							<label>{{p.name}}</label>
+							<input type="number" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}"></br>
+						</div>
+
+						<div class="row" hidden$="{{hideProperty('simple-bool', p)}}">
+							<label>{{p.name}}</label>
+							<input type="checkbox" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{p.value}}"></br>
+						</div>
+
+						<div class="row" hidden$="{{hideProperty('simple-string', p)}}">
+							<label>{{p.name}}</label>
+							<input type="text" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}"></br>
 						</div>
 
 						<!-- array of simple -->
 						<div class="row" hidden$="{{hideProperty('array', p)}}">
 							{{p.name}}</br>
 							<template is="dom-repeat" items="{{ p.values }}" as="v">
-								<label for="v">{{v.name}}</label>
-								<input id="v" type="text" value="{{v.value::input}}"></br>
-							</template>
 
+								<div hidden$="{{hideProperty('simple-number', v)}}">
+									<label>{{v.name}}</label>
+									<input type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+								</div>
+
+								<div hidden$="{{hideProperty('simple-bool', v)}}">
+									<label>{{v.name}}</label>
+									<input type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{v.value}}"></br>
+								</div>
+
+								<div hidden$="{{hideProperty('simple-string', v)}}">
+									<label>{{v.name}}</label>
+									<input type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+								</div>
+
+							</template>
 						</div>
 
 						<!-- array of vec2 -->
@@ -74,14 +85,12 @@
 							<template is="dom-repeat" items="{{ p.values }}" as="v">
 								<div class="row">
 									{{v.name}}</br>
-				                    <div class="col left">
-				                        <label for="x">x</label>
-				                        <input id="x" type="number" value="{{v.value[0].value::input}}">
-				                    </div>
-				                    <div class="col right">
-				                        <label for="y">y</label>
-				                        <input id="y" type="number" value="{{v.value[1].value::input}}">
-				                    </div>
+									<template id="class-list" is="dom-repeat" items="{{ v.value.value }}" as="vv">
+					                    <div class="col left">
+					                        <label>{{vv.name}}</label>
+					                        <input type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{vv.value}}">
+					                    </div>
+									</template>
 				                </div>
 							</template>
 						</div>
@@ -93,10 +102,7 @@
 
 			</template>
         </div>
-
-
 	</template>
-
 </dom-module>
 
 <script>
@@ -125,6 +131,8 @@
 
 		},
 
+		ready: function () { },
+
 		hideProperty: function(type, p) {
 
 			switch(type) {
@@ -141,6 +149,10 @@
 					return !(typeof p.value == 'string')
 				break;
 
+				case 'vec2':
+					return !(p.value && p.value.type && p.value.type === 'Vec2');
+				break;
+
 				case 'array':
 					return !(Array.isArray(p.values) && typeof p.values[0].value != 'object');
 				break;
@@ -149,61 +161,59 @@
 					return !(Array.isArray(p.values) && typeof p.values[0].value == 'object');
 				break;
 
-				case 'vec2':
-					return !(p.value && p.value.type && p.value.type === 'Vec2');
-				break;
-
 				default:
 				return true;
+
 				break;
 			}
 
 		},
 
-		// valuesChange: function() {
-		// 	//apply object changes to prefab
-		// 	if(this.actor) {
-		//
-		// 		//layer
-		// 		this.actor.prefab.renderer.args.layer = this.actor.renderer.layer;
-		//
-		// 		switch(this.actor.renderer.type) {
-		// 			case 'sprite':
-		//
-		// 				//sprite
-		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
-		//
-		// 			break;
-		// 			case 'animation':
-		//
-		// 				//sprite
-		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
-		//
-		// 				//frames
-		// 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
-		//
-		// 				//ups
-		// 				this.actor.prefab.renderer.args.updatesPerFrame = this.actor.renderer.updatesPerFrame;
-		//
-		// 				//play
-		// 				this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
-		//
-		// 			break;
-		// 			case 'rect':
-		//
-		// 				//color
-		// 				this.actor.prefab.renderer.args.color = this.actor.renderer.color;
-		//
-		// 				//size
-		// 				this.actor.prefab.renderer.args.size.args.x = this.actor.renderer.size.x;
-		// 				this.actor.prefab.renderer.args.size.args.y = this.actor.renderer.size.y;
-		//
-		// 			break;
-		// 		}
-		// 	}
-		// },
+		propertyUpdate: function(p, e) {
 
-		ready: function () { },
+			if(typeof p.args[0] == 'number' || typeof p.args[0] == 'boolean' || typeof p.args[0] == 'string') {
+				switch(e.target.type) {
+					case 'number':
+						return p.args[0] = Number(e.target.value)
+					break;
+
+					case 'text':
+						return p.args[0] = e.target.value
+					break;
+
+					case 'checkbox':
+						return p.args[0] = e.target.checked;
+					break;
+				}
+			} else if (p.args[0].name == 'Array') { //array
+
+				var index = Number(e.target.index);
+				return p.args[0].args[index].args[0] = this.propertyUpdate(p.args[0].args[index], e);
+
+			} else if(p.args[0].name == 'Vec2' ){
+				var type = e.target.id;
+				if(type == 'x') {
+					p.args[0].args[0].args[0] = this.propertyUpdate(p.args[0].args[0], e)
+				} else {
+					p.args[0].args[1].args[0] = this.propertyUpdate(p.args[0].args[1], e)
+				}
+				return p.args[0];
+			}
+		},
+
+		valuesChange: function(e) {
+			//apply object changes to prefab
+			var property = e.target.property;
+			var component = this.actor.prefab.components.find(c => c.name == e.target.component);
+
+			if(component) {
+
+				var p = component.properties.find(p => p.name == property)
+				p = this.propertyUpdate(p, e);
+
+			}
+
+		},
 
 		decodeProperties: function(obj) {
 
@@ -250,9 +260,7 @@
 				this.actor = Amble.app.scene.getActorByID(sceneID);
 
 				this.hideAll = !(this.actor.prefab.components.length > 0);
-				// 
-				// var lc = this.components.length;
-				// this.splice('components', 0, lc);
+
 				this.components = [];
 
 				for(var i in this.actor.prefab.components) {
@@ -262,13 +270,12 @@
 						var a = this.decodeProperties(c.properties[x]);
 						p.push(a);
 					}
+
 					this.push('components', {
 						name: c.name,
 						props: p
 					});
 				}
-
-				console.log(this.components)
 			}
 		},
 

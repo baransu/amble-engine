@@ -54,5 +54,3 @@ window.Vec2 = (function(){
     return Vec2;
 
 }());
-
-module.exports = window.Vec2;

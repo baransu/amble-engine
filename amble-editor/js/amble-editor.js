@@ -440,47 +440,16 @@ window.Amble = (function(){
             }
         }
 
-        // console.log(c);
         Amble._classes.push(c);
 
         /*
         flow order:
 
-        - script as object in A.Script function
-        - script parsed and saved to json style object
-        - game start -> script back script
         - every class is registered in engine and can be extended?
         - user can create custom classes which are not engine default
 
         */
 
-        // copy simple values
-        // get type of object and store in substring
-        // get args ob type of object and store in string (args)
-        // get copy functions
-
-        // var player = {
-        //     name: 'player',
-        //     tag: ['object', 'player'],
-        //     options: {},
-        //     transform: { name: "Amble.Transform", args: {
-        //         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        //         scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-        //     }},
-        //     renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
-        //         sprite: 'data/me.jpg'
-        //     }},
-        //     components: [
-        //         { name: "Amble.Transform", args: {
-        //             position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-        //             scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-        //         }}
-        //     ],
-        // };
-
-
-        //convert script to my prefab?
-        // Amble.script.push(obj);
     };
 
     Amble.Class.prototype = {
@@ -496,6 +465,16 @@ window.Amble = (function(){
     };
 
     Amble.Scene.prototype = {
+
+        createSceneFile: function(){
+
+            var data = []
+            for(var i = 1; i < this.children.length; i++) {
+                data.push(this.children[i].prefab);
+            }
+
+            return JSON.stringify(data);
+        },
 
         getActorByName: function(name) {
             return this.children.find(c => c.name === name)
@@ -1319,14 +1298,17 @@ window.Amble = (function(){
         this.successCount = 0;
         this.errorCount = 0;
         this.cache = [];
+        this.names = [];
     };
+
 
     Amble.Data.Loader.prototype = {
         /* Supported types: image, json */
 
-        load: function(type, path){
+        load: function(type, path, name){
             this.queue.push(path);
             this.types.push(type);
+            this.names.push(name);
         },
 
         isDone: function(){
@@ -1349,8 +1331,10 @@ window.Amble = (function(){
                 var that = this;
                 switch(this.types[i]){
                     /* loading image */
+                    case 'img':
                     case 'image':
                         var imgPath = this.queue[i];
+                        var name = this.names[i];
 
                         var img = new Image();
 
@@ -1369,7 +1353,7 @@ window.Amble = (function(){
                         this.cache.push({
                             data: img,
                             type: 'image',
-                            path: imgPath
+                            path: name
                         });
 
                     break;

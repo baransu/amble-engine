@@ -1,35 +1,56 @@
 var fs = require('fs');
 var watch = require('node-watch');
 
+const electron = require('electron');
+const remote = electron.remote;
+const Menu = remote.Menu;
+const ipcRenderer = electron.ipcRenderer;
+
+var menu = Menu.buildFromTemplate([
+    {
+        label: 'File',
+        submenu: [
+            {
+                label: 'Build',
+                accelerator: 'Ctrl+B',
+                click: function(){
+                    //create scene json file
+                    var data = Amble.app.scene.createSceneFile();
+                    ipcRenderer.send('build-respond', data);
+                }
+            },
+            {
+                type: 'separator'
+            }
+        ]
+    }
+]);
+
+Menu.setApplicationMenu(menu);
+
+ipcRenderer.on('build-request', function(){
+    //create scene json file
+    var data = Amble.app.scene.createSceneFile();
+    ipcRenderer.send('build-respond', data);
+});
+
 var Amble = require('./js/amble-editor.js');
-// var Camera = require('./js/camera.js');
-
-var Vec2 = require('./js/src/vec2.js');
-require('./js/camera.js');
-
-
-require('./js/player.js');
-
 var scripts = [
-    {name: 'Player', path: './js/player.js'}
+    './js/camera.js',
+    './js/src/user/player.js',
+    './js/src/user/gunHolder.js'
 ]
 
 for(var i in scripts) {
-    require(scripts[i].path);
+    require(scripts[i]);
 }
 
-//change after amble.clas
 var componentsToAdd = [
-    {
-        name: 'Player',
-        type: 'class',
-        body: { type:'noneditor', name: 'Player', properties: {}}
-    },
     {
         name: 'SpriteRenderer',
         type: 'renderer',
         body: { name: 'Amble.Graphics.SpriteRenderer', args: {
-            sprite: 'data/me.jpg'
+            sprite: 'me.jpg'
         }}
     },
     {
@@ -45,7 +66,7 @@ var componentsToAdd = [
         name: 'AnimationRenderer',
         type: 'renderer',
         body: { name: 'Amble.Graphics.AnimationRenderer', args: {
-            sprite: 'data/me.jpg',
+            sprite: 'me.jpg',
             frames: 1,
             updatesPerFrame: 1,
             layer: 0
@@ -253,8 +274,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
             break;
 
-            // default:
-            //     break;
         }
     });
 
@@ -271,7 +290,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 console.log(p);
                 var cl = {
                     name: Amble._classes[i].name,
-                    tyle: 'class',
+                    type: 'class',
                     body: {
                         name: Amble._classes[i].name,
                         properties: p
@@ -389,7 +408,7 @@ var aPrefabs = [
             rotation: 0
         }},
         renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
-            sprite: 'data/me.jpg'
+            sprite: 'me.jpg'
         }},
         components: [
             { type:'editor', name: 'Player', properties: {}}
@@ -434,16 +453,16 @@ var app = new Amble.Application({
         ]
     },
 
-    mainCamera: {
-        name: 'MainCamera',
-        tag: ['mainCamera'],
-        options: {},
-        camera: { name: "Amble.Camera", args: {
-            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            context: "scene-view"
-        }},
-        components: []
-    },
+    // mainCamera: {
+    //     name: 'MainCamera',
+    //     tag: ['mainCamera'],
+    //     options: {},
+    //     camera: { name: "Amble.Camera", args: {
+    //         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+    //         context: "scene-view"
+    //     }},
+    //     components: []
+    // },
 
     preload: function(){
 
@@ -461,7 +480,7 @@ var app = new Amble.Application({
         //load all images listed in proejct file
         var data = fs.readdirSync('data')
         for(var i = 0; i < data.length; i++) {
-            this.loader.load('image', 'data/' + data[i]);
+            this.loader.load('image', 'data/' + data[i], data[i]);
         }
 
     },
