@@ -17,11 +17,4 @@ gulp.task('watch', function(){
     gulp.watch('pre-less/src/*.less', ['less']);
 });
 
-gulp.task('build-game', function(){
-
-    return gulp.src('./js/src/*.js')
-      .pipe(concat('scripts.js'))
-      .pipe(gulp.dest('../game/assets/js'));
-});
-
 gulp.task('default', ['less', 'watch']);

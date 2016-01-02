@@ -1,1 +1,0 @@
-var imagesList = ["bullet.png","character.png","explosion2.png","explosion3.png","explosion.png","me.jpg"]

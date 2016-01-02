@@ -1,19 +1,20 @@
 const electron = require('electron');
 const app = electron.app;
-const BrowserWindow = require('electron').BrowserWindow;
-const ipcMain = require('electron').ipcMain;
-const globalShortcut = require('global-shortcut');
+const BrowserWindow = electron.BrowserWindow;
+const ipcMain = electron.ipcMain;
+const globalShortcut = electron.globalShortcut;
+const dialog = electron.dialog;
 
-var dialog = require('dialog');
 var fs = require('fs');
-
-var gulp = require('gulp');
-// var minifyCss = require('gulp-minify-css');
-// var less = require('gulp-less');
-var concat = require('gulp-concat');
+var mkdirp = require('mkdirp');
+var gulp = require('./gulp.js');
 
 var shortcuts = {};
 var mainWindow = null;
+
+var projectDirectory = null;
+var projectFile = null;
+var buildDir = null;
 
 app.on('ready', function(){
     mainWindow = new BrowserWindow({
@@ -32,57 +33,256 @@ app.on('ready', function(){
 
 var menuFunctions = {
 
-    build: function(){
-        mainWindow.webContents.send('build-request');
+    new: function() {
+        dialog.showSaveDialog(
+            mainWindow,
+            {
+                title: 'Select new project directory',
+                properties: ['openDirectory', 'createDirectory'],
+                filters: [
+                    { name: 'Amble Project', extensions: ['aproject'] }
+                ]
+            },
+            function(path) {
+                if(!path) return;
+                //check if aproject
+                var a = path.split('.');
+                if(a[a.length - 1] != 'aproject') {
+                    path += '.aproject';
+                }
+
+                projectFile = path;
+                fs.writeFileSync(projectFile, JSON.stringify({}), 'utf8');
+
+                if (path.indexOf("/") == -1) { // windows
+                    projectDirectory = path.substring(0, path.lastIndexOf('\\'));
+                }
+                else { // unix
+                    projectDirectory = path.substring(0, path.lastIndexOf('/'));
+                }
+
+                mainWindow.setTitle(projectDirectory);
+
+                var data = {
+                    path: projectDirectory,
+                    project: {
+                        actors: [],
+                        camera: {
+                            x: 0,
+                            y: 0
+                        }
+                    },
+                };
+
+                mkdirp(projectDirectory + '/assets', function(err) {
+
+                    if(err) throw err;
+                    mainWindow.webContents.send('open-request-renderer', data);
+
+                });
+
+        });
+
+    },
+
+    open: function() {
+        dialog.showOpenDialog(
+            mainWindow,
+            {
+                title: 'Select new project directory',
+                properties: ['openFile'],
+                filters: [
+                    { name: 'Amble Project', extensions: ['aproject'] }
+                ]
+            },
+            function(path) {
+                if(!path) return;
+
+                projectFile = path[0];
+
+                var d = JSON.parse(fs.readFileSync(projectFile, 'utf8'));
+
+                // console.log(d.scene);
+
+                if (projectFile.indexOf("/") == -1) { // windows
+                    projectDirectory  = projectFile.substring(0, projectFile.lastIndexOf('\\'));
+                }
+                else { // unix
+                    projectDirectory = projectFile.substring(0, projectFile.lastIndexOf('/'));
+                }
+
+                mainWindow.setTitle(projectDirectory);
+
+                //load
+                var data = {
+                    path: projectDirectory,
+                    project: {
+                        actors: d.scene,
+                        camera: d.camera
+                    },
+                };
+
+                mainWindow.webContents.send('open-request-renderer', data);
+
+        });
+    },
+
+    save: function() {
+
+        if(!projectFile) {
+
+            dialog.showSaveDialog(
+                mainWindow,
+                {
+                    title: 'Select new project directory',
+                    properties: ['openDirectory', 'createDirectory'],
+                    filters: [
+                        { name: 'Amble Project', extensions: ['aproject'] }
+                    ]
+                },
+                function(path) {
+                    if(!path) return;
+                    //check if aproject
+                    var a = path.split('.');
+                    if(a[a.length - 1] != 'aproject') {
+                        path += '.aproject';
+                    }
+
+                    projectFile = path;
+
+                    fs.writeFileSync(projectFile, JSON.stringify({}), 'utf8');
+
+                    if (projectFile.indexOf("/") == -1) { // windows
+                        projectDirectory = projectFile.substring(0, projectFile.lastIndexOf('\\'));
+                    }
+                    else { // unix
+                        projectDirectory = projectFile.substring(0, projectFile.lastIndexOf('/'));
+                    }
+
+                    mainWindow.setTitle(projectDirectory);
+
+                    var data = {
+                        path: projectDirectory,
+                        project: {
+                            actors: [],
+                            camera: {
+                                x: 0,
+                                y: 0
+                            }
+                        },
+                    };
+
+                    mkdirp(projectDirectory + '/assets', function(err) {
+
+                        if(err) throw err;
+                        mainWindow.webContents.send('save-request');
+
+                    });
+
+            });
+
+        } else {
+            mainWindow.webContents.send('save-request');
+        }
+
+    },
+
+    build: function() {
+
+        dialog.showOpenDialog(
+            mainWindow,
+            {
+                title: 'Select build destination',
+                properties: ['openDirectory', 'createDirectory'],
+            },
+            function(path) {
+
+                if(!path) return;
+
+                buildDir = path[0];
+
+                mkdirp(buildDir, function(err) {
+
+                    if(err) throw err;
+                    mainWindow.webContents.send('build-request');
+
+                });
+
+        });
+
     }
 
 }
 
-gulp.task('build-engine', function(){
-    return gulp.src('./js/src/engine/*.js')
-        .pipe(concat('engine-scripts.js'))
-        .pipe(gulp.dest('../game/assets/js'));
+ipcMain.on('new-request', function(event, data) {
+
+    menuFunctions.new();
+
 });
 
-gulp.task('build-user', function(){
-    return gulp.src('./js/src/user/*.js')
-        .pipe(concat('user-scripts.js'))
-        .pipe(gulp.dest('../game/assets/js'));
+ipcMain.on('open-request', function(event, data) {
+
+    menuFunctions.open();
+
 });
 
-gulp.task('img-move', function(){
-    return gulp.src([
-        './data/*.jpg',
-        './data/*.png'
-        ])
-        .pipe(gulp.dest('../game/assets/img'));
-});
-
-ipcMain.on('build-respond', function(event, data){
+ipcMain.on('save-respond', function(event, data) {
 
     console.log(data);
+    fs.writeFileSync(projectFile, data, 'utf8');
 
-    fs.writeFileSync('../game/assets/json/scene.json', data, 'utf8');
+});
 
-    var imgList = fs.readdirSync("../game/assets/img")
-    // console.log(JSON.stringify(imgList));
+ipcMain.on('build-respond', function(event, data) {
 
-    fs.writeFileSync('../game/assets/js/assets-list.js', "var imagesList = " + JSON.stringify(imgList), 'utf8');
+    var sceneFile = data.sceneFile;
+    var imagesList = data.imagesList;
 
-    gulp.start('img-move');
-    gulp.start('build-engine');
-    gulp.start('build-user');
+    gulp.projectDirectory = projectDirectory;
+    gulp.imagesList = [];
+    gulp.scriptsList = [];
+    gulp.outputDir = buildDir;
 
-    console.log('builded')
+    console.log(buildDir);
+
+    for(var i in data.imagesList) {
+        gulp.imagesList.push(data.imagesList[i].path);
+    }
+
+    for(var i in data.scriptsList) {
+        gulp.scriptsList.push(data.scriptsList[i].path);
+    }
+
+    gulp.start('build-game', function(){
+        fs.writeFileSync(buildDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+        fs.writeFileSync(buildDir + '/assets/js/assets-list.js', "var imagesList = " + JSON.stringify(imagesList), 'utf8');
+        console.log('build-game callback')
+    });
 
 });
 
 app.on('browser-window-focus', function() {
-    shortcuts.open = globalShortcut.register('ctrl+b', function() {
-        menuFunctions.build();
-    });
+
+    //new project
+    shortcuts.open = globalShortcut.register('ctrl+n', menuFunctions.new);
+
+    //open
+    shortcuts.open = globalShortcut.register('ctrl+o', menuFunctions.open);
+
+    //save
+    shortcuts.open = globalShortcut.register('ctrl+s', menuFunctions.save);
+
+    // //save as
+    // shortcuts.open = globalShortcut.register('shift+ctrl+s', menuFunctions.saveAs);
+
+    //build
+    shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
 });
 
 app.on('browser-window-blur', function(){
+    globalShortcut.unregisterAll();
+});
+
+app.on('will-quit', function(){
     globalShortcut.unregisterAll();
 });

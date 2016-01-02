@@ -1,26 +1,88 @@
-var fs = require('fs');
-var watch = require('node-watch');
-
 const electron = require('electron');
 const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
+
+var fs = require('fs');
+var watch = require('node-watch');
+
+var Amble = require('./js/amble-editor.js');
+
+var scripts = [
+    './js/camera.js',
+];
+
+var imgExtensionList = [
+    'png',
+    'jpg',
+    'jpeg'
+];
+
+for(var i in scripts) {
+    require(scripts[i]);
+}
+
+var projectDirectory = null;
+
+var projectData = {};
+
+var EDITOR = null;
 
 var menu = Menu.buildFromTemplate([
     {
         label: 'File',
         submenu: [
             {
-                label: 'Build',
-                accelerator: 'Ctrl+B',
+                label: 'New Project',
+                accelerator: 'Ctrl+N',
                 click: function(){
-                    //create scene json file
-                    var data = Amble.app.scene.createSceneFile();
-                    ipcRenderer.send('build-respond', data);
+
+                    ipcRenderer.send('new-request');
+
+                }
+            },
+            {
+                label: 'Open',
+                accelerator: 'Ctrl+O',
+                click: function() {
+
+                    ipcRenderer.send('open-request');
+
+                }
+            },
+            {
+                label: 'Save',
+                accelerator: 'Ctrl+S',
+                click: function() {
+
+                    var data = {};
+                    data.scene = Amble.app.scene.createSceneFile();
+                    data.camera = {
+                        x: Amble.app.mainCamera.camera.position.x,
+                        y: Amble.app.mainCamera.camera.position.y
+                    };
+
+                    ipcRenderer.send('save-respond', data);
+
                 }
             },
             {
                 type: 'separator'
+            },
+            {
+                label: 'Build',
+                accelerator: 'Ctrl+B',
+                click: function(){
+
+                    var data = {
+                        sceneFile: Amble.app.scene.createSceneFile(),
+                        imagesList: projectData.imgs,
+                        scriptsList: projectData.scripts
+                    };
+
+                    ipcRenderer.send('build-respond', data);
+
+                }
             }
         ]
     }
@@ -28,29 +90,66 @@ var menu = Menu.buildFromTemplate([
 
 Menu.setApplicationMenu(menu);
 
-ipcRenderer.on('build-request', function(){
-    //create scene json file
-    var data = Amble.app.scene.createSceneFile();
+ipcRenderer.on('build-request', function() {
+
+    var data = {
+        sceneFile: Amble.app.scene.createSceneFile(),
+        imagesList: projectData.imgs,
+        scriptsList: projectData.scripts
+    };
+
     ipcRenderer.send('build-respond', data);
+
 });
 
-var Amble = require('./js/amble-editor.js');
-var scripts = [
-    './js/camera.js',
-    './js/src/user/player.js',
-    './js/src/user/gunHolder.js'
-]
+ipcRenderer.on('save-request', function() {
 
-for(var i in scripts) {
-    require(scripts[i]);
-}
+    var data = {};
+    data.scene = Amble.app.scene.createSceneFile();
+    data.camera = {
+        x: Amble.app.mainCamera.camera.position.x | 0,
+        y: Amble.app.mainCamera.camera.position.y | 0
+    };
+
+    console.log(data.scene);
+
+    ipcRenderer.send('save-respond', JSON.stringify(data));
+
+});
+
+ipcRenderer.on('open-request-renderer', function(event, data) {
+    console.log(data.path);
+
+    projectDirectory = data.path;
+    projectData = data.project;
+    projectData.imgs = [];
+    projectData.scripts = [];
+
+    document.getElementById('list').innerHTML = "";
+
+    projectView.init();
+
+    for(var i in projectData.scripts) {
+        require(projectData.scripts[i].path);
+    }
+
+    //clear canvases
+    document.getElementById('scene-view').innerHTML = "";
+
+    //game
+    var app = new Amble.Application(application);
+
+    EDITOR.update();
+    EDITOR.refresh();
+
+});
 
 var componentsToAdd = [
     {
         name: 'SpriteRenderer',
         type: 'renderer',
         body: { name: 'Amble.Graphics.SpriteRenderer', args: {
-            sprite: 'me.jpg'
+            sprite: ''
         }}
     },
     {
@@ -66,18 +165,19 @@ var componentsToAdd = [
         name: 'AnimationRenderer',
         type: 'renderer',
         body: { name: 'Amble.Graphics.AnimationRenderer', args: {
-            sprite: 'me.jpg',
+            sprite: '',
             frames: 1,
             updatesPerFrame: 1,
             layer: 0
         }}
     }
-]
+];
 
-var projectPath = '../project-folder';
-
+//move to angular
 var projectView = {
+
     projectStructure: [],
+
     makeList: function(array) {
 
         var list = document.createElement("ul");
@@ -144,7 +244,6 @@ var projectView = {
         var highlighted = "header highlighted";
 
         var parent = e.target.parentElement;
-        console.log(parent)
 
         if(parent.className == normal) {
             parent.className = highlighted;
@@ -171,6 +270,24 @@ var projectView = {
 
             if(file.type == 'folder') {
                 file.childs = this.processDir(path + '/' + abc[i]);
+            } else {
+                var f = abc[i].split('.');
+                var extension = f[f.length - 1];
+                for(var x in imgExtensionList) {
+                    if(extension == imgExtensionList[x]) {
+                        projectData.imgs.push({
+                            path: path + '/' + abc[i],
+                            name: abc[i]
+                        })
+                        break;
+                    } else if(extension == 'js') {
+                        projectData.scripts.push({
+                            path: path + '/' + abc[i],
+                            name: abc[i]
+                        });
+                        break;
+                    }
+                }
             }
 
             files.push(file)
@@ -182,12 +299,47 @@ var projectView = {
 
     watch: function(){
 
-        watch(projectView.projectPath, function(filename){
-            projectView.projectStructure = projectView.processDir(projectPath);
+        watch(projectDirectory + '/assets', function(filename){
+            projectData.scripts = [];
+            projectView.projectStructure = projectView.processDir(projectDirectory + '/assets');
             var list = document.getElementById("list");
             list.innerHTML = "";
             for(var i = 0; i < projectView.projectStructure.length; i++) {
                 list.appendChild(projectView.item(projectView.projectStructure[i]));
+            }
+
+            for(var i in projectData.scripts) {
+                require.reload(projectData.scripts[i].path);
+            }
+
+
+            for(var i in EDITOR.actors) {
+                var a = EDITOR.actors[i].prefab;
+                for(var j in a.components) {
+                    var c = Amble._classes.find(c => c.name == a.components[j].name);
+                    if(!c) continue;
+                    for(var x in c.properties) {
+                        if(!a.components[j].properties[x]) {
+                            var p = JSON.stringify(c.properties[x])
+                            a.components[j].properties[x] = JSON.parse(p);
+                        }
+                    }
+
+                    var toDel = [];
+                    for(var x in a.components[j].properties) {
+                        var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
+                        if(!aa) {
+                            toDel.push(a.components[j].properties[x].name);
+                        }
+                    }
+
+                    for(var x in toDel) {
+                        var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
+                        a.components[j].properties.splice(index, 1);
+                    }
+
+                    console.log(a.components[j].properties);
+                }
             }
         });
 
@@ -195,7 +347,7 @@ var projectView = {
 
     init: function(){
 
-        this.projectStructure = this.processDir(projectPath);
+        this.projectStructure = this.processDir(projectDirectory + '/assets');
 
         var list = document.getElementById("list");
         for(var i = 0; i < this.projectStructure.length; i++) {
@@ -207,33 +359,39 @@ var projectView = {
     }
 }
 
-projectView.init();
-
 var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
-    var editor = this;
+    var editor = EDITOR = this;
+    editor.actors = [];
 
-    editor.hierarchy = {};
+    editor.refresh = function() {
+        $scope.$apply();
+    };
 
-    editor.inspector = {};
+    editor.updateActors = function() {
+        editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
+    };
 
-    editor.inspector.transformShow = true;
+    editor.update = function() {
 
-    editor.previousActor = null;
+        this.hierarchy = {};
+        this.inspector = {};
+        this.inspector.transformShow = true;
+        this.previousActor = null;
+        this.sceneID = null;
+        this.actor = null;
+        this.hideComponentAdder = true;
+        this.componentsToAdd = [];
 
-    editor.sceneID = null
+        var cameraScript = Amble.app.scene.getActorByName('SceneCamera').getComponent('Camera');
+        cameraScript.editor = this;
 
-    editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
+        editor.updateActors();
 
-    editor.actor = null;
+    };
 
-    editor.hideComponentAdder = true;
-
-    editor.componentsToAdd = [];
-
-    var cameraScript = Amble.app.scene.getActorByName('SceneCamera').getComponent('Camera');
-    cameraScript.editor = this;
+    editor.update();
 
     angular.element(window).on('keydown', function(e) {
         // console.log(e.which);
@@ -277,10 +435,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         }
     });
 
-    editor.refresh = function() {
-        $scope.$apply();
-    };
-
     editor.showComponentAdder = function() {
         if(this.actor) {
 
@@ -292,24 +446,18 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                     name: Amble._classes[i].name,
                     type: 'class',
                     body: {
+                        type: 'noneditor',
                         name: Amble._classes[i].name,
                         properties: p
                     }
                 }
                 var c = componentsToAdd.find(c => c.name == cl.name)
                 if(!c) {
-                    console.log('add')
                     componentsToAdd.push(cl);
                 } else {
-                    console.log('update')
                     c.body.properties = Amble._classes[i].properties
                 }
             }
-
-            // if(this.actor.renderer) {
-            //     this.componentsToAdd = componentsToAdd.filter(c => c.type != 'renderer');
-            // } else {
-            // }
 
             this.componentsToAdd = componentsToAdd;
 
@@ -320,7 +468,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     };
 
     editor.addComponent = function(component, $e) {
-        console.log(component);
+        // console.log(component);
 
         //add to prefab
         if(component.type == 'renderer') {
@@ -350,6 +498,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             name: 'actor',
             tag: ['actor'],
             options: {},
+            selected: false,
             transform: { name: "Amble.Transform", args: {
                 position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
                 scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
@@ -358,7 +507,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             components: []
         };
 
-        aPrefabs.push(obj);
         Amble.app.scene.instantiate(obj);
 
         editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
@@ -396,47 +544,10 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     };
 }]);
 
-//temporary
-var aPrefabs = [
-    {
-        name: 'player',
-        tag: ['object', 'player'],
-        options: {},
-        transform: { name: "Amble.Transform", args: {
-            position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-            rotation: 0
-        }},
-        renderer: {name: 'Amble.Graphics.SpriteRenderer', args: {
-            sprite: 'me.jpg'
-        }},
-        components: [
-            { type:'editor', name: 'Player', properties: {}}
-        ],
-    },
-    {
-        name: 'object',
-        tag: ['object'],
-        options: {},
-        transform: { name: "Amble.Transform", args: {
-            position: { name: "Amble.Math.Vector2", args: {x:500 ,y:0}},
-            scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
-            rotation: 0
-        }},
-        renderer: {name: 'Amble.Graphics.RectRenderer', args: {
-            color: '#1B5E20',
-            size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}}
-        }},
-        components: []
-    },
-
-]
-
-//aplikacja
-var app = new Amble.Application({
+//scane view
+var application = {
 
     resize: true,
-    //implement post LD34 stuff
 
     sceneCamera: {
         name: 'SceneCamera',
@@ -453,40 +564,31 @@ var app = new Amble.Application({
         ]
     },
 
-    // mainCamera: {
-    //     name: 'MainCamera',
-    //     tag: ['mainCamera'],
-    //     options: {},
-    //     camera: { name: "Amble.Camera", args: {
-    //         position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-    //         context: "scene-view"
-    //     }},
-    //     components: []
-    // },
-
     preload: function(){
 
-        //load scene/project file
-        //load all objects from project file
-        for(var i in aPrefabs) {
-            for(var x in aPrefabs[i].components) {
-                var p = Amble._classes.find(c => c.name == aPrefabs[i].components[x].name).properties;
-                aPrefabs[i].components[x].properties = p;
-            }
-
-            this.scene.instantiate(aPrefabs[i]);
+        //load actors to scene
+        for(var i in projectData.actors) {
+            console.log(projectData.actors[i])
+            this.scene.instantiate(projectData.actors[i]);
+            EDITOR.updateActors();
         }
 
-        //load all images listed in proejct file
-        var data = fs.readdirSync('data')
-        for(var i = 0; i < data.length; i++) {
-            this.loader.load('image', 'data/' + data[i], data[i]);
+        // load imgs
+        if(projectData.imgs) {
+            for(var i in projectData.imgs) {
+                this.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
+            }
         }
 
     },
 
     //process scripts int engine and load objects
     loaded: function(){
+
+        if(projectData.camera) {
+            this.mainCamera.camera.position.x = projectData.camera.x;
+            this.mainCamera.camera.position.y = projectData.camera.y;
+        }
 
     },
 
@@ -506,52 +608,51 @@ var app = new Amble.Application({
     postrender: function(){
 
     }
-});
+};
+
+var app = new Amble.Application(application);
+
+
+/**
+ * Removes a module from the cache.
+ */
+require.uncache = function (moduleName) {
+    // Run over the cache looking for the files
+    // loaded by the specified module name
+    require.searchCache(moduleName, function (mod) {
+        delete require.cache[mod.id];
+    });
+};
+
+/**
+ * Runs over the cache to search for all the cached files.
+ */
+require.searchCache = function (moduleName, callback) {
+    // Resolve the module identified by the specified name
+    var mod = require.resolve(moduleName);
+
+    // Check if the module has been resolved and found within
+    // the cache
+    if (mod && ((mod = require.cache[mod]) !== undefined)) {
+        // Recursively go over the results
+        (function run(mod) {
+            // Go over each of the module's children and
+            // run over it
+            mod.children.forEach(function (child) {
+                run(child);
+            });
+
+            // Call the specified callback providing the
+            // found module
+            callback(mod);
+        })(mod);
+    }
+};
 
 /*
-
-static html design (materialize css?)
-
-*/
-
-/*
-    scene view
-
-grid background
-
-load all scene actors
-dragable actors
-click opens inspector for given actor
-
-drag arrows
-
-drag from project folder to scene if supported format like image or prefab
-
-drag from scene to inspector - to script variable?
-
-snap?
-
-*/
-
-
-/*
-    game view
-
-browser like window to preview game - stand alone?
-
-*/
-
-/*
-    project view/asset/folder manager
-
-*/
-
-/*
-    inspector
-
-*/
-
-/*
-    hierarchy - scene list
-
-*/
+ * Load a module, clearing it from the cache if necessary.
+ */
+require.reload = function(moduleName) {
+    require.uncache(moduleName);
+    return require(moduleName);
+};

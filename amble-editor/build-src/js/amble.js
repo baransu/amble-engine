@@ -286,28 +286,28 @@ window.Amble = (function(){
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
-                            if(obj[attr][i].type != 'noneditor') {
+                            // if(obj[attr][i].type == 'noneditor') {
 
-                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
-                                if(cl) {
+                            var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+                            if(cl) {
 
-                                    copy[attr][i] = {
-                                        id: obj[attr][i].name,
-                                        body: this.makeClass(cl, obj[attr][i].properties)
-                                    };
-
-                                } else {
-
-                                    copy[attr][i] = {
-                                        id: obj[attr][i].name,
-                                        body: Amble.Utils.makeFunction(obj[attr][i])
-                                    }
-
-                                }
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: this.makeClass(cl, obj[attr][i].properties)
+                                };
 
                             } else {
-                                continue;
+
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: Amble.Utils.makeFunction(obj[attr][i])
+                                }
+
                             }
+
+                            // } else {
+                            //     continue;
+                            // }
                         }
                     } else {
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
@@ -926,19 +926,6 @@ window.Amble = (function(){
 
             // draw
             layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
-
-            layer.ctx.save();
-            layer.strokeStyle(
-                'black'
-            ).lineWidth(
-                1
-            ).strokeRect(
-                -width/2,
-                -height/2,
-                width,
-                height
-            )
-            layer.ctx.restore();
 
             if(self.selected) {
                 layer.ctx.save();

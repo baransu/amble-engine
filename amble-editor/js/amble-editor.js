@@ -168,11 +168,13 @@ window.Amble = (function(){
 
                 Amble.app.loader.audioCache = [];
                 // that.scene.start();
+                that.loaded();
+
                 that.start();
                 Amble.Time._lastTime = Date.now()
                 gameLoop();
 
-            }, 1000);
+            }, 0);
         })
 
         /* hearth of the Amble/game */
@@ -319,7 +321,7 @@ window.Amble = (function(){
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i in obj[attr]) {
-                            if(obj[attr][i].type != 'noneditor') {
+                            if(obj[attr][i].type == 'editor') {
 
                                 var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
                                 if(cl) {
@@ -347,7 +349,7 @@ window.Amble = (function(){
                     }
                 }
             }
-            console.log(copy)
+            // console.log(copy)
             return copy;
         },
 
@@ -440,6 +442,12 @@ window.Amble = (function(){
             }
         }
 
+        var a = Amble._classes.find(s => s.name == c.name);
+        if(a) {
+            var index = Amble._classes.indexOf(a);
+            Amble._classes.splice(index, 1);
+        }
+
         Amble._classes.push(c);
 
         /*
@@ -452,12 +460,6 @@ window.Amble = (function(){
 
     };
 
-    Amble.Class.prototype = {
-        makeArg: function(args) {
-            // var args =
-        },
-    }
-
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
@@ -468,12 +470,13 @@ window.Amble = (function(){
 
         createSceneFile: function(){
 
-            var data = []
+            var data = [];
             for(var i = 1; i < this.children.length; i++) {
                 data.push(this.children[i].prefab);
             }
 
-            return JSON.stringify(data);
+            console.log(data);
+            return data;
         },
 
         getActorByName: function(name) {
@@ -1026,18 +1029,18 @@ window.Amble = (function(){
             // draw
             layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
 
-            layer.ctx.save();
-            layer.strokeStyle(
-                'black'
-            ).lineWidth(
-                1
-            ).strokeRect(
-                -width/2,
-                -height/2,
-                width,
-                height
-            )
-            layer.ctx.restore();
+            // layer.ctx.save();
+            // layer.strokeStyle(
+            //     'black'
+            // ).lineWidth(
+            //     1
+            // ).strokeRect(
+            //     -width/2,
+            //     -height/2,
+            //     width,
+            //     height
+            // )
+            // layer.ctx.restore();
 
             if(self.selected) {
                 layer.ctx.save();

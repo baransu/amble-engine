@@ -23,7 +23,7 @@ var app = new Amble.Application({
         //load assets (png, json)
         //load images
         for(var i in imagesList) {
-            this.loader.load('image', 'assets/img/' + imagesList[i], imagesList[i]);
+            this.loader.load('image', 'assets/img/' + imagesList[i].name, imagesList[i].name);
         }
 
         //load audio
