@@ -1,6 +1,9 @@
+var COCOONJS = navigator.isCocoonJS;
+
 window.Amble = (function(){
 
     var Amble = {};
+
     Amble.app = {};
 
     /* Game */
@@ -11,23 +14,25 @@ window.Amble = (function(){
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : true;
         this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
-        if(this.resize) {
-            window.addEventListener('resize', function(){
-                console.log('resize')
-                var camera = Amble.app.mainCamera.camera;
-                for(var i = 0; i < camera.layers.length; i++) {
-                    camera.layers[i].layer.resize();
-                }
-
-            });
-        }
-
         this.fullscreen = args['fullscreen'] || false;
         this.width = args['width'] || 640;
         this.height = args['height'] || 480;
 
         this.scene = new Amble.Scene();
+        // console.log('camera init')
         this.mainCamera = this.scene.instantiate(args['mainCamera']);
+        // console.log('after camera init')
+
+        if(this.resize && COCOONJS) {
+            // console.log('resize add')
+            window.addEventListener('resize', function(){
+                // console.log('resize')
+                var camera = Amble.app.mainCamera.camera;
+                for(var i = 0; i < camera.layers.length; i++) {
+                    camera.layers[i].layer.resize();
+                }
+            });
+        }
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -39,7 +44,7 @@ window.Amble = (function(){
         this.update = function(){
             this.mainCamera.camera.update()
             this.scene.update();
-
+            // console.log('update')
             //update all objects on scene
             //priorytet sort?
         };
@@ -169,7 +174,13 @@ window.Amble = (function(){
 
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
-        this.context = document.getElementById(args['context']) || document.body;
+
+        if(args['context']) {
+            this.context = document.getElementById(args['context']);
+        } else {
+            this.context = document.body;
+        }
+
         this.size = new Amble.Math.Vector2({x: Amble.app.width, y: Amble.app.height});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
@@ -183,7 +194,7 @@ window.Amble = (function(){
                 index = 0;
                 throw "Z-index cannot be negative!"
             }
-            var layer = this.layers.find(l => l.index == index);
+            var layer = this.layers.find(function(l) { return l.index == index });
             if(!layer) {
                 return this.addLayer(index).layer;
             } else {
@@ -192,7 +203,7 @@ window.Amble = (function(){
         },
 
         addLayer: function(index){
-            var l = this.layers.find(l => l.index == index);
+            var l = this.layers.find(function(l) { return l.index == index });
             if(!l) {
                 var layer = {
                     index: index,
@@ -238,7 +249,7 @@ window.Amble = (function(){
 
         getArgs: function(p) {
 
-            if(p.args.length == 1){
+            if(p.args && p.args.length == 1){
                 if(typeof p.args[0] == 'number' || typeof p.args[0] == "string" || typeof p.args[0] == 'boolean') {
                     return p.args[0];
                 } else if(p.args[0].name == "Array") {
@@ -281,14 +292,14 @@ window.Amble = (function(){
 
         clone: function(obj) {
             var copy = {};
+            // console.log('clone name', obj.name);
             if (obj instanceof Object || obj instanceof Array) {
                 for(var attr in obj) {
+                    // console.log('copy attr', attr);
                     if(attr == 'components') {
                         copy[attr] = [];
-                        for(var i in obj[attr]) {
-                            // if(obj[attr][i].type == 'noneditor') {
-
-                            var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
+                        for(var i = 0; i < obj[attr].length; i++) {
+                            var cl = Amble._classes.find(function(c) { return c.name == obj[attr][i].name });
                             if(cl) {
 
                                 copy[attr][i] = {
@@ -302,14 +313,10 @@ window.Amble = (function(){
                                     id: obj[attr][i].name,
                                     body: Amble.Utils.makeFunction(obj[attr][i])
                                 }
-
                             }
-
-                            // } else {
-                            //     continue;
-                            // }
                         }
                     } else {
+                        // console.log('copy attr', attr);
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
                     }
                 }
@@ -318,13 +325,15 @@ window.Amble = (function(){
         },
 
         stringToFunction: function(str) {
+            // console.log('stringtofunction', str);
             var arr = str.split(".");
-            var fn = window || this;
+            var fn = window || Amble || this;
             for (var i = 0, len = arr.length; i < len; i++) {
                 fn = fn[arr[i]];
             }
 
             if (typeof fn !== "function") {
+                console.log('stringtofunction', str);
                 throw new Error("function not found");
             }
 
@@ -345,7 +354,7 @@ window.Amble = (function(){
     Amble.Actor.prototype = {
 
         getComponent: function(componentName){
-            var component = this.components.find(c => c.id == componentName);
+            var component = this.components.find(function(c) { return c.id == componentName });
             return component.body;
         }
     };
@@ -412,49 +421,40 @@ window.Amble = (function(){
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
-        this.shortArray = [];
+        // this.shortArray = [];
     };
 
     Amble.Scene.prototype = {
 
         getActorByName: function(name) {
-            return this.children.find(c => c.name === name)
+            return this.children.find(function(c) { return c.name === name })
         },
 
         getActorByTag: function(tag) {
-            return this.children.find(c => tag === tag);
+            return this.children.find(function(c) { return c.tag == tag });
         },
 
         getActorsByTag: function(tag) {
-            return this.children.filter(c => tag === tag);
+            return this.children.filter(function(c) { return c.tag == tag });
         },
 
         //get by tag array?
 
         getActorByID: function(id){
-            return this.children.find(c => c.sceneID === id);
+            return this.children.find(function(c) { return c.sceneID == id });
         },
 
-        instantiate: function(obj, callback){
+        instantiate: function(obj){
             var actor = new Amble.Actor();
             var clone = Amble.Utils.clone(obj);
             for(var i in clone) {
                 actor[i] = clone[i];
             }
 
-            //set args
-
-            for(var i in obj.components) {
-                for(var j in obj.components[i].args) {
-                    console.log(obj.components[i].args[j])
-                }
-            }
-
-
-            return this._add(actor, obj, callback);
+            return this._add(actor, obj);
         },
 
-        _add: function(object, prefab, callback) {
+        _add: function(object, prefab) {
 
             var sceneID = Amble.Utils.generateID();
             object.sceneID = sceneID;
@@ -462,7 +462,7 @@ window.Amble = (function(){
             object.prefab = prefab;
 
             if(object.components != 'undefined') {
-                for(var i in object.components) {
+                for(var i = 0; i < object.components.length; i++) {
                     var _component = object.components[i].body;
                     if(typeof _component.update == 'function'){
                         _component.start(object);
@@ -472,13 +472,6 @@ window.Amble = (function(){
 
             this.children.push(object);
 
-            this.shortArray.push({
-                name: object.name,
-                sceneID: sceneID,
-                selected: false
-            });
-
-            if(callback) callback(this.children);
             return object;
         },
 
@@ -493,7 +486,7 @@ window.Amble = (function(){
         awake: function(){
             for(var i in this.children){
                 /* component start */
-                for(var j in this.children[i].components){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.start == 'function'){
                         _component.start(this.children[i]);
@@ -503,9 +496,9 @@ window.Amble = (function(){
         },
 
         update: function(){
-            for(var i in this.children){
+            for(var i = 0; i < this.children.length; i++){
                 /* script update */
-                for(var j in this.children[i].components){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.update == 'function'){
                         _component.update(this.children[i]);
@@ -516,7 +509,7 @@ window.Amble = (function(){
         },
 
         render: function(camera){
-            for(var i in this.children){
+            for(var i = 0; i < this.children.length; i++){
                 /* render objects by renderer*/
                 if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
                     this.children[i].renderer.render(this.children[i], camera)
@@ -526,8 +519,8 @@ window.Amble = (function(){
 
         //input events
         onmousewheel: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmousewheel == 'function'){
                         _component.onmousewheel(this.children[i], e);
@@ -537,8 +530,8 @@ window.Amble = (function(){
         },
 
         onmousedown: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmousedown == 'function'){
                         _component.onmousedown(this.children[i], e);
@@ -548,8 +541,8 @@ window.Amble = (function(){
         },
 
         onmouseup: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmouseup == 'function'){
                         _component.onmouseup(this.children[i], e);
@@ -559,8 +552,8 @@ window.Amble = (function(){
         },
 
         onkeydown: function(e) {
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onkeydown == 'function'){
                         _component.onkeydown(this.children[i], e);
@@ -570,8 +563,8 @@ window.Amble = (function(){
         },
 
         onkeyup: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onkeyup == 'function'){
                         _component.onkeyup(this.children[i], e);
@@ -581,8 +574,8 @@ window.Amble = (function(){
         },
 
         ontouchstart: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.ontouchstart == 'function'){
                         _component.ontouchstart(this.children[i], e);
@@ -592,8 +585,8 @@ window.Amble = (function(){
         },
 
         oncontextmenu: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.oncontextmenu == 'function'){
                         _component.oncontextmenu(this.children[i], e);
@@ -608,7 +601,6 @@ window.Amble = (function(){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.rotation = args['rotation'] || 0;
 
-        //move size to other component -> there rename to scale
         this.scale = args['scale'] || new Amble.Math.Vector2({x: 1, y: 1});
     };
 
@@ -621,8 +613,13 @@ window.Amble = (function(){
         this.canvas.height = height || Amble.app.height;
         this.canvas.style.position = 'absolute';
         this.canvas.style.zIndex = index.toString() || '0';
-        this.ctx = this.canvas.getContext('2d');
 
+        this.ctx = this.canvas.getContext('2d');
+        // if(COCOONJS) {
+        //     // this.ctx = this.canvas.getContext('experimental-webgl');
+        //     this.canvas.screencanvas = true;
+        // } else {
+        // }
         this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
         this.ctx.mozImageSmoothingEnabled = Amble.app.antyAliasing;
         this.ctx.msImageSmoothingEnabled = Amble.app.antyAliasing;
@@ -642,7 +639,8 @@ window.Amble = (function(){
                 this.canvas.style.transform = "scale(" + scaleToFit + ")";
             // }
         }
-        this.resize();
+
+        if(!COCOONJS) this.resize();
     };
 
     Amble.Graphics.Layer.prototype = {
@@ -1211,7 +1209,7 @@ window.Amble = (function(){
         },
 
         getAsset: function(path){
-            var a =  this.cache.find(c => c.path == path);
+            var a =  this.cache.find(function(c) { return c.path == path });
             if(a) return a.data;
             else return undefined;
         },
@@ -1255,41 +1253,48 @@ window.Amble = (function(){
                     /* loading json file */
                     case 'json':
                         var jsonPath = this.queue[i];
+                        var name = this.names[i];
 
                         var xobj = new XMLHttpRequest();
-                        xobj.overrideMimeType("application/json");
+                        // xobj.overrideMimeType("application/json");
                         xobj.open('GET', jsonPath, true);
 
-                        xobj.addEventListener("load", function(e){
-                            var path = e.srcElement.responseURL.toString();
-                            var href = window.location.href.toString();
+                        xobj.onreadystatechange = function(){
 
-                            var path = path.split(href).pop();
-                            that.cache.push({
-                                data: e.srcElement.responseText,
-                                type: 'json',
-                                path: path
-                            });
+                            // console.log('xmlhttprequest change', xobj.readyState, xobj.status)
 
-                            that.successCount++;
-                            if(that.isDone()) callback();
-                        }, false);
+                            if (xobj.readyState == 4 && xobj.status == 200) { //success
 
-                        xobj.addEventListener("error", function(e){
-                            var path = e.srcElement.responseURL.toString();
-                            var href = window.location.href.toString();
+                                // var href = window.location.href.toString();
+                                // var path = xobj.responseURL.toString().split(href).pop();
 
-                            var path = path.split(href).pop();
+                                that.cache.push({
+                                    data: xobj.responseText.toString(),
+                                    type: 'json',
+                                    path: name
+                                });
 
-                            that.cache.push({
-                                data: e.srcElement.responseText,
-                                type: 'json',
-                                path: path
-                            });
+                                that.successCount++;
 
-                            that.errorCount++;
-                            if(that.isDone()) callback();
-                        }, false);
+                                if(that.isDone()) callback();
+
+                            } else if(xobj.readyState == 4 && xobj.status == 404){ //err
+
+                                // var href = window.location.href.toString();
+                                // var path = xobj.responseURL.toString().split(href).pop();
+
+                                that.cache.push({
+                                    data: xobj.responseText.toString(),
+                                    type: 'json',
+                                    path: name
+                                });
+
+                                that.errorCount++;
+                                if(that.isDone()) callback();
+
+                            }
+                        }
+
                         xobj.send(null);
 
                     break;

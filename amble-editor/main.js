@@ -189,26 +189,7 @@ var menuFunctions = {
 
     build: function() {
 
-        dialog.showOpenDialog(
-            mainWindow,
-            {
-                title: 'Select build destination',
-                properties: ['openDirectory', 'createDirectory'],
-            },
-            function(path) {
-
-                if(!path) return;
-
-                buildDir = path[0];
-
-                mkdirp(buildDir, function(err) {
-
-                    if(err) throw err;
-                    mainWindow.webContents.send('build-request');
-
-                });
-
-        });
+        mainWindow.webContents.send('build-request');
 
     }
 
@@ -235,28 +216,42 @@ ipcMain.on('save-respond', function(event, data) {
 
 ipcMain.on('build-respond', function(event, data) {
 
-    var sceneFile = data.sceneFile;
-    var imagesList = data.imagesList;
+    dialog.showOpenDialog(
+        mainWindow,
+        {
+            title: 'Select build destination',
+            properties: ['openDirectory', 'createDirectory'],
+        },
+        function(path) {
 
-    gulp.projectDirectory = projectDirectory;
-    gulp.imagesList = [];
-    gulp.scriptsList = [];
-    gulp.outputDir = buildDir;
+            if(!path) return;
 
-    console.log(buildDir);
+            buildDir = path[0];
 
-    for(var i in data.imagesList) {
-        gulp.imagesList.push(data.imagesList[i].path);
-    }
+            var sceneFile = data.sceneFile;
+            var imagesList = data.imagesList;
 
-    for(var i in data.scriptsList) {
-        gulp.scriptsList.push(data.scriptsList[i].path);
-    }
+            gulp.projectDirectory = projectDirectory;
+            gulp.imagesList = [];
+            gulp.scriptsList = [];
+            gulp.outputDir = buildDir;
 
-    gulp.start('build-game', function(){
-        fs.writeFileSync(buildDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-        fs.writeFileSync(buildDir + '/assets/js/assets-list.js', "var imagesList = " + JSON.stringify(imagesList), 'utf8');
-        console.log('build-game callback')
+            console.log(buildDir);
+
+            for(var i in data.imagesList) {
+                gulp.imagesList.push(data.imagesList[i].path);
+            }
+
+            for(var i in data.scriptsList) {
+                gulp.scriptsList.push(data.scriptsList[i].path);
+            }
+
+            gulp.start('build-game', function(){
+                fs.writeFileSync(buildDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+                fs.writeFileSync(buildDir + '/assets/js/assets-list.js', "var imagesList = " + JSON.stringify(imagesList), 'utf8');
+                console.log('build-game callback')
+            });
+
     });
 
 });
