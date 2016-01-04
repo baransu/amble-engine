@@ -1,6 +1,7 @@
-var COCOONJS = navigator.isCocoonJS;
 window.onload = function() {
     // Cocoon Canvas+ code here
+    var counter = 0;
+
     var app = new Amble.Application({
 
         resize: true,
@@ -58,6 +59,17 @@ window.onload = function() {
         },
 
         postrender: function(){
+
+            var layer = this.mainCamera.camera.layer(0);
+            layer.ctx.save();
+            layer.textAlign('left');
+            layer.font('30px Arial');
+            layer.fillStyle('white');
+
+            var fps = (Amble.Time.deltaTime).toFixed(3);
+
+            layer.fillText(fps || 0, 0,30);
+            layer.ctx.restore();
 
         }
     });

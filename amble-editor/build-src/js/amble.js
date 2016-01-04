@@ -1,5 +1,3 @@
-var COCOONJS = navigator.isCocoonJS;
-
 window.Amble = (function(){
 
     var Amble = {};
@@ -23,7 +21,7 @@ window.Amble = (function(){
         this.mainCamera = this.scene.instantiate(args['mainCamera']);
         // console.log('after camera init')
 
-        if(this.resize && COCOONJS) {
+        if(this.resize) {
             // console.log('resize add')
             window.addEventListener('resize', function(){
                 // console.log('resize')
@@ -573,6 +571,17 @@ window.Amble = (function(){
             }
         },
 
+        oncontextmenu: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.oncontextmenu == 'function'){
+                        _component.oncontextmenu(this.children[i], e);
+                    }
+                }
+            }
+        },
+
         ontouchstart: function(e){
             for(var i = 0; i < this.children.length; i++){
                 for(var j = 0; j < this.children[i].components.length; j++){
@@ -584,16 +593,27 @@ window.Amble = (function(){
             }
         },
 
-        oncontextmenu: function(e){
+        ontouchend: function(e){
             for(var i = 0; i < this.children.length; i++){
                 for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
-                    if(typeof _component.oncontextmenu == 'function'){
-                        _component.oncontextmenu(this.children[i], e);
+                    if(typeof _component.ontouchend == 'function'){
+                        _component.ontouchend(this.children[i], e);
                     }
                 }
             }
-        }
+        },
+
+        ontouchmove: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchmove == 'function'){
+                        _component.ontouchmove(this.children[i], e);
+                    }
+                }
+            }
+        },
     };
 
     /* Transform */
@@ -615,11 +635,7 @@ window.Amble = (function(){
         this.canvas.style.zIndex = index.toString() || '0';
 
         this.ctx = this.canvas.getContext('2d');
-        // if(COCOONJS) {
-        //     // this.ctx = this.canvas.getContext('experimental-webgl');
-        //     this.canvas.screencanvas = true;
-        // } else {
-        // }
+
         this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
         this.ctx.mozImageSmoothingEnabled = Amble.app.antyAliasing;
         this.ctx.msImageSmoothingEnabled = Amble.app.antyAliasing;
@@ -640,7 +656,7 @@ window.Amble = (function(){
             // }
         }
 
-        if(!COCOONJS) this.resize();
+        this.resize();
     };
 
     Amble.Graphics.Layer.prototype = {
@@ -1138,6 +1154,21 @@ window.Amble = (function(){
         contextmenu: function(e) {
             e.preventDefault();
             Amble.app.scene.oncontextmenu(e);
+        },
+
+        touchstart: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchstart(e);
+        },
+
+        touchend: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchend(e);
+        },
+
+        touchmove: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchmove(e);
         }
     }
 
@@ -1153,8 +1184,11 @@ window.Amble = (function(){
         element.addEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         //touch start
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchstart, false);
         //touch end
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchend, false);
         //touch move
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchmove, false);
     }
 
     Amble.Input._removeListeners = function(){
@@ -1170,6 +1204,14 @@ window.Amble = (function(){
             element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
             element.removeEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
+            //touch start
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchstart, false);
+            //touch end
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchend, false);
+            //touch move
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchmove, false);
+
+
         } else if (document.detachEvent) { // For IE 8 and earlier versions
 
             document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
@@ -1179,6 +1221,14 @@ window.Amble = (function(){
             element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
             element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
             element.detachEvent("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
+
+            //touch start
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchstart, false);
+            //touch end
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchend, false);
+            //touch move
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchmove, false);
+
 
         }
     }
@@ -1261,12 +1311,7 @@ window.Amble = (function(){
 
                         xobj.onreadystatechange = function(){
 
-                            // console.log('xmlhttprequest change', xobj.readyState, xobj.status)
-
                             if (xobj.readyState == 4 && xobj.status == 200) { //success
-
-                                // var href = window.location.href.toString();
-                                // var path = xobj.responseURL.toString().split(href).pop();
 
                                 that.cache.push({
                                     data: xobj.responseText.toString(),
@@ -1279,9 +1324,6 @@ window.Amble = (function(){
                                 if(that.isDone()) callback();
 
                             } else if(xobj.readyState == 4 && xobj.status == 404){ //err
-
-                                // var href = window.location.href.toString();
-                                // var path = xobj.responseURL.toString().split(href).pop();
 
                                 that.cache.push({
                                     data: xobj.responseText.toString(),
