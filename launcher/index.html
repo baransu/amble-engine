@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html ng-app="launcherApp">
+    <head>
+        <meta charset="utf-8">
+        <title>Amble Engine Launcher</title>
+    </head>
+    <body ng-controller="launcherController as launcher">
+
+        <!-- <button onclick="editor()">Editor</button>
+        <button onclick="scriptsEditor()">Scripts Editor</button> -->
+
+        <input type="text" name="name" ng-model="launcher.projectName" placeholder="amble-engine-project">
+        <div>
+            <button ng-click="launcher.directorySelect()">Directory</button>
+            {{launcher.projectDirectory}}
+        </div>
+
+        <button ng-click="launcher.create()">Create</button>
+
+        <div>{{launcher.error}}</div>
+
+        <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
+        <script src="js/index.js" charset="utf-8"></script>
+    </body>
+</html>
