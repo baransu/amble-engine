@@ -14,6 +14,10 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
     launcher.projectDirectory = 'undefined';
     launcher.error = '';
 
+    launcher.projects = []
+
+    ipcRenderer.send('launcher-projects-request');
+
     launcher.refresh = function() {
         $scope.$apply();
     };
@@ -37,6 +41,11 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
     };
 
 }]);
+ipcRenderer.on('launcher-projects-respond', function(event, data) {
+    console.log(data)
+    LAUNCHER.projects = data;
+    LAUNCHER.refresh();
+});
 
 ipcRenderer.on('launcher-dir-respond', function(event, data) {
     LAUNCHER.projectDirectory = data;

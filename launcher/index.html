@@ -6,9 +6,6 @@
     </head>
     <body ng-controller="launcherController as launcher">
 
-        <!-- <button onclick="editor()">Editor</button>
-        <button onclick="scriptsEditor()">Scripts Editor</button> -->
-
         <input type="text" name="name" ng-model="launcher.projectName" placeholder="amble-engine-project">
         <div>
             <button ng-click="launcher.directorySelect()">Directory</button>
@@ -18,6 +15,14 @@
         <button ng-click="launcher.create()">Create</button>
 
         <div>{{launcher.error}}</div>
+
+        <div>
+            <ul ng-repeat="project in launcher.projects">
+                <li>
+                    <a href="#" ng-click="launcher.projectSelected($event, project)">{{project.name}} | {{project.dir}}</a>
+                </li>
+            </ul>
+        </div>
 
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
         <script src="js/index.js" charset="utf-8"></script>

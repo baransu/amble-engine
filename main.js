@@ -40,6 +40,29 @@ app.on('ready', function() {
 });
 
 //launcher
+ipcMain.on('launcher-projects-request', function(event, data) {
+
+    var projects = [];
+
+    fs.access(app.getPath('userData') + '/projectsData.json', fs.F_OK, function(err) {
+        if(err) {
+            fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify({ projects: [] }), 'utf-8');
+        } else {
+            var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
+            if(Array.isArray(f)) {
+                projects = f;
+            } else {
+                projects = f.projects
+            }
+        }
+
+        console.log(projects);
+
+        mainWindow.webContents.send('launcher-projects-respond', projects);
+
+    });
+});
+
 ipcMain.on('launcher-dir-request', function(event, data) {
     dialog.showOpenDialog(
         mainWindow,
@@ -48,7 +71,11 @@ ipcMain.on('launcher-dir-request', function(event, data) {
             properties: ['openDirectory', 'createDirectory'],
         },
         function(path) {
-            mainWindow.webContents.send('launcher-dir-respond', path[0] || undefined);
+
+            if(path != undefined) path = path[0];
+            else path = 'undefined';
+
+            mainWindow.webContents.send('launcher-dir-respond', path);
     });
 });
 
@@ -69,6 +96,23 @@ ipcMain.on('launcher-create-request', function(event, data) {
         mkdirp(folder + '/assets', function(err) {
             if(err) throw err;
 
+            var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
+            if(Array.isArray(f)) {
+                var projects = f;
+            } else {
+                var projects = f.projects
+            }
+
+            //check name and dir
+            //if already exist prevent from creation
+
+            projects.push({
+                name: name,
+                dir: dir
+            });
+
+            fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify({ projects: projects }), 'utf-8');
+
             //send create respond
             mainWindow.webContents.send('launcher-create-respond');
         });
@@ -80,6 +124,8 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
     var name = data.name;
     var dir = data.dir;
+
+    mainWindow.close();
 
     mainWindow = new BrowserWindow({
         width: 1280,
