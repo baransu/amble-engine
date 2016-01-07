@@ -19,7 +19,7 @@
         <div>
             <ul ng-repeat="project in launcher.projects">
                 <li>
-                    <a href="#" ng-click="launcher.projectSelected($event, project)">{{project.name}} | {{project.dir}}</a>
+                    <a href="#" ng-click="launcher.openProject($event, project)">{{project.name}} | {{project.dir}}</a>
                 </li>
             </ul>
         </div>

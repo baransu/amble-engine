@@ -28,43 +28,58 @@ var projectData = {};
 
 var EDITOR = null;
 
+var menuFunctions = {
+
+    save: function() {
+        var data = {};
+        data.scene = Amble.app.scene.createSceneFile();
+        data.camera = {
+            x: Amble.app.mainCamera.camera.position.x,
+            y: Amble.app.mainCamera.camera.position.y
+        };
+
+        ipcRenderer.send('editor-save-respond', JSON.stringify(data));
+    },
+
+    build: function() {
+        // var data = {};
+        // data.scene = Amble.app.scene.createSceneFile();
+        // data.camera = {
+        //     x: Amble.app.mainCamera.camera.position.x,
+        //     y: Amble.app.mainCamera.camera.position.y
+        // };
+        //
+        // ipcRenderer.send('editor-save-respond', data);
+    }
+
+}
+
 var menu = Menu.buildFromTemplate([
     {
         label: 'File',
         submenu: [
-            {
-                label: 'New Project',
-                accelerator: 'Ctrl+N',
-                click: function(){
-
-                    ipcRenderer.send('new-request');
-
-                }
-            },
-            {
-                label: 'Open',
-                accelerator: 'Ctrl+O',
-                click: function() {
-
-                    ipcRenderer.send('open-request');
-
-                }
-            },
+            // {
+            //     label: 'New Project',
+            //     accelerator: 'Ctrl+N',
+            //     click: function(){
+            //
+            //         ipcRenderer.send('new-request');
+            //
+            //     }
+            // },
+            // {
+            //     label: 'Open',
+            //     accelerator: 'Ctrl+O',
+            //     click: function() {
+            //
+            //         ipcRenderer.send('editor-open-request');
+            //
+            //     }
+            // },
             {
                 label: 'Save',
                 accelerator: 'Ctrl+S',
-                click: function() {
-
-                    var data = {};
-                    data.scene = Amble.app.scene.createSceneFile();
-                    data.camera = {
-                        x: Amble.app.mainCamera.camera.position.x,
-                        y: Amble.app.mainCamera.camera.position.y
-                    };
-
-                    ipcRenderer.send('save-respond', data);
-
-                }
+                click: menuFunctions.save
             },
             {
                 type: 'separator'
@@ -72,17 +87,7 @@ var menu = Menu.buildFromTemplate([
             {
                 label: 'Build',
                 accelerator: 'Ctrl+B',
-                click: function(){
-
-                    var data = {
-                        sceneFile: Amble.app.scene.createSceneFile(),
-                        imagesList: projectData.imgs,
-                        scriptsList: projectData.scripts
-                    };
-
-                    ipcRenderer.send('build-respond', data);
-
-                }
+                click: menuFunctions.build
             }
         ]
     }
@@ -90,38 +95,27 @@ var menu = Menu.buildFromTemplate([
 
 Menu.setApplicationMenu(menu);
 
-ipcRenderer.on('build-request', function() {
+// ipcRenderer.on('build-request', function() {
+//
+//     var data = {
+//         sceneFile: Amble.app.scene.createSceneFile(),
+//         imagesList: projectData.imgs,
+//         scriptsList: projectData.scripts
+//     };
+//
+//     ipcRenderer.send('build-respond', data);
+//
+// });
 
-    var data = {
-        sceneFile: Amble.app.scene.createSceneFile(),
-        imagesList: projectData.imgs,
-        scriptsList: projectData.scripts
-    };
+ipcRenderer.on('editor-save-request', menuFunctions.save );
 
-    ipcRenderer.send('build-respond', data);
-
-});
-
-ipcRenderer.on('save-request', function() {
-
-    var data = {};
-    data.scene = Amble.app.scene.createSceneFile();
-    data.camera = {
-        x: Amble.app.mainCamera.camera.position.x | 0,
-        y: Amble.app.mainCamera.camera.position.y | 0
-    };
-
-    console.log(data.scene);
-
-    ipcRenderer.send('save-respond', JSON.stringify(data));
-
-});
-
-ipcRenderer.on('editor-load', function(event, data) {
-    console.log(data.path);
+ipcRenderer.on('editor-load-respond', function(event, data) {
 
     projectDirectory = data.path;
     projectData = data.project;
+
+    console.log(projectData)
+
     projectData.imgs = [];
     projectData.scripts = [];
 
