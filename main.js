@@ -8,17 +8,24 @@ const dialog = electron.dialog;
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 
+var builderGulp = require('./builder/js/builder-gulp.js');
+
 var launcherWindow = null;
 var editorWindow = null;
+var builderWindow = null;
 
 var currentState = null; // ['launcher', 'editor']
 
 var currentDir = null;
 var currentName = null;
+var buildDir = null;
+
+var projectBuildData = null;
 
 var shortcuts = {};
 
 app.on('ready', function() {
+    //launcher
     launcherWindow = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -37,21 +44,18 @@ app.on('ready', function() {
         launcherWindow = null;
     });
 
-    editorWindow = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        'min-width': 854,
-        'min-height': 480,
-        show: false
-    });
+});
 
-    editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
+app.on('browser-window-blur', function(event, bWindow){
+    globalShortcut.unregisterAll();
+});
 
-    editorWindow.toggleDevTools();
-    editorWindow.center();
-    editorWindow.on('closed', function() {
-        editorWindow = null;
-    });
+app.on('will-quit', function(event, bWindow){
+    globalShortcut.unregisterAll();
+
+    editorWindow = null;
+    launcherWindow = null;
+    builderWindow = null;
 
 });
 
@@ -90,7 +94,6 @@ ipcMain.on('launcher-dir-request', function(event, data) {
 
             if(path != undefined) path = path[0];
             else path = 'undefined';
-
             launcherWindow.webContents.send('launcher-dir-respond', path);
     });
 });
@@ -147,12 +150,30 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
     launcherWindow.close();
 
-    editorWindow.show();
+    //editor
+    editorWindow = new BrowserWindow({
+        width: 1280,
+        height: 720,
+        'min-width': 854,
+        'min-height': 480,
+        show: false
+    });
 
-    editorWindow.setTitle(currentName + ' | Amble Editor')
+    editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
+
+    editorWindow.toggleDevTools();
+    editorWindow.center();
+
+    editorWindow.on('closed', function() {
+        editorWindow = null;
+    });
 
     currentState = 'editor';
 
+});
+
+//editor
+ipcMain.on('editor-app-loaded', function(event, data) {
     var d = JSON.parse(fs.readFileSync(currentDir + '/' + currentName + '.aproject', 'utf8'));
     var data = {
         path: currentDir,
@@ -163,10 +184,11 @@ ipcMain.on('launcher-open-request', function(event, data) {
     };
 
     editorWindow.webContents.send('editor-load-respond', data);
+    editorWindow.setTitle(currentName + ' | Amble Editor')
+    editorWindow.show();
 
 });
 
-//editor
 ipcMain.on('editor-save-respond', function(event, data) {
 
     console.log(data);
@@ -174,7 +196,86 @@ ipcMain.on('editor-save-respond', function(event, data) {
 
 });
 
+ipcMain.on('editor-build-respond', function(event, data) {
+
+    projectBuildData = data;
+
+    //builder
+    builderWindow = new BrowserWindow({
+        width: 1280,
+        height: 720,
+        'min-width': 854,
+        'min-height': 480
+    });
+
+    builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
+
+    builderWindow.setTitle(currentName + ' | Amble Builder');
+    builderWindow.toggleDevTools();
+    builderWindow.center();
+    builderWindow.on('closed', function() {
+        builderWindow = null;
+    });
+
+    console.log(data);
+
+});
+
 //builder
+ipcMain.on('builder-dir-request', function(event, data) {
+    dialog.showOpenDialog(
+        builderWindow,
+        {
+            title: 'Select build destination',
+            properties: ['openDirectory', 'createDirectory'],
+        },
+        function(path) {
+
+            if(path != undefined) path = path[0];
+            else path = 'undefined';
+
+            buildDir = path;
+
+            builderWindow.webContents.send('builder-dir-respond', path);
+    });
+});
+
+ipcMain.on('builder-build-request', function(event, data) {
+
+    //process build
+    var sceneFile = projectBuildData.sceneFile;
+    var imagesList = projectBuildData.imagesList;
+    var targetDir = buildDir + '/' + data.name;
+    var gameTitle = data.name;
+
+    builderGulp.projectDirectory = currentDir + '/' + currentName;
+    builderGulp.imagesList = [];
+    builderGulp.scriptsList = [];
+    builderGulp.outputDir = targetDir;
+
+    console.log(targetDir);
+
+    for(var i in data.imagesList) {
+        builderGulp.imagesList.push(data.imagesList[i].path);
+    }
+
+    for(var i in data.scriptsList) {
+        builderGulp.scriptsList.push(data.scriptsList[i].path);
+    }
+
+    builderGulp.start('build-game', function(){
+
+        fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+        fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+
+        console.log('build-game callback')
+
+        var info = 'Game build succesful - game build to: ' + targetDir;
+        //send respond with respond
+        builderWindow.send('builder-build-respond', info)
+
+    });
+});
 
 app.on('browser-window-focus', function(event, bWindow) {
 
@@ -183,25 +284,25 @@ app.on('browser-window-focus', function(event, bWindow) {
         //save
         shortcuts.open = globalShortcut.register('ctrl+s', menuFunctions.save);
 
-        // //build
-        // shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
+        //build
+        shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
         break;
     }
 
 });
 
-app.on('browser-window-blur', function(event, bWindow){
-    globalShortcut.unregisterAll();
-});
+var menuFunctions = {
 
-app.on('will-quit', function(event, bWindow){
-    globalShortcut.unregisterAll();
+    save: function() {
+        editorWindow.webContents.send('editor-save-request');
+    },
 
-    editorWindow = null;
-    launcherWindow = null;
-    builderWindow = null;
+    build: function() {
+        editorWindow.webContents.send('editor-build-request');
+    }
 
-});
+}
+
 
 // ipcMain.on('build-respond', function(event, data) {
 //
@@ -244,14 +345,6 @@ app.on('will-quit', function(event, bWindow){
 //     });
 //
 // });
-
-var menuFunctions = {
-
-    save: function() {
-        editorWindow.webContents.send('editor-save-request');
-    },
-
-}
 
 //
 // var menuFunctions = {

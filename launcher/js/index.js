@@ -12,7 +12,7 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
 
     launcher.projectName = '';
     launcher.projectDirectory = 'undefined';
-    launcher.error = '';
+    launcher.errorInfo = '';
 
     launcher.projects = []
 
@@ -42,9 +42,9 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
                 dir: launcher.projectDirectory
             });
         } else if(!launcher.projectName){
-            launcher.error = 'You must enter project name!';
+            launcher.errorInfo = 'You must enter project name!';
         } else if(launcher.projectDirectory == 'undefined') {
-            launcher.error = 'You must select project directory!';
+            launcher.errorInfo = 'You must select project directory!';
         }
     };
 

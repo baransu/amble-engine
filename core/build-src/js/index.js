@@ -23,6 +23,8 @@ window.onload = function() {
 
         preload: function(){
 
+            document.title = gameTitle || 'untitled';
+            
             //load images
             for(var i = 0; i < imagesList.length; i++) {
                 this.loader.load('image', './assets/img/' + imagesList[i].name, imagesList[i].name);

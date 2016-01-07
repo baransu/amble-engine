@@ -42,14 +42,14 @@ var menuFunctions = {
     },
 
     build: function() {
-        // var data = {};
-        // data.scene = Amble.app.scene.createSceneFile();
-        // data.camera = {
-        //     x: Amble.app.mainCamera.camera.position.x,
-        //     y: Amble.app.mainCamera.camera.position.y
-        // };
-        //
-        // ipcRenderer.send('editor-save-respond', data);
+
+        var data = {
+            sceneFile: Amble.app.scene.createSceneFile(),
+            imagesList: projectData.imgs,
+            scriptsList: projectData.scripts
+        };
+
+        ipcRenderer.send('editor-build-respond', data);
     }
 
 }
@@ -95,17 +95,10 @@ var menu = Menu.buildFromTemplate([
 
 Menu.setApplicationMenu(menu);
 
-// ipcRenderer.on('build-request', function() {
-//
-//     var data = {
-//         sceneFile: Amble.app.scene.createSceneFile(),
-//         imagesList: projectData.imgs,
-//         scriptsList: projectData.scripts
-//     };
-//
-//     ipcRenderer.send('build-respond', data);
-//
-// });
+ipcRenderer.send('editor-app-loaded');
+ipcRenderer.on('editor-build-request', function() {
+    menuFunctions.build();
+});
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
 

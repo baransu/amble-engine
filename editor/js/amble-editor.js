@@ -476,7 +476,7 @@ window.Amble = (function(){
                 data.push(this.children[i].prefab);
             }
 
-            console.log(data);
+            // console.log(data);
             return data;
         },
 

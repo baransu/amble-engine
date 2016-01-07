@@ -2,7 +2,7 @@
 <html ng-app="ambleEditor">
     <head>
         <meta charset="utf-8">
-        <!-- <title>Amble Editor</title>  -->
+        <title>Amble Editor</title>
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/>
     </head>
@@ -48,7 +48,7 @@
                     <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
 
                         <li class="list-item">
-                            <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.prefab.name}}</a>
+                            <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
                         </li>
 
                     </ul>
@@ -61,7 +61,7 @@
             <div class="scroll inspector" id="inspector-components">
 
                 <div class="inspector-info">
-        			<input id="actor-name" type="text" ng-model="editor.actor.prefab.name" placeholder="name" name="name">
+        			<input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
         		</div>
 
                 <transform-component actor="{{editor.actor}}"></transform-component>

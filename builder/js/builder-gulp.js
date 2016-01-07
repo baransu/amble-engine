@@ -1,19 +1,20 @@
 var gulp = require('gulp');
 var concat = require('gulp-concat');
+// var minifyCss = require('gulp-minify-css');
+// var less = require('gulp-less');
+
+var core = ['./core/build-src/**/*']
+var engineSrc = ['./editor/js/src/engine/*.js']
 
 gulp.imagesList = [];
 gulp.scriptsList = [];
 gulp.projectDirectory = '';
 gulp.outputDir = '';
 
-
 gulp.buildProperties = {};
 
-// var minifyCss = require('gulp-minify-css');
-// var less = require('gulp-less');
-
 gulp.task('core-move', function() {
-    return gulp.src(['build-src/**/*'])
+    return gulp.src(core)
         .pipe(gulp.dest(gulp.outputDir));
 });
 
@@ -23,7 +24,7 @@ gulp.task('img-move', function(){
 });
 
 gulp.task('build-engine', function(){
-    return gulp.src('./js/src/engine/*.js')
+    return gulp.src(engineSrc)
         .pipe(concat('engine-scripts.js'))
         .pipe(gulp.dest(gulp.outputDir + '/assets/js'));
 });

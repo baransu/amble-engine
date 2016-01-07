@@ -4,7 +4,7 @@
   "authors": [
     "Tomasz Cichocinski <sajgonek123@gmail.com>"
   ],
-  "description": "",
+  "description": "JavaScript game engine for web and mobile",
   "moduleType": [],
   "license": "MIT",
   "ignore": [
