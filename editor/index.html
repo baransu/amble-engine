@@ -3,92 +3,98 @@
     <head>
         <meta charset="utf-8">
         <title>Amble Editor</title>
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
-        <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/>
+        <!-- <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/> -->
     </head>
     <body ng-controller="editorController as editor">
-        <div id="tools">
 
-            <!-- list? nav?-->
-            <!-- <div class="button">
-                <a href="#">Button1</a>
+        <div class="container-fluid">
+
+            <div id="tools">
+
+                <!-- list? nav?-->
+                <!-- <div class="button">
+                    <a href="#">Button1</a>
+                </div>
+
+                <div class="button">
+                    <a href="#">Button2</a>
+                </div>
+
+                <div class="button">
+                    <a href="#">Button3</a>
+                </div>
+
+                <div class="button">
+                    <a href="#">Button4</a>
+                </div> -->
+
             </div>
 
-            <div class="button">
-                <a href="#">Button2</a>
-            </div>
-
-            <div class="button">
-                <a href="#">Button3</a>
-            </div>
-
-            <div class="button">
-                <a href="#">Button4</a>
-            </div> -->
-
-        </div>
-
-        <div id="project-view" class="scroll">
-            <div class="list-container">
-                <ul id="list" class="list"></ul>
-            </div>
-        </div>
-
-        <div id="scene-view"></div>
-
-        <div id="debug-console">debug</div>
-
-        <div id="hierarchy">
-            <div class="search">
-                <input id="hierarchySearch" type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
-            </div>
-            <button class="add-button" ng-click="editor.addActor()">Add actor</button>
-            <div class="scroll hierarchy">
+            <div id="project-view" class="scroll">
                 <div class="list-container">
-                    <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
-
-                        <li class="list-item">
-                            <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
-                        </li>
-
-                    </ul>
+                    <ul id="list" class="list"></ul>
                 </div>
             </div>
-        </div>
 
-        <div id="inspector-view">
-            <button class="add-button" ng-click="editor.showComponentAdder()">Add component</button>
-            <div class="scroll inspector" id="inspector-components">
+            <div id="scene-view"></div>
 
-                <div class="inspector-info">
-        			<input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
-        		</div>
+            <div id="debug-console">debug</div>
 
-                <transform-component actor="{{editor.actor}}"></transform-component>
-                <renderer-component actor="{{editor.actor}}"></renderer-component>
-                <class-component actor="{{editor.actor}}"> </class-component>
-
-                <!--  camera -->
-                <!--  list of components -->
-
-            </div>
-        </div>
-        <div id="preview">preview</div>
-
-        <div id="component-select" ng-hide="editor.hideComponentAdder">
-            <div class="search">
-                <input id="hierarchySearch" type="text" ng-model="editor.componentAdd.search" name="name" value="" placeholder="search">
-            </div>
-            <div class="scroll hierarchy">
-                <div class="list-container">
-                    <ul id="hierarchy-list" class="list" ng-repeat="component in editor.componentsToAdd | filter: { name: editor.componentAdd.search }">
-
-                        <li class="list-item">
-                            <a href="#" class="hierarchy-item" ng-click="editor.addComponent(component, $event)">{{component.name}}</a>
-                        </li>
-
-                    </ul>
+            <div id="hierarchy">
+                <div class="search">
+                    <input id="hierarchySearch" type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
                 </div>
+                <button class="add-button" ng-click="editor.addActor()">Add actor</button>
+                <div class="scroll hierarchy">
+                    <div class="list-container">
+                        <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
+
+                            <li class="list-item">
+                                <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inspector-view">
+                <button class="add-button" ng-click="editor.showComponentAdder()">Add component</button>
+                <div class="scroll inspector" id="inspector-components">
+
+                    <div class="inspector-info">
+            			<input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
+            		</div>
+
+                    <transform-component actor="{{editor.actor}}"></transform-component>
+                    <renderer-component actor="{{editor.actor}}"></renderer-component>
+                    <class-component actor="{{editor.actor}}"> </class-component>
+
+                    <!--  camera -->
+                    <!--  list of components -->
+
+                </div>
+            </div>
+            <div id="preview">preview</div>
+
+            <div id="component-select" ng-hide="editor.hideComponentAdder">
+                <div class="search">
+                    <input id="hierarchySearch" type="text" ng-model="editor.componentAdd.search" name="name" value="" placeholder="search">
+                </div>
+                <div class="scroll hierarchy">
+                    <div class="list-container">
+                        <ul id="hierarchy-list" class="list" ng-repeat="component in editor.componentsToAdd | filter: { name: editor.componentAdd.search }">
+
+                            <li class="list-item">
+                                <a href="#" class="hierarchy-item" ng-click="editor.addComponent(component, $event)">{{component.name}}</a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+
             </div>
 
         </div>
@@ -96,10 +102,10 @@
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
 
         <script src="js/src/engine/vec2.js" charset="utf-8"></script>
-
         <script src="js/index.js" charset="utf-8"></script>
 
         <script src="../bower_components/webcomponentsjs/webcomponents.js" charset="utf-8"></script>
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
 
         <link rel="import" href="elements/class-component.html">
         <link rel="import" href="elements/transform-component.html">

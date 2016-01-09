@@ -30,12 +30,16 @@ window.Amble = (function(){
 
         this.scene = new Amble.Scene();
 
-        this.mainCamera = this.scene.instantiate(args['sceneCamera']);
+        if(args['sceneCamera']) {
+            this.mainCamera = this.scene.instantiate(args['sceneCamera']);
+        }
 
         // this.scene.instantiate(args['mainCamera']);
 
-        this.width = this.mainCamera.camera.size.x || 800;
-        this.height = this.mainCamera.camera.size.y || 600;
+        if(this.mainCamera) {
+            this.width = this.mainCamera.camera.size.x || 800;
+            this.height = this.mainCamera.camera.size.y || 600;
+        }
 
         //init all public game loop functions
         var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
@@ -45,6 +49,7 @@ window.Amble = (function(){
 
         //private game loop functions
         this.update = function(){
+
             this.mainCamera.camera.update()
             this.scene.update();
 
@@ -161,6 +166,7 @@ window.Amble = (function(){
 
         /* all loading */
         this.loader.loadAll(function(){
+
             setTimeout(function(){
                 clearInterval(that.loadingInterval);
                 Amble.Input._setListeners();
@@ -183,12 +189,13 @@ window.Amble = (function(){
             var now = Date.now();
             Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
-            //dafuq?
-            that.preupdate();
-            that.update();
-            that.postupdate();
-            that.render();
-            that.postrender();
+            if(that.mainCamera) {
+                that.preupdate();
+                that.update();
+                that.postupdate();
+                that.render();
+                that.postrender();
+            }
 
             Amble.Time._lastTime = now;
             requestAnimationFrame(gameLoop)
@@ -375,7 +382,7 @@ window.Amble = (function(){
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
         // this.renderer = {};
-        this.components = {};
+        this.components = [];
     };
 
     Amble.Actor.prototype = {

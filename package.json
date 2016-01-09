@@ -1,29 +1,31 @@
 {
-    "name": "amble-engine",
-    "version": "0.1.0",
-    "description": "JavaScript game engine for web and mobile",
-    "main": "main.js",
-    "scripts": {
-        "start": "electron ."
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/Baransu/amble-engine.git"
-    },
-    "author": "Tomasz Cichocinski",
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/Baransu/amble-engine/issues"
-    },
-    "homepage": "https://github.com/Baransu/amble-engine#readme",
-    "dependencies": {
-        "electron-prebuilt": "^0.35.1",
-        "gulp-concat": "^2.6.0",
-        "gulp-less": "^3.0.5",
-        "gulp-minify-css": "^1.2.1",
-        "mkdirp": "^0.5.1",
-        "node-watch": "^0.3.4",
-        "browserify": "latest",
-        "vinyl-source-stream": "latest"
-    }
+  "name": "amble-engine",
+  "version": "0.1.0",
+  "description": "JavaScript game engine for web and mobile",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Baransu/amble-engine.git"
+  },
+  "author": "Tomasz Cichocinski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Baransu/amble-engine/issues"
+  },
+  "homepage": "https://github.com/Baransu/amble-engine#readme",
+  "dependencies": {
+    "angular": "^1.4.8",
+    "browserify": "latest",
+    "electron-prebuilt": "^0.35.1",
+    "gulp-concat": "^2.6.0",
+    "gulp-less": "^3.0.5",
+    "gulp-minify-css": "^1.2.1",
+    "jquery": "^2.2.0",
+    "mkdirp": "^0.5.1",
+    "node-watch": "^0.3.4",
+    "vinyl-source-stream": "latest"
+  }
 }

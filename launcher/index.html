@@ -3,28 +3,79 @@
     <head>
         <meta charset="utf-8">
         <title>Amble Engine Launcher</title>
+
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <link rel="stylesheet" href="css/style.css" charset="utf-8">
+
     </head>
     <body ng-controller="launcherController as launcher">
 
-        <input type="text" name="name" ng-model="launcher.projectName" placeholder="amble-engine-project">
-        <div>
-            <button ng-click="launcher.directorySelect()">Directory</button>
-            {{launcher.projectDirectory}}
-        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="text-center">{{launcher.projectName}}</h3>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <input class="form-control" type="text" maxlength="50" ng-model="launcher.projectName" placeholder="New Amble Project">
+                </div>
+            </div>
 
-        <button ng-click="launcher.create()">Create</button>
+            <div class="row top-buffer">
+                <div class="col-md-12">
+                    <div class="input-group">
+                        <input class="form-control" type="text" maxlength="50" ng-model="launcher.projectDirectory">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="button" ng-click="launcher.directorySelect()">Browse</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <div>{{launcher.errorInfo}}</div>
+            <div class="row top-buffer">
+                <div class="col-md-2">
+                    <button class="btn btn-success" type="button" ng-click="launcher.create()">Create</button>
+                </div>
+            </div>
 
-        <div>
-            <ul ng-repeat="project in launcher.projects">
-                <li>
-                    <a href="#" ng-click="launcher.openProject($event, project)">{{project.name}} | {{project.dir}}</a>
-                </li>
-            </ul>
+            <div class="row">
+                <div class="col-md-12 text-danger">
+                    <h3 class="text-center">{{launcher.errorInfo}}</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h3 class="text-center">Created projects:</h3>
+                </div>
+            </div>
+
+            <div class="row top-buffer">
+                <div class="col-md-12">
+                    <div class="list-group" ng-repeat="project in launcher.projects">
+                        <a href="#" class="list-group-item" ng-click="launcher.openProject($event, project)">
+                            {{project.name}} | {{project.dir}}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
         <script src="js/index.js" charset="utf-8"></script>
+
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
     </body>
 </html>
+
+<!--
+5
+10
+13
+17
+19
+21
+24
+-->

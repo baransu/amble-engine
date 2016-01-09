@@ -27,10 +27,9 @@ var shortcuts = {};
 app.on('ready', function() {
     //launcher
     launcherWindow = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        'min-width': 854,
-        'min-height': 480
+        width: 640,
+        height: 360,
+        resizable: false
     });
 
     launcherWindow.loadURL('file://' + __dirname + '/launcher/index.html');
@@ -148,7 +147,11 @@ ipcMain.on('launcher-open-request', function(event, data) {
     currentName = data.name;
     currentDir = data.dir;
 
-    launcherWindow.close();
+    //load launcher loader page
+    launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
+    launcherWindow.focus();
+    launcherWindow.setAlwaysOnTop(true);
+
 
     //editor
     editorWindow = new BrowserWindow({
@@ -185,8 +188,12 @@ ipcMain.on('editor-app-loaded', function(event, data) {
 
     editorWindow.webContents.send('editor-load-respond', data);
     editorWindow.setTitle(currentName + ' | Amble Editor')
-    editorWindow.show();
 
+});
+
+ipcMain.on('editor-project-loaded', function(event, data) {
+    if(launcherWindow) launcherWindow.close();
+    editorWindow.show();
 });
 
 ipcMain.on('editor-save-respond', function(event, data) {

@@ -5,6 +5,7 @@ const ipcRenderer = electron.ipcRenderer;
 
 var fs = require('fs');
 var watch = require('node-watch');
+global.jQuery = $ = require('jquery');
 
 var Amble = require('./js/amble-editor.js');
 
@@ -127,10 +128,13 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
     document.querySelector('renderer-component').sprites = projectData.imgs;
 
     //game
-    var app = new Amble.Application(application);
+    app = null;
+    app = new Amble.Application(application);
 
     EDITOR.update();
     EDITOR.refresh();
+
+    ipcRenderer.send('editor-project-loaded');
 
 });
 
@@ -357,8 +361,11 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         this.hideComponentAdder = true;
         this.componentsToAdd = [];
 
-        var cameraScript = Amble.app.scene.getActorByName('SceneCamera').getComponent('Camera');
-        cameraScript.editor = this;
+        var cam = Amble.app.scene.getActorByName('SceneCamera');
+        if(cam) {
+            var cameraScript = cam.getComponent('Camera');
+            cameraScript.editor = this;
+        }
 
         editor.updateActors();
         editor.updateClass();
@@ -614,8 +621,7 @@ var application = {
     }
 };
 
-var app = new Amble.Application(application);
-
+var app = new Amble.Application({});
 
 /**
  * Removes a module from the cache.

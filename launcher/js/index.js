@@ -3,6 +3,8 @@ const ipcRenderer = electron.ipcRenderer;
 // const remote = electron.remote;
 // const Menu = remote.Menu;
 
+global.jQuery = $ = require('jquery');
+
 var LAUNCHER = null;
 
 var launcherApp = angular.module('launcherApp', []);
@@ -10,8 +12,8 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
 
     var launcher = LAUNCHER = this;
 
-    launcher.projectName = '';
-    launcher.projectDirectory = 'undefined';
+    launcher.projectName = 'New Amble Project';
+    launcher.projectDirectory = '';
     launcher.errorInfo = '';
 
     launcher.projects = []
@@ -36,14 +38,14 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
 
     launcher.create = function() {
 
-        if(launcher.projectName && launcher.projectDirectory != 'undefined') {
+        if(launcher.projectName != 'New Amble Project' && launcher.projectName != '' && launcher.projectDirectory != '' && launcher.projectDirectory != 'undefined') {
             ipcRenderer.send('launcher-create-request', {
                 name: launcher.projectName,
                 dir: launcher.projectDirectory
             });
-        } else if(!launcher.projectName){
+        } else if(launcher.projectName == 'New Amble Project' || launcher.projectName == ''){
             launcher.errorInfo = 'You must enter project name!';
-        } else if(launcher.projectDirectory == 'undefined') {
+        } else if(launcher.projectDirectory == '' || launcher.projectDirectory == 'undefined') {
             launcher.errorInfo = 'You must select project directory!';
         }
     };
