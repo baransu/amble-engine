@@ -4,100 +4,128 @@
 
 	<style>
 
-    .title {
-		color: magenta;
-		font-size: 20px;
-		text-align: center;
-    }
-
-    .content {
-
-    }
+    .panel {
+		margin-top: 10px;
+		color: black;
+	}
 
 	</style>
 
 	<template>
 
-        <div class="tranform"  hidden$="{{hideAll}}">
+        <div hidden$="{{hideAll}}">
 
 			<template id="class-list" is="dom-repeat" items="{{ components }}" as="component">
-	            <div class="title">{{component.name}} - script</div>
-	            <div class="content">
+				<div class="panel panel-primary">
+					<div class="panel-heading" on-click="hide">
+						<div class="row">
+							<div class="col-md-6">
+								<h3 class="panel-title">{{component.name}} - (script)</h3>
 
-					<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
-
-						<!-- vector -->
-						<div class="row" hidden$="{{hideProperty('vec2', p)}}">
-							<div class="row">
-								{{p.name}}</br>
-								<template id="class-list" is="dom-repeat" items="{{ p.value.value }}" as="v">
-				                    <div class="col left">
-				                        <label>{{v.name}}</label>
-				                        <input type="number" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{v.value}}">
-				                    </div>
-								</template>
-				            </div>
-
+							</div>
+							<!-- utility buttons -->
 						</div>
 
+					</div>
+					<div class="panel-body" hidden$="{{hideConent}}">
+						<div class="container-fluid">
 
-						<!-- simple properties -->
-						<div class="row" hidden$="{{hideProperty('simple-number', p)}}">
-							<label>{{p.name}}</label>
-							<input type="number" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}"></br>
-						</div>
+							<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
 
-						<div class="row" hidden$="{{hideProperty('simple-bool', p)}}">
-							<label>{{p.name}}</label>
-							<input type="checkbox" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{p.value}}"></br>
-						</div>
+								<!-- vector -->
+								<div class="row" hidden$="{{hideProperty('vec2', p)}}">
 
-						<div class="row" hidden$="{{hideProperty('simple-string', p)}}">
-							<label>{{p.name}}</label>
-							<input type="text" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}"></br>
-						</div>
+									<div class="row">
+										{{p.name}} (vec2):</br>
+										<template id="class-list" is="dom-repeat" items="{{ p.value.value }}" as="v">
+											<div class="col-md-6">
+												<form class="form-horizontal">
+													<div class="form-group form-group-sm">
+														<input class="form-control" type="number" placeholder="{{v.name}}" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{v.value}}">
+													</div>
+												</form>
+											</div>
+										</template>
+						            </div>
 
-						<!-- array of simple -->
-						<div class="row" hidden$="{{hideProperty('array', p)}}">
-							{{p.name}}</br>
-							<template is="dom-repeat" items="{{ p.values }}" as="v">
-
-								<div hidden$="{{hideProperty('simple-number', v)}}">
-									<label>{{v.name}}</label>
-									<input type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
 								</div>
 
-								<div hidden$="{{hideProperty('simple-bool', v)}}">
-									<label>{{v.name}}</label>
-									<input type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{v.value}}"></br>
+								<!-- simple properties -->
+								<div class="row" hidden$="{{hideProperty('simple-number', p)}}">
+									<div class="col-md-12">
+										<label>{{p.name}} (number)</label>
+										<input class="form-control" type="number" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}">
+									</div>
 								</div>
 
-								<div hidden$="{{hideProperty('simple-string', v)}}">
-									<label>{{v.name}}</label>
-									<input type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+								<div class="row" hidden$="{{hideProperty('simple-bool', p)}}">
+									<div class="col-md-12">
+										<label>{{p.name}} (bool)</label>
+										<input class="checkbox" type="checkbox" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{p.value}}">
+									</div>
 								</div>
 
-							</template>
-						</div>
 
-						<!-- array of vec2 -->
-						<div class="row" hidden$="{{hideProperty('vec2-array', p)}}">
-							<template is="dom-repeat" items="{{ p.values }}" as="v">
-								<div class="row">
-									{{v.name}}</br>
-									<template id="class-list" is="dom-repeat" items="{{ v.value.value }}" as="vv">
-					                    <div class="col left">
-					                        <label>{{vv.name}}</label>
-					                        <input type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{vv.value}}">
-					                    </div>
+								<div class="row" hidden$="{{hideProperty('simple-string', p)}}">
+									<div class="col-md-12">
+										<label>{{p.name}} (string)</label>
+										<input class="form-control" type="text" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}">
+									</div>
+								</div>
+
+								<!-- array of simple -->
+								<div class="row" hidden$="{{hideProperty('array', p)}}">
+									{{p.name}} (array)</br>
+									<template is="dom-repeat" items="{{ p.values }}" as="v">
+										<div class="row" hidden$="{{hideProperty('simple-number', v)}}">
+											<div class="col-md-12">
+												<label>{{v.name}} (number)</label>
+												<input class="form-control" type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+											</div>
+										</div>
+
+										<div class="row" hidden$="{{hideProperty('simple-bool', v)}}">
+											<div class="col-md-12">
+												<label>{{v.name}} (bool)</label>
+												<input class="checkbox" type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{v.value}}"></br>
+											</div>
+										</div>
+
+										<div class="row" hidden$="{{hideProperty('simple-string', v)}}">
+											<div class="col-md-12">
+												<label>{{v.name}} (string)</label>
+												<input class="form-control" type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+											</div>
+										</div>
+
 									</template>
-				                </div>
+								</div>
+
+								<!-- array of vec2 -->
+								<div class="row" hidden$="{{hideProperty('vec2-array', p)}}">
+									{{p.name}} (array)</br>
+									<template is="dom-repeat" items="{{ p.values }}" as="v">
+
+										<div class="row">
+											{{v.name}}</br>
+											<template id="class-list" is="dom-repeat" items="{{ v.value.value }}" as="vv">
+												<div class="col-md-6">
+													<form class="form-horizontal">
+														<div class="form-group form-group-sm">
+															<input class="form-control" placeholder="{{vv.name}}" type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{vv.value}}">
+														</div>
+													</form>
+												</div>
+											</template>
+						                </div>
+									</template>
+								</div>
+
+								<div class="divider"></div>
+
 							</template>
 						</div>
-
-					</template>
-
-					<div class="divider"></div>
+					</div>
 	            </div>
 
 			</template>
@@ -154,6 +182,7 @@
 				break;
 
 				case 'array':
+					console.log(p.values)
 					return !(Array.isArray(p.values) && typeof p.values[0].value != 'object');
 				break;
 

@@ -13,21 +13,14 @@
 
             <div id="tools">
 
-                <!-- list? nav?-->
-                <!-- <div class="button">
-                    <a href="#">Button1</a>
-                </div>
-
-                <div class="button">
-                    <a href="#">Button2</a>
-                </div>
-
-                <div class="button">
-                    <a href="#">Button3</a>
-                </div>
-
-                <div class="button">
-                    <a href="#">Button4</a>
+                <!-- <div class="row">
+                    <div class="col-md-12">
+                        <div class="btn-group" role="group" aria-label="...">
+                            <button type="button" class="btn btn-default">Left</button>
+                            <button type="button" class="btn btn-default">Middle</button>
+                            <button type="button" class="btn btn-default">Right</button>
+                        </div>
+                    </div>
                 </div> -->
 
             </div>
@@ -43,30 +36,55 @@
             <div id="debug-console">debug</div>
 
             <div id="hierarchy">
-                <div class="search">
-                    <input id="hierarchySearch" type="text" ng-model="editor.hierarchy.search" name="name" value="" placeholder="search">
-                </div>
-                <button class="add-button" ng-click="editor.addActor()">Add actor</button>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li ng-repeat="actor in editor.actorsToAdd" >
+                                        <a href="#" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+                                    </li>
+                                </ul>
+                            </div><!-- /btn-group -->
+                            <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
+                        </div><!-- /input-group -->
+                    </div><!-- /.col-lg-6 -->
+                </div><!-- /.row -->
+
                 <div class="scroll hierarchy">
                     <div class="list-container">
                         <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
-
                             <li class="list-item">
                                 <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
                             </li>
-
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div id="inspector-view">
-                <button class="add-button" ng-click="editor.showComponentAdder()">Add component</button>
-                <div class="scroll inspector" id="inspector-components">
 
-                    <div class="inspector-info">
-            			<input id="actor-name" type="text" ng-model="editor.actor.name" placeholder="name" name="name">
-            		</div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="input-group input-group-sm">
+                            <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
+                            <div class="input-group-btn">
+
+                                <button class="btn btn-default dropdown-toggle" type="button" ng-click="editor.updateComponents()" data-toggle="dropdown">Add <span class="caret"></span></button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                                    <li ng-repeat="component in editor.componentsToAdd">
+                                        <a href="#" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                                    </li>
+                                </ul>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scroll inspector" id="inspector-components">
 
                     <transform-component actor="{{editor.actor}}"></transform-component>
                     <renderer-component actor="{{editor.actor}}"></renderer-component>
@@ -77,25 +95,8 @@
 
                 </div>
             </div>
-            <div id="preview">preview</div>
 
-            <div id="component-select" ng-hide="editor.hideComponentAdder">
-                <div class="search">
-                    <input id="hierarchySearch" type="text" ng-model="editor.componentAdd.search" name="name" value="" placeholder="search">
-                </div>
-                <div class="scroll hierarchy">
-                    <div class="list-container">
-                        <ul id="hierarchy-list" class="list" ng-repeat="component in editor.componentsToAdd | filter: { name: editor.componentAdd.search }">
-
-                            <li class="list-item">
-                                <a href="#" class="hierarchy-item" ng-click="editor.addComponent(component, $event)">{{component.name}}</a>
-                            </li>
-
-                        </ul>
-                    </div>
-                </div>
-
-            </div>
+            <!-- <div id="preview">preview</div> -->
 
         </div>
 

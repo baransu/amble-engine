@@ -17,6 +17,7 @@
   "dependencies": {
     "polymer": "Polymer/polymer#~1.2.1",
     "iron-list": "PolymerElements/iron-list#~1.1.5",
-    "bootstrap": "~3.3.6"
+    "bootstrap": "~3.3.6",
+    "bootswatch-dist": "paper"
   }
 }

@@ -8,6 +8,8 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
+        this.imgList = [];
+
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
 
         //wrap this things up
@@ -770,6 +772,7 @@ window.Amble = (function(){
         this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
 
         this.type = "animation";
+        this._editorName = "Animation Renderer"
     };
 
     Amble.Graphics.AnimationRenderer.prototype = {
@@ -948,6 +951,7 @@ window.Amble = (function(){
         this.anchor = new Amble.Math.Vector2({});
 
         this.type = "sprite";
+        this._editorName = "Sprite Renderer"
     }
 
     Amble.Graphics.SpriteRenderer.prototype = {
@@ -1009,6 +1013,7 @@ window.Amble = (function(){
         this.anchor = new Amble.Math.Vector2({});
 
         this.type = "rect";
+        this._editorName = "Rect Renderer"
     };
 
     /* Amble.Graphics.Renderer functions */

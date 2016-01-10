@@ -4,96 +4,137 @@
 
 	<style>
 
-    .title {
-		/*color: red;*/
-    }
-
-    .content {
-
+    .panel {
+		margin-top: 10px;
+		color: black;
     }
 
 	</style>
 
 	<template>
 
-        <div class="tranform"  hidden$="{{hideRenderer}}">
-            <div class="title" on-click="hideComponent">
-                Renderer
+        <div class="panel panel-primary"  hidden$="{{hideRenderer}}">
+            <div class="panel-heading" on-click="hideComponent">
+				<div class="row">
+					<div class="col-md-6">
+						<h3 class="panel-title">{{actor.renderer._editorName}}</h3>
+					</div>
+					<!-- utility buttons -->
+				</div>
             </div>
-            <div class="content" hidden$="{{hideContent}}">
+            <div class="panel-body" hidden$="{{hideContent}}">
+				<div class="container-fluid">
+					<!-- rect renderer -->
+	                <div hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
 
-				<!-- rect renderer -->
-                <div class="row" hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
+						<div class="row">
+							<div class="col-md-6">
+								<form class="form-horizontal">
+									<div class="form-group form-group-sm">
+										<label>size x</label>
+				                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
+									</div>
+								</form>
+							</div>
+							<div class="col-md-6">
+								<form class="form-horizontal">
+									<div class="form-group form-group-sm">
+										<label>size y</label>
+				                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
+				                    </div>
+								</form>
+							</div>
+						</div>
 
-					<div class="row">
-	                    <div class="col left">
-	                        <label for="size-x">size x</label>
-	                        <input id="size-x" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
-	                    </div>
-	                    <div class="col right">
-	                        <label for="size-y">size y</label>
-	                        <input id="size-y" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
-	                    </div>
-	                </div></br>
+						<div class="row">
+							<div class="col-md-12">
+								<label>layer</label>
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}">
+							</div>
+						</div>
 
-					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+						<div class="row">
+							<div class="col-md-12">
+								<label>color</label>
+								<input class="form-control" type="text" on-change="valuesChange" value="{{actor.renderer.color::input}}">
+							</div>
+						</div>
+					</div>
 
-					<label for="color">color</label>
-                    <input id="color" type="text" on-change="valuesChange" value="{{actor.renderer.color::input}}"></br>
+					<!-- sprite renderer -->
+					<div hidden$="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
 
-				</div>
+						<div class="row">
+							<div class="col-md-12">
+								<label>layer</label>
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+							</div>
+						</div>
 
-				<!-- sprite renderer -->
-				<div class="row" hidden$="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
+						<div class="row">
+							<div class="col-md-12">
+								<label>sprite</label>
+								<select class="form-control" on-change="spriteChange">
+									<template is="dom-repeat" items="{{ sprites }}" as="sprite">
+										<option value="{{sprite.name}}" selected$="{{selected(sprite.name, actor.renderer.sprite)}}">
+											{{sprite.name}}
+										</option>
+									</template>
+								</select>
+							</div>
+						</div>
 
-					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+					</div>
 
-					<label for="sprite">sprite</label>
-					<select id="sprite" on-change="spriteChange">
-						<template id="spriteList" is="dom-repeat" items="{{ sprites }}" as="sprite">
-							<option value="{{sprite.name}}" selected$="{{selected(sprite.name, actor.renderer.sprite)}}">
-								{{sprite.name}}
-							</option>
-						</template>
-					</select></br>
+					<!-- animation renderer -->
+					<div hidden$="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
 
-				</div>
+						<div class="row">
+							<div class="col-md-12">
+								<label>play</label>
+								<input id="play" class="checkbox" type="checkbox" on-change="valuesChange">
+							</div>
+						</div>
 
-				<!-- animation renderer -->
-				<div class="row" hidden$="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
+						<div class="row">
+							<div class="col-md-12">
+								<label>layer</label>
+			                    <input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}">
+							</div>
+						</div>
 
-					<label for="play">play</label>
-					<input id="play" type="checkbox" on-change="valuesChange"></br>
+						<div class="row">
+							<div class="col-md-12">
+								<label>frames</label>
+								<input class="form-control" type="number" step="1" min="1" on-change="valuesChange" value="{{actor.renderer.frames::input}}">
+							</div>
+						</div>
 
-					<label for="layer">layer</label>
-                    <input id="layer" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+						<div class="row">
+							<div class="col-md-12">
+								<label>updatesPerFrame</label>
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.updatesPerFrame::input}}">
+							</div>
+						</div>
 
-					<label for="frames">frames</label>
-					<input id="frames" type="number" step="1" min="1" on-change="valuesChange" value="{{actor.renderer.frames::input}}"></br>
 
-					<label for="updatesPerFrame">updatesPerFrame</label>
-					<input id="updatesPerFrame" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.updatesPerFrame::input}}"></br>
+						<div class="row">
+							<div class="col-md-12">
+								<label>sprite</label>
+								<select class="form-control" on-change="spriteChange">
+									<template is="dom-repeat" items="{{ sprites }}" as="sprite">
+										<option value="{{sprite.name}}" selected$="{{selected(sprite.name, actor.renderer.sprite)}}">
+											{{sprite.name}}
+										</option>
+									</template>
+								</select>
+							</div>
+						</div>
 
-					<label for="sprite">sprite</label>
-					<select id="sprite" on-change="spriteChange">
-						<template id="spriteList" is="dom-repeat" items="{{ sprites }}" as="sprite">
-							<option value="{{sprite.name}}" selected$="{{selected(sprite.name, actor.renderer.sprite)}}">
-								{{sprite.name}}
-							</option>
-						</template>
-					</select></br>
-
-				</div>
-
-				<!-- anchor? -->
-            </div>
-
-			<div class="divider"></div>
-
+					</div>
+	            </div>
+			</div>
         </div>
-
 
 	</template>
 
@@ -182,6 +223,7 @@
 			if(this.actor.renderer && (this.actor.renderer.type == 'sprite' || this.actor.renderer.type == 'animation') && !this.actor.renderer.sprite && this.sprites.length > 0) {
 				this.actor.renderer.sprite = this.actor.prefab.renderer.args.sprite = this.sprites[0].name;
 			}
+
 		},
 
 		typeofRenderer: function(type, current) {
@@ -213,6 +255,11 @@
 
 				var sceneID = this.actor.sceneID;
 				this.actor = Amble.app.scene.getActorByID(sceneID);
+
+				this.sprites = [];
+				for(var i in Amble.app.imgList) {
+					this.push('sprites', Amble.app.imgList[i])
+				}
 
 				this.spriteUpdate();
 

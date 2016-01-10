@@ -152,7 +152,6 @@ ipcMain.on('launcher-open-request', function(event, data) {
     launcherWindow.focus();
     launcherWindow.setAlwaysOnTop(true);
 
-
     //editor
     editorWindow = new BrowserWindow({
         width: 1280,
@@ -187,7 +186,7 @@ ipcMain.on('editor-app-loaded', function(event, data) {
     };
 
     editorWindow.webContents.send('editor-load-respond', data);
-    editorWindow.setTitle(currentName + ' | Amble Editor')
+    editorWindow.setTitle('Amble Editor - ' + currentDir + ' - ' + currentName)
 
 });
 
@@ -217,7 +216,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
-    builderWindow.setTitle(currentName + ' | Amble Builder');
+    builderWindow.setTitle(currentName + ' | ' + currentDir + ' | Amble Builder');
     builderWindow.toggleDevTools();
     builderWindow.center();
     builderWindow.on('closed', function() {

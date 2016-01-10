@@ -4,51 +4,68 @@
 
 	<style>
 
-    .title {
-
-    }
-
-    .content {
-
-    }
+    .panel {
+		margin-top: 20px;
+		color: black;
+	}
 
 	</style>
 
 	<template>
 
-        <div class="tranform">
-            <div class="title" on-click="hide">
-                Transform
-            </div>
-            <div class="content" hidden$="{{hideConent}}">
-                <div class="row">
-                    <div class="col left">
-                        <label>x</label>
-                        <input type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.y::input}}">
-                    </div>
-                    <div class="col right">
-                        <label>y</label>
-                        <input type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.x::input}}">
-                    </div>
-                </div>
+        <div class="panel panel-primary">
+			<div class="panel-heading" on-click="hide">
+				<div class="row">
+					<div class="col-md-6">
+						<h3 class="panel-title">Transform</h3>
 
-                <div class="row">
-                    <div class="col left">
-                        <label>scale x</label>
-                        <input type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.x::input}}">
-                    </div>
-                    <div class="col right">
-                        <label>scale y</label>
-                        <input type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.y::input}}">
-                    </div>
-                </div>
+					</div>
+					<!-- utility buttons -->
+				</div>
 
-                <div class="row">
-                    <label>rotation</label>
-                    <input type="number" step="0.1" on-change="valuesChange" value="{{actor.transform.rotation::input}}">
-                </div>
+			</div>
+            <div class="panel-body" hidden$="{{hideConent}}">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-6">
+			                <form class="form-horizontal">
+			                    <div class="form-group form-group-sm">
+			                        <label>position.x</label>
+									<input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.y::input}}">
+			                    </div>
+			                    <div class="form-group form-group-sm">
+			                        <label>scale.y</label>
+			                        <input class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.y::input}}">
+			                    </div>
+			                </form>
+						</div>
+
+						<div class="col-md-6">
+							<form class="form-hotizontal">
+			                    <div class="form-group form-group-sm">
+			                        <label>position.y</label>
+			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.x::input}}">
+			                    </div>
+			                    <div class="form-group form-group-sm">
+			                        <label>scale.x</label>
+			                        <input class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.x::input}}">
+			                    </div>
+			                </form>
+						</div>
+					</div>
+
+
+	                <div class="row">
+						<div class="col-md-11">
+
+		                    <label>rotation</label>
+		                    <input class="form-control"type="number" step="0.1" on-change="valuesChange" value="{{actor.transform.rotation::input}}">
+
+						</div>
+	                </div>
+
+				</div>
             </div>
-			<div class="divider"></div>
         </div>
 
 

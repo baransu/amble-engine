@@ -125,7 +125,7 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
     document.getElementById('scene-view').innerHTML = "";
 
     //pass sprites to polymer
-    document.querySelector('renderer-component').sprites = projectData.imgs;
+    // document.querySelector('renderer-component').sprites = projectData.imgs;
 
     //game
     app = null;
@@ -135,37 +135,9 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
     EDITOR.refresh();
 
     ipcRenderer.send('editor-project-loaded');
+    Amble.app.imgList = projectData.imgs
 
 });
-
-var componentsToAdd = [
-    {
-        name: 'SpriteRenderer',
-        type: 'renderer',
-        body: { name: 'Amble.Graphics.SpriteRenderer', args: {
-            sprite: ''
-        }}
-    },
-    {
-        name: 'RectRenderer',
-        type: 'renderer',
-        body: { name: 'Amble.Graphics.RectRenderer', args: {
-            color: '#1B5E20',
-            size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
-            layer: 0
-        }}
-    },
-    {
-        name: 'AnimationRenderer',
-        type: 'renderer',
-        body: { name: 'Amble.Graphics.AnimationRenderer', args: {
-            sprite: '',
-            frames: 1,
-            updatesPerFrame: 1,
-            layer: 0
-        }}
-    }
-];
 
 //move to angular
 var projectView = {
@@ -198,14 +170,14 @@ var projectView = {
             case 'folder':
 
                 var arrow = document.createElement("i");
-                arrow.className = "fa fa-caret-right no-clickable triangle icon"
+                arrow.className = "glyphicon glyphicon-triangle-right no-clickable triangle icon"
                 header.appendChild(arrow);
-                icon.className = "fa fa-folder no-clickable folder icon"
+                icon.className = "glyphicon glyphicon-folder-close no-clickable folder icon"
 
                 break;
             case 'file':
 
-                icon.className = "fa fa-file-text-o no-clickable file icon"
+                icon.className = "glyphicon glyphicon-file no-clickable file icon"
 
                 break;
 
@@ -313,11 +285,8 @@ var projectView = {
 
             EDITOR.updateClass();
 
-            //force polymer to refresh
-            //global assets list
-            //pass it to polymer component if nessesary
-
-            document.querySelector('renderer-component').sprites = projectData.imgs;
+            Amble.app.imgList = projectData.imgs
+            // document.querySelector('renderer-component').sprites = projectData.imgs;
         });
 
     },
@@ -358,8 +327,53 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         this.previousActor = null;
         this.sceneID = null;
         this.actor = null;
-        this.hideComponentAdder = true;
-        this.componentsToAdd = [];
+
+        //default components to add
+        this.componentsToAdd = [
+            {
+                name: 'SpriteRenderer',
+                type: 'renderer',
+                body: { name: 'Amble.Graphics.SpriteRenderer', args: {
+                    sprite: ''
+                }}
+            },
+            {
+                name: 'RectRenderer',
+                type: 'renderer',
+                body: { name: 'Amble.Graphics.RectRenderer', args: {
+                    color: '#1B5E20',
+                    size: { name: "Amble.Math.Vector2", args: {x:100 ,y:100}},
+                    layer: 0
+                }}
+            },
+            {
+                name: 'AnimationRenderer',
+                type: 'renderer',
+                body: { name: 'Amble.Graphics.AnimationRenderer', args: {
+                    sprite: '',
+                    frames: 1,
+                    updatesPerFrame: 1,
+                    layer: 0
+                }}
+            }
+        ];
+
+        //default actors type to add
+        this.actorsToAdd = [
+            {
+                name: 'actor',
+                tag: ['actor'],
+                options: {},
+                selected: false,
+                transform: { name: "Amble.Transform", args: {
+                    position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
+                    scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}},
+                    rotation: 0
+                }},
+                renderer: { name: 'Amble.Graphics.EngineRenderer', args: {}},
+                components: []
+            }
+        ];
 
         var cam = Amble.app.scene.getActorByName('SceneCamera');
         if(cam) {
@@ -409,7 +423,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         switch(e.which) {
             case 27: //esc
 
-                editor.hideComponentAdder = true;
                 editor.refresh();
 
                 if(editor.actor && editor.actor.selected) {
@@ -446,85 +459,70 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         }
     });
 
-    editor.showComponentAdder = function() {
-        if(this.actor) {
-
-            //updated componentsToAdd
-            for(var i in Amble._classes) {
-                var p = Amble._classes[i].properties
-                console.log(p);
-                var cl = {
+    editor.updateComponents = function() {
+        //updated componentsToAdd
+        for(var i in Amble._classes) {
+            var p = Amble._classes[i].properties
+            console.log(p);
+            var cl = {
+                name: Amble._classes[i].name,
+                type: 'class',
+                body: {
+                    type: 'noneditor',
                     name: Amble._classes[i].name,
-                    type: 'class',
-                    body: {
-                        type: 'noneditor',
-                        name: Amble._classes[i].name,
-                        properties: p
-                    }
-                }
-                var c = componentsToAdd.find(c => c.name == cl.name)
-                if(!c) {
-                    componentsToAdd.push(cl);
-                } else {
-                    c.body.properties = Amble._classes[i].properties
+                    properties: p
                 }
             }
-
-            this.componentsToAdd = componentsToAdd;
-
-            console.log(this.componentsToAdd);
-
-            this.hideComponentAdder = false;
+            var c = this.componentsToAdd.find(c => c.name == cl.name)
+            if(!c) {
+                this.componentsToAdd.push(cl);
+            } else {
+                c.body.properties = Amble._classes[i].properties
+            }
         }
+
+        console.log(this.componentsToAdd);
+
     };
 
     editor.addComponent = function(component, $e) {
-        // console.log(component);
+        console.log(component);
 
-        //add to prefab
-        if(component.type == 'renderer') {
-            editor.actor.prefab.renderer = component.body;
-        } else if(component.type == 'class'){
-            console.log(editor.actor.prefab);
+        if(editor.actor) {
+            //add to prefab
+            if(component.type == 'renderer') {
+                editor.actor.prefab.renderer = component.body;
+            } else if(component.type == 'class'){
+                console.log(editor.actor.prefab);
+                editor.actor.prefab.components.push(component.body);
+            }
 
-            editor.actor.prefab.components.push(component.body);
+            var sceneID = editor.actor.sceneID;
+            var prefab = editor.actor.prefab;
+
+            Amble.app.scene.remove(this.actor);
+            editor.actor = Amble.app.scene.instantiate(prefab);
+
+            editor.actor.selected = true;
+            editor.actor.sceneID = sceneID;
         }
 
-        var sceneID = editor.actor.sceneID;
-        var prefab = editor.actor.prefab;
-
-        Amble.app.scene.remove(this.actor);
-        editor.actor = Amble.app.scene.instantiate(prefab);
-
-        editor.actor.selected = true;
-        editor.actor.sceneID = sceneID;
-
-        editor.hideComponentAdder = true;
     };
 
-    editor.addActor = function() {
-        editor.hideComponentAdder = true;
+    editor.addActor = function(actor) {
 
-        var obj = {
-            name: 'actor',
-            tag: ['actor'],
-            options: {},
-            selected: false,
-            transform: { name: "Amble.Transform", args: {
-                position: { name: "Amble.Math.Vector2", args: {x:0 ,y:0}},
-                scale: { name: "Amble.Math.Vector2", args: {x:1 ,y:1}}
-            }},
-            renderer: { name: 'Amble.Graphics.EngineRenderer', args: {}},
-            components: []
-        };
+        var a = JSON.parse(JSON.stringify(this.actorsToAdd.find(a => a.name == actor.name)));
+        if(a) {
+            delete a.$$hashKey;
+            a.name += editor.actors.length;
+            Amble.app.scene.instantiate(a);
+        }
 
-        Amble.app.scene.instantiate(obj);
-
+        console.log(Amble.app.scene.children)
         editor.actors = Amble.app.scene.children.filter(c => c.options.hideInHierarchy != true);
     };
 
     editor.actorSelected = function(_actor, $e) {
-        editor.hideComponentAdder = true;
 
         if(editor.actor) {
             editor.actor.selected = false;

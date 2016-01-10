@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <title>Amble Engine Launcher</title>
 
-        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <link rel="stylesheet" href="../bower_components/bootswatch-dist/css/bootstrap.min.css" charset="utf-8">
         <link rel="stylesheet" href="css/style.css" charset="utf-8">
 
     </head>
@@ -40,8 +40,8 @@
             </div>
 
             <div class="row">
-                <div class="col-md-12 text-danger">
-                    <h3 class="text-center">{{launcher.errorInfo}}</h3>
+                <div class="col-md-12">
+                    <h3 class="text-center text-danger">{{launcher.errorInfo}}</h3>
                 </div>
             </div>
 
@@ -55,7 +55,8 @@
                 <div class="col-md-12">
                     <div class="list-group" ng-repeat="project in launcher.projects">
                         <a href="#" class="list-group-item" ng-click="launcher.openProject($event, project)">
-                            {{project.name}} | {{project.dir}}
+                            <h3 class="list-group-item-heading">{{project.name}}</h3>
+                            <p class="list-group-item-text">{{project.dir}}</p>
                         </a>
                     </div>
                 </div>
@@ -66,7 +67,7 @@
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
         <script src="js/index.js" charset="utf-8"></script>
 
-        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../bower_components/bootswatch-dist/js/bootstrap.min.js" charset="utf-8"></script>
     </body>
 </html>
 
