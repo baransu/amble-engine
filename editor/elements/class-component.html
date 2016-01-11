@@ -6,7 +6,6 @@
 
     .panel {
 		margin-top: 10px;
-		color: black;
 	}
 
 	</style>
@@ -21,9 +20,16 @@
 						<div class="row">
 							<div class="col-md-6">
 								<h3 class="panel-title">{{component.name}} - (script)</h3>
-
 							</div>
-							<!-- utility buttons -->
+							<div class="btn-group">
+								<button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Options <span class="caret"></span>
+								</button>
+								<ul class="dropdown-menu">
+									<li><a href="#" component="{{index}}" on-click="deleteClass">Delete</a></li>
+									<li><a href="#" component="{{index}}" on-click="resetClass">Reset</a></li>
+								</ul>
+							</div>
 						</div>
 
 					</div>
@@ -41,7 +47,7 @@
 											<div class="col-md-6">
 												<form class="form-horizontal">
 													<div class="form-group form-group-sm">
-														<input class="form-control" type="number" placeholder="{{v.name}}" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{v.value}}">
+														<input class="form-control" type="number" placeholder="{{v.name}}" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.index}}" on-change="valuesChange" value="{{v.value}}">
 													</div>
 												</form>
 											</div>
@@ -54,14 +60,14 @@
 								<div class="row" hidden$="{{hideProperty('simple-number', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (number)</label>
-										<input class="form-control" type="number" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}">
+										<input class="form-control" type="number" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" value="{{p.value}}">
 									</div>
 								</div>
 
 								<div class="row" hidden$="{{hideProperty('simple-bool', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (bool)</label>
-										<input class="checkbox" type="checkbox" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{p.value}}">
+										<input class="checkbox" type="checkbox" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" checked="{{p.value}}">
 									</div>
 								</div>
 
@@ -69,7 +75,7 @@
 								<div class="row" hidden$="{{hideProperty('simple-string', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (string)</label>
-										<input class="form-control" type="text" property="{{p.name}}" component="{{component.name}}" on-change="valuesChange" value="{{p.value}}">
+										<input class="form-control" type="text" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" value="{{p.value}}">
 									</div>
 								</div>
 
@@ -80,21 +86,21 @@
 										<div class="row" hidden$="{{hideProperty('simple-number', v)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (number)</label>
-												<input class="form-control" type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+												<input class="form-control" type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" value="{{v.value::input}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('simple-bool', v)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (bool)</label>
-												<input class="checkbox" type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" checked="{{v.value}}"></br>
+												<input class="checkbox" type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" checked="{{v.value}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('simple-string', v)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (string)</label>
-												<input class="form-control" type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.name}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+												<input class="form-control" type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" value="{{v.value::input}}"></br>
 											</div>
 										</div>
 
@@ -112,7 +118,7 @@
 												<div class="col-md-6">
 													<form class="form-horizontal">
 														<div class="form-group form-group-sm">
-															<input class="form-control" placeholder="{{vv.name}}" type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.name}}" on-change="valuesChange" value="{{vv.value}}">
+															<input class="form-control" placeholder="{{vv.name}}" type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.index}}" on-change="valuesChange" value="{{vv.value}}">
 														</div>
 													</form>
 												</div>
@@ -161,6 +167,53 @@
 
 		ready: function () { },
 
+		deleteClass: function(e) {
+			var index = e.target.component;
+
+			if(this.actor) this.actor.prefab.components.splice(index, 1);
+
+			this.components = [];
+			for(var i in this.actor.prefab.components) {
+				var c = this.actor.prefab.components[i];
+				var p = [];
+				for(var x in c.properties) {
+					var a = this.decodeProperties(c.properties[x]);
+					p.push(a);
+				}
+
+				this.push('components', {
+					name: c.name,
+					props: p
+				});
+			}
+		},
+
+		resetClass: function(e) {
+			var index = e.target.component;
+			var c = Amble._classes.find(c => c.name == this.components[index].name);
+			if(c) {
+
+				for(var x in c.properties) {
+					this.actor.prefab.components[index].properties[x] = JSON.parse(JSON.stringify(c.properties[x]));
+				}
+
+				this.components = [];
+				for(var i in this.actor.prefab.components) {
+					var c = this.actor.prefab.components[i];
+					var p = [];
+					for(var x in c.properties) {
+						var a = this.decodeProperties(c.properties[x]);
+						p.push(a);
+					}
+
+					this.push('components', {
+						name: c.name,
+						props: p
+					});
+				}
+			}
+		},
+
 		hideProperty: function(type, p) {
 
 			switch(type) {
@@ -182,7 +235,6 @@
 				break;
 
 				case 'array':
-					console.log(p.values)
 					return !(Array.isArray(p.values) && typeof p.values[0].value != 'object');
 				break;
 
@@ -199,7 +251,6 @@
 		},
 
 		propertyUpdate: function(p, e) {
-
 			if(typeof p.args[0] == 'number' || typeof p.args[0] == 'boolean' || typeof p.args[0] == 'string') {
 				switch(e.target.type) {
 					case 'number':
@@ -232,8 +283,10 @@
 
 		valuesChange: function(e) {
 			//apply object changes to prefab
+			console.log('value change')
+			var index = e.target.component;
 			var property = e.target.property;
-			var component = this.actor.prefab.components.find(c => c.name == e.target.component);
+			var component = this.actor.prefab.components[index];
 
 			if(component) {
 
@@ -292,7 +345,7 @@
 
 				this.components = [];
 
-				for(var i in this.actor.prefab.components) {
+				for(var i = 0; i < this.actor.prefab.components.length; i++) {
 					var c = this.actor.prefab.components[i];
 					var p = [];
 					for(var x in c.properties) {
@@ -301,12 +354,15 @@
 					}
 
 					this.push('components', {
+						index: i,
 						name: c.name,
 						props: p
 					});
 				}
 			}
 		},
+
+		hide: function() {},
 
 	});
 

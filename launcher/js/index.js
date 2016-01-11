@@ -28,6 +28,10 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
         ipcRenderer.send('launcher-dir-request');
     };
 
+    launcher.openOther = function() {
+        ipcRenderer.send('launcher-other-request');
+    };
+
     launcher.openProject = function($event, data) {
         console.log(data)
         ipcRenderer.send('launcher-open-request', {
@@ -61,6 +65,18 @@ ipcRenderer.on('launcher-dir-respond', function(event, data) {
     LAUNCHER.refresh();
 });
 
+ipcRenderer.on('launcher-other-respond', function(event, data) {
+    if(data.name && data.dir) {
+        ipcRenderer.send('launcher-open-request', {
+            name: data.name,
+            dir: data.dir
+        });
+    } else {
+        LAUNCHER.errorInfo = 'Cannot open this project!';
+        LAUNCHER.refresh();
+    }
+});
+
 ipcRenderer.on('launcher-create-respond', function(event, data) {
     //update folders list and send open request with dir
     switch(data) {
@@ -72,7 +88,7 @@ ipcRenderer.on('launcher-create-respond', function(event, data) {
         break;
 
         case 'already exist':
-            LAUNCHER.error = 'Project already exist in given directory.';
+            LAUNCHER.errorInfo = 'Project already exist in given directory.';
             LAUNCHER.refresh();
         break;
     }

@@ -6,7 +6,6 @@
 
     .panel {
 		margin-top: 20px;
-		color: black;
 	}
 
 	</style>
@@ -14,13 +13,20 @@
 	<template>
 
         <div class="panel panel-primary">
-			<div class="panel-heading" on-click="hide">
+			<div class="panel-heading">
 				<div class="row">
-					<div class="col-md-6">
+					<div class="col-md-6" on-click="hide">
 						<h3 class="panel-title">Transform</h3>
 
 					</div>
-					<!-- utility buttons -->
+					<div class="btn-group">
+						<button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							Options <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu">
+							<li><a href="#" on-click="reset">Reset</a></li>
+						</ul>
+					</div>
 				</div>
 
 			</div>
@@ -31,11 +37,11 @@
 			                <form class="form-horizontal">
 			                    <div class="form-group form-group-sm">
 			                        <label>position.x</label>
-									<input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.y::input}}">
+									<input id="posx" class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.y::input}}">
 			                    </div>
 			                    <div class="form-group form-group-sm">
 			                        <label>scale.y</label>
-			                        <input class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.y::input}}">
+			                        <input id="scaley" class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.y::input}}">
 			                    </div>
 			                </form>
 						</div>
@@ -44,11 +50,11 @@
 							<form class="form-hotizontal">
 			                    <div class="form-group form-group-sm">
 			                        <label>position.y</label>
-			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.x::input}}">
+			                        <input id="posy" class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.x::input}}">
 			                    </div>
 			                    <div class="form-group form-group-sm">
 			                        <label>scale.x</label>
-			                        <input class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.x::input}}">
+			                        <input id="scalex" class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.x::input}}">
 			                    </div>
 			                </form>
 						</div>
@@ -59,7 +65,7 @@
 						<div class="col-md-11">
 
 		                    <label>rotation</label>
-		                    <input class="form-control"type="number" step="0.1" on-change="valuesChange" value="{{actor.transform.rotation::input}}">
+		                    <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" value="{{actor.transform.rotation::input}}">
 
 						</div>
 	                </div>
@@ -79,16 +85,37 @@
 		is: 'transform-component',
 
 		properties: {
+
 			actor: {
 				type: Object,
 				value: null,
 				notify: true,
 				observer: 'refreshActor'
 			},
+
 			hideConent: {
 				type: Boolean,
 				value: false
 			}
+
+		},
+
+		reset: function() {
+			//position
+			this.actor.prefab.transform.args.position.args.x = this.actor.transform.position.x = 0;
+			this.notifyPath('actor.transform.position.x', this.actor.transform.position.x);
+			this.actor.prefab.transform.args.position.args.y = this.actor.transform.position.y = 0;
+			this.notifyPath('actor.transform.position.y', this.actor.transform.position.y);
+
+			//scale
+			this.actor.prefab.transform.args.scale.args.x = this.actor.transform.scale.x = 1;
+			this.notifyPath('actor.transform.scale.x', this.actor.transform.scale.x);
+			this.actor.prefab.transform.args.scale.args.y = this.actor.transform.scale.y = 1;
+			this.notifyPath('actor.transform.scale.y', this.actor.transform.scale.y);
+
+			//rotation
+			this.actor.prefab.transform.args.rotation = this.actor.transform.rotation = 0;
+			this.notifyPath('actor.transform.rotation', this.actor.transform.rotation);
 		},
 
 		valuesChange: function() {

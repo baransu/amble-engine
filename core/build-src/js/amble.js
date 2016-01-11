@@ -9,6 +9,8 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
+        this.debug = new Amble.Debug();
+
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : true;
         this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
@@ -17,14 +19,10 @@ window.Amble = (function(){
         this.height = args['height'] || 480;
 
         this.scene = new Amble.Scene();
-        // console.log('camera init')
         this.mainCamera = this.scene.instantiate(args['mainCamera']);
-        // console.log('after camera init')
 
         if(this.resize) {
-            // console.log('resize add')
             window.addEventListener('resize', function(){
-                // console.log('resize')
                 var camera = Amble.app.mainCamera.camera;
                 for(var i = 0; i < camera.layers.length; i++) {
                     camera.layers[i].layer.resize();
@@ -42,7 +40,6 @@ window.Amble = (function(){
         this.update = function(){
             this.mainCamera.camera.update()
             this.scene.update();
-            // console.log('update')
             //update all objects on scene
             //priorytet sort?
         };
@@ -137,7 +134,7 @@ window.Amble = (function(){
                 Amble.Input._setListeners();
 
                 Amble.app.loader.audioCache = [];
-                // that.scene.start();
+                that.scene.start();
                 that.loaded();
                 that.start();
                 Amble.Time._lastTime = Date.now()
@@ -220,6 +217,40 @@ window.Amble = (function(){
         }
     };
 
+    Amble.Debug = function() {
+        this.logs = [];
+    };
+
+    Amble.Debug.prototype = {
+
+        log: function(log) {
+
+            // if(EDITOR != undefined) {
+            //     this.logs.push({
+            //         type: 'log',
+            //         message: log
+            //     });
+            //     EDITOR.refresh();
+            // }
+
+            console.log(log)
+        },
+
+        error: function(err) {
+
+            // if(EDITOR != undefined) {
+            //     this.logs.push({
+            //         type: 'error',
+            //         message: err
+            //     });
+            //     EDITOR.refresh();
+            // }
+
+            console.log(err)
+
+        },
+    };
+
     Amble.Utils = {
 
         generateID: function() {
@@ -290,10 +321,8 @@ window.Amble = (function(){
 
         clone: function(obj) {
             var copy = {};
-            // console.log('clone name', obj.name);
             if (obj instanceof Object || obj instanceof Array) {
                 for(var attr in obj) {
-                    // console.log('copy attr', attr);
                     if(attr == 'components') {
                         copy[attr] = [];
                         for(var i = 0; i < obj[attr].length; i++) {
@@ -316,7 +345,6 @@ window.Amble = (function(){
                     } else if (attr == 'renderer' && obj[attr] && obj[attr].name == "Amble.Graphics.EngineRenderer") {
                         continue;
                     } else {
-                        // console.log('copy attr', attr);
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
                     }
                 }
@@ -325,7 +353,6 @@ window.Amble = (function(){
         },
 
         stringToFunction: function(str) {
-            // console.log('stringtofunction', str);
             var arr = str.split(".");
             var fn = window || Amble || this;
             for (var i = 0, len = arr.length; i < len; i++) {
@@ -333,7 +360,7 @@ window.Amble = (function(){
             }
 
             if (typeof fn !== "function") {
-                console.log('stringtofunction', str);
+                Amble.app.debug.error('stringtofunction ' + str);
                 throw new Error("function not found");
             }
 
@@ -416,12 +443,16 @@ window.Amble = (function(){
         }
 
         Amble._classes.push(c);
+
+        console.log(Amble._classes);
     };
 
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
         // this.shortArray = [];
+
+        this.started = false;
     };
 
     Amble.Scene.prototype = {
@@ -461,10 +492,19 @@ window.Amble = (function(){
 
             object.prefab = prefab;
 
-            if(object.components != 'undefined') {
+            if(object.components !== undefined) {
                 for(var i = 0; i < object.components.length; i++) {
                     var _component = object.components[i].body;
-                    if(typeof _component.update == 'function'){
+                    if(typeof _component.awake == 'function'){
+                        _component.awake(object);
+                    }
+                }
+            }
+
+            if(this.started && object.components !== undefined) {
+                for(var i = 0; i < object.components.length; i++) {
+                    var _component = object.components[i].body;
+                    if(typeof _component.start == 'function'){
                         _component.start(object);
                     }
                 }
@@ -483,7 +523,7 @@ window.Amble = (function(){
             }
         },
 
-        awake: function(){
+        start: function(){
             for(var i in this.children){
                 /* component start */
                 for(var j = 0; j < this.children[i].components.length; j++){
@@ -493,6 +533,7 @@ window.Amble = (function(){
                     }
                 }
             }
+            this.started = true;
         },
 
         update: function(){
@@ -645,13 +686,18 @@ window.Amble = (function(){
 
         //scale to fullscreen
         this.resize = function() {
-            // console.log('resize-layer')
             // if(Amble.app.fullscreen) {
                 var scaleX = window.innerWidth / this.canvas.width;
                 var scaleY = window.innerHeight / this.canvas.height;
 
                 var scaleToFit = Math.min(scaleX, scaleY);
                 var scaleToCover = Math.max(scaleX, scaleY);
+
+                var w = window.innerWidth - (this.canvas.width * scaleToFit);
+                var h = window.innerHeight - (this.canvas.height * scaleToFit);
+
+                this.canvas.style.top = (h/2) + 'px';
+                this.canvas.style.left = (w/2) + 'px';
 
                 this.canvas.style.transformOrigin = "0 0"; //scale from top left
                 this.canvas.style.transform = "scale(" + scaleToFit + ")";
@@ -1099,7 +1145,7 @@ window.Amble = (function(){
 
         keydown: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input.isShiftPressed = e.shiftKey;
             Amble.Input.isCtrlPressed = e.ctrlKey;
             Amble.Input._keyValues[e.which] = true;
@@ -1115,7 +1161,7 @@ window.Amble = (function(){
 
         mousedown: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input._mouseValues[e.which] = true;
 
             Amble.app.scene.onmousedown(e);
@@ -1123,7 +1169,7 @@ window.Amble = (function(){
 
         mouseup: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input._mouseValues[e.which] = false;
 
             Amble.app.scene.onmouseup(e);
@@ -1134,8 +1180,8 @@ window.Amble = (function(){
             var offsetTop = Amble.app.mainCamera.camera.context.offsetTop;
 
             if(Amble.Input.debug) {
-                console.log(e.clientX - offsetLeft);
-                console.log(e.clientY - offsetTop);
+                Amble.app.debug.log(e.clientX - offsetLeft);
+                Amble.app.debug.log(e.clientY - offsetTop);
             }
 
             Amble.Input.offset.x = offsetLeft;

@@ -2,13 +2,17 @@ Amble.Class({
 
     name: 'Camera',
 
+    _options: {
+        hide: true
+    },
+
     properties: {
         lastMousePos: new Vec2(),
         done: false,
         zoomSpeed: 1,
         origin: new Vec2(),
-        maxZoom: 0.15,
-        minZoom: 2,
+        maxZoom: 0.05,
+        minZoom: 4,
         translate: new Vec2(),
         zoom: 0,
         mouse: new Vec2(),

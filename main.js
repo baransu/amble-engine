@@ -77,6 +77,8 @@ ipcMain.on('launcher-projects-request', function(event, data) {
 
         console.log(projects);
 
+        projects.sort((a, b) => b.time - a.time);
+
         launcherWindow.webContents.send('launcher-projects-respond', projects);
 
     });
@@ -97,6 +99,31 @@ ipcMain.on('launcher-dir-request', function(event, data) {
     });
 });
 
+ipcMain.on('launcher-other-request', function(event, data) {
+    dialog.showOpenDialog(
+        launcherWindow,
+        {
+            title: 'Select project directory',
+            properties: ['openFile'],
+            filters: [
+                { name: 'Amble Project', extensions: ['aproject'] }
+            ]
+        },
+        function(path) {
+
+            if(path != undefined) {
+                path = path[0];
+                console.log(path);
+                var p = JSON.parse(fs.readFileSync(path, 'utf-8'));
+                if(p) var data = { name: p.name, dir: p.dir + '/' + p.name};
+            } else {
+                var data = 'undefined'
+            }
+
+            launcherWindow.webContents.send('launcher-other-respond', data);
+    });
+});
+
 ipcMain.on('launcher-create-request', function(event, data) {
 
     var dir = currentDir = data.dir;
@@ -108,7 +135,7 @@ ipcMain.on('launcher-create-request', function(event, data) {
         if(err) throw err;
 
         //create aproject file
-        fs.writeFileSync(folder + '/' + name + '.aproject', JSON.stringify({}), 'utf8');
+        fs.writeFileSync(folder + '/' + name + '.aproject', JSON.stringify({name: currentName, dir: currentDir}), 'utf8');
 
         //create assets file
         mkdirp(folder + '/assets', function(err) {
@@ -125,6 +152,7 @@ ipcMain.on('launcher-create-request', function(event, data) {
             if(!projects.find( c => c.name == name && c.dir == folder)) {
 
                 projects.push({
+                    time: Date.now(),
                     name: name,
                     dir: folder
                 });
@@ -146,6 +174,21 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
     currentName = data.name;
     currentDir = data.dir;
+
+    var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
+    if(f && f.projects) {
+        var p = f.projects.find(pr => pr.name == currentName && pr.dir == currentDir)
+        if(p) p.time = Date.now();
+        else {
+            f.projects.push({
+                time: Date.now(),
+                name: currentName,
+                dir: currentDir
+            });
+        }
+    }
+
+    fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify(f), 'utf-8')
 
     //load launcher loader page
     launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
@@ -186,7 +229,7 @@ ipcMain.on('editor-app-loaded', function(event, data) {
     };
 
     editorWindow.webContents.send('editor-load-respond', data);
-    editorWindow.setTitle('Amble Editor - ' + currentDir + ' - ' + currentName)
+    editorWindow.setTitle(currentName + ' - ' + currentDir + ' - Amble Editor')
 
 });
 
@@ -198,7 +241,10 @@ ipcMain.on('editor-project-loaded', function(event, data) {
 ipcMain.on('editor-save-respond', function(event, data) {
 
     console.log(data);
-    fs.writeFileSync(currentDir + '/' + currentName + '.aproject', data, 'utf8');
+    var d = JSON.parse(data);
+    d.name = currentName;
+    d.dir = currentDir;
+    fs.writeFileSync(currentDir + '/' + currentName + '.aproject', JSON.stringify(d), 'utf8');
 
 });
 
@@ -248,9 +294,12 @@ ipcMain.on('builder-dir-request', function(event, data) {
 
 ipcMain.on('builder-build-request', function(event, data) {
 
+    console.log(projectBuildData);
+
     //process build
     var sceneFile = projectBuildData.sceneFile;
     var imagesList = projectBuildData.imagesList;
+    var scriptsList = projectBuildData.scriptsList;
     var targetDir = buildDir + '/' + data.name;
     var gameTitle = data.name;
 
@@ -261,25 +310,38 @@ ipcMain.on('builder-build-request', function(event, data) {
 
     console.log(targetDir);
 
-    for(var i in data.imagesList) {
-        builderGulp.imagesList.push(data.imagesList[i].path);
+    for(var i = 0; i < imagesList.length; i++) {
+        builderGulp.imagesList.push(imagesList[i].path);
     }
 
-    for(var i in data.scriptsList) {
-        builderGulp.scriptsList.push(data.scriptsList[i].path);
+    for(var i = 0; i < scriptsList.length; i++) {
+        builderGulp.scriptsList.push(scriptsList[i].path);
     }
 
-    builderGulp.start('build-game', function(){
+    console.log(builderGulp.scriptsList);
 
-        fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-        fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+    builderGulp.start('prepare', function(err) {
+        if(err) {
+            builderWindow.send('builder-build-respond', 'Game build failed - preparation');
+            throw err;
+        }
 
-        console.log('build-game callback')
+        builderGulp.start('build-game', function(err) {
+            if(err) {
+                builderWindow.send('builder-build-respond', 'Game build failed - build');
+                throw err;
+            }
 
-        var info = 'Game build succesful - game build to: ' + targetDir;
-        //send respond with respond
-        builderWindow.send('builder-build-respond', info)
+            fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+            fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
 
+            console.log('build-game callback')
+
+            var info = 'Game build succesful - game build to: ' + targetDir;
+            //send respond with respond
+            builderWindow.send('builder-build-respond', info)
+
+        });
     });
 });
 

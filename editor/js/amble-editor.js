@@ -8,6 +8,7 @@ window.Amble = (function(){
         var that = this;
         Amble.app = this;
 
+        this.debug = new Amble.Debug();
         this.imgList = [];
 
         this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
@@ -124,42 +125,43 @@ window.Amble = (function(){
         var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
         this.loadingInterval = setInterval(function(){
-            var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-            var layer = that.mainCamera.camera.layer(0);
-            layer.ctx.save();
-            var loading = [
-                "   loading.  ",
-                "   loading.. ",
-                "   loading...",
-            ]
+            if(that.mainCamera) {
+                var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
+                var layer = that.mainCamera.camera.layer(0);
+                layer.ctx.save();
+                var loading = [
+                    "   loading.  ",
+                    "   loading.. ",
+                    "   loading...",
+                ]
 
-            layer.clear('black')
-                .fillStyle(color)
-                .strokeStyle('white')
-                .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
-                .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
+                layer.clear('black')
+                    .fillStyle(color)
+                    .strokeStyle('white')
+                    .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
+                    .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
 
-            layer.ctx.shadowColor = "white";
-            layer.ctx.shadowBlur = 20;
+                layer.ctx.shadowColor = "white";
+                layer.ctx.shadowBlur = 20;
 
-            layer.fillStyle('white');
-            layer.ctx.textAlign = 'center';
-            layer.ctx.font = "25px Arial";
-            var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
-            layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
+                layer.fillStyle('white');
+                layer.ctx.textAlign = 'center';
+                layer.ctx.font = "25px Arial";
+                var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
+                layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
 
-            layer.ctx.font = "20px Arial";
-            text = loading[currentLoadingText];
-            layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
+                layer.ctx.font = "20px Arial";
+                text = loading[currentLoadingText];
+                layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
 
-            loadingTimer += 1/60;
-            if(loadingTimer > 1) {
-                loadingTimer = 0;
-                currentLoadingText++;
-                if(currentLoadingText == loading.length) currentLoadingText = 0;
+                loadingTimer += 1/60;
+                if(loadingTimer > 1) {
+                    loadingTimer = 0;
+                    currentLoadingText++;
+                    if(currentLoadingText == loading.length) currentLoadingText = 0;
+                }
+                layer.ctx.restore();
             }
-            layer.ctx.restore();
-
         }, 1000/60);
 
 
@@ -253,6 +255,40 @@ window.Amble = (function(){
             return this;
         }
     };
+
+    Amble.Debug = function() {
+        this.logs = [];
+    };
+
+    Amble.Debug.prototype = {
+
+        log: function(log) {
+
+            if(EDITOR !== undefined) {
+                this.logs.push({
+                    type: 'log',
+                    message: log
+                });
+                EDITOR.refresh();
+            }
+
+            console.log(log)
+        },
+
+        error: function(err) {
+
+            if(EDITOR !== undefined) {
+                this.logs.push({
+                    type: 'error',
+                    message: err
+                });
+                EDITOR.refresh();
+            }
+
+            console.log(err)
+
+        },
+    }
 
     /* Utils */
     Amble.Utils = {
@@ -358,7 +394,6 @@ window.Amble = (function(){
                     }
                 }
             }
-            // console.log(copy)
             return copy;
         },
 
@@ -370,6 +405,7 @@ window.Amble = (function(){
             }
 
             if (typeof fn !== "function") {
+                Amble.app.debug.error(str + 'function not found');
                 throw new Error("function not found");
             }
 
@@ -405,7 +441,7 @@ window.Amble = (function(){
                 args: []
             }
 
-            if(arg != null) {
+            if(arg !== null) {
                 var n = arg.constructor.name;
                 if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
                     var b = {
@@ -428,15 +464,19 @@ window.Amble = (function(){
         };
 
         if(!obj) {
+            Amble.app.debug.error('Wrong class code!')
             throw new Error('Wrong class code!');
         } else if(typeof obj !== 'object') {
+            Amble.app.debug.error('Class must be an object!')
             throw new Error('Class must be an object!');
         } else if(!obj.name) {
+            Amble.app.debug.error('Class must have a name!')
             throw new Error('Class must have a name!');
         }
 
         var c = {
             name: obj.name,
+            _options: obj._options,
             properties: [],
         }
 
@@ -460,7 +500,7 @@ window.Amble = (function(){
         Amble._classes.push(c);
 
         /*
-        flow order:
+        order:
 
         - every class is registered in engine and can be extended?
         - user can create custom classes which are not engine default
@@ -485,7 +525,6 @@ window.Amble = (function(){
                 data.push(this.children[i].prefab);
             }
 
-            // console.log(data);
             return data;
         },
 
@@ -1211,7 +1250,7 @@ window.Amble = (function(){
 
         keydown: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input.isShiftPressed = e.shiftKey;
             Amble.Input.isCtrlPressed = e.ctrlKey;
             Amble.Input._keyValues[e.which] = true;
@@ -1227,7 +1266,7 @@ window.Amble = (function(){
 
         mousedown: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input._mouseValues[e.which] = true;
 
             Amble.app.scene.onmousedown(e);
@@ -1235,7 +1274,7 @@ window.Amble = (function(){
 
         mouseup: function(e){
             if(Amble.Input.debug)
-                console.log(e.which);
+                Amble.app.debug.log(e.which);
             Amble.Input._mouseValues[e.which] = false;
 
             Amble.app.scene.onmouseup(e);
@@ -1246,8 +1285,8 @@ window.Amble = (function(){
             var offsetTop = Amble.app.mainCamera.camera.context.offsetTop;
 
             if(Amble.Input.debug) {
-                console.log(e.clientX - offsetLeft);
-                console.log(e.clientY - offsetTop);
+                Amble.app.debug.log(e.clientX - offsetLeft);
+                Amble.app.debug.log(e.clientY - offsetTop);
             }
 
             Amble.Input.offset.x = offsetLeft;
@@ -1268,13 +1307,15 @@ window.Amble = (function(){
 
     Amble.Input._setListeners = function(){
 
-        var element = Amble.app.mainCamera.camera.context;
-        document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
-        document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-        element.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-        element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-        element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-        element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        if(Amble.app.mainCamera) {
+            var element = Amble.app.mainCamera.camera.context;
+            document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+            document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+            element.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        }
 
         //touch start
         //touch end
@@ -1283,25 +1324,27 @@ window.Amble = (function(){
 
     Amble.Input._removeListeners = function(){
 
-        var element = Amble.app.mainCamera.camera.context;
-        if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+        if(Amble.app.mainCamera) {
+            var element = Amble.app.mainCamera.camera.context;
+            if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
 
-            document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
-            document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-            element.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-            element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-            element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-            element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+                document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+                document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+                element.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+                element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+                element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+                element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
 
-        } else if (document.detachEvent) { // For IE 8 and earlier versions
+            } else if (document.detachEvent) { // For IE 8 and earlier versions
 
-            document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
-            document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
-            element.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
-            element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
-            element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
-            element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+                document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
+                document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
+                element.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
+                element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
+                element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
+                element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
 
+            }
         }
     }
 

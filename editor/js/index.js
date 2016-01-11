@@ -33,6 +33,8 @@ var menuFunctions = {
 
     save: function() {
         var data = {};
+
+        data.time = Date.now();
         data.scene = Amble.app.scene.createSceneFile();
         data.camera = {
             x: Amble.app.mainCamera.camera.position.x,
@@ -96,12 +98,20 @@ var menu = Menu.buildFromTemplate([
 
 Menu.setApplicationMenu(menu);
 
-ipcRenderer.send('editor-app-loaded');
+window.onload = function() {
+    ipcRenderer.send('editor-app-loaded');
+}
+
 ipcRenderer.on('editor-build-request', function() {
     menuFunctions.build();
 });
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
+
+// var debugConsole = document.getElementById('debug-console');
+// debugConsole.addEventListener("dom-ready", function(){
+//     debugConsole.openDevTools();
+// });
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
 
@@ -321,6 +331,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.update = function() {
 
+        this.logs = Amble.app.debug.logs;
         this.hierarchy = {};
         this.inspector = {};
         this.inspector.transformShow = true;
@@ -386,6 +397,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     };
 
     editor.updateClass = function() {
+
         for(var i in editor.actors) {
             var a = editor.actors[i].prefab;
             for(var j in a.components) {
@@ -466,6 +478,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             console.log(p);
             var cl = {
                 name: Amble._classes[i].name,
+                options: Amble._classes[i]._options,
                 type: 'class',
                 body: {
                     type: 'noneditor',

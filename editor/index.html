@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>Amble Editor</title>
-        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <link rel="stylesheet" href="../bower_components/bootswatch-dist/css/bootstrap.min.css" charset="utf-8">
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
         <!-- <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/> -->
     </head>
@@ -33,7 +33,18 @@
 
             <div id="scene-view"></div>
 
-            <div id="debug-console">debug</div>
+            <div id="debug-console" class="scroll">
+                <div class="container-fluid" ng-repeat="log in editor.logs">
+                    <div class="row">
+                        <div class="col-md-12 text-danger console-message" ng-if="log.type == 'error'">
+                            {{log.message}}
+                        </div>
+                        <div class="col-md-12 console-message" ng-if="log.type == 'log'">
+                            {{log.message}}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div id="hierarchy">
 
@@ -41,7 +52,7 @@
                     <div class="col-md-12">
                         <div class="input-group input-group-sm">
                             <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></button>
+                                <a role="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></a>
                                 <ul class="dropdown-menu" role="menu">
                                     <li ng-repeat="actor in editor.actorsToAdd" >
                                         <a href="#" ng-click="editor.addActor(actor)">{{actor.name}}</a>
@@ -72,10 +83,10 @@
                             <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
                             <div class="input-group-btn">
 
-                                <button class="btn btn-default dropdown-toggle" type="button" ng-click="editor.updateComponents()" data-toggle="dropdown">Add <span class="caret"></span></button>
+                                <a class="btn btn-default dropdown-toggle" role="button" ng-click="editor.updateComponents()" data-toggle="dropdown">Add <span class="caret"></span></a>
                                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
                                     <li ng-repeat="component in editor.componentsToAdd">
-                                        <a href="#" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                                        <a href="#" ng-if="!component.options.hide" ng-click="editor.addComponent(component)">{{component.name}}</a>
                                     </li>
                                 </ul>
 
@@ -106,7 +117,7 @@
         <script src="js/index.js" charset="utf-8"></script>
 
         <script src="../bower_components/webcomponentsjs/webcomponents.js" charset="utf-8"></script>
-        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
+        <script src="../bower_components/bootswatch-dist/js/bootstrap.min.js" charset="utf-8"></script>
 
         <link rel="import" href="elements/class-component.html">
         <link rel="import" href="elements/transform-component.html">
