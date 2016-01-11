@@ -53,6 +53,17 @@ var menuFunctions = {
         };
 
         ipcRenderer.send('editor-build-respond', data);
+    },
+
+    play: function() {
+        var data = {
+            sceneFile: Amble.app.scene.createSceneFile(),
+            imagesList: projectData.imgs,
+            scriptsList: projectData.scripts
+        };
+
+        Amble.app.pause();
+        ipcRenderer.send('editor-game-preview-respond', data);
     }
 
 }
@@ -91,6 +102,11 @@ var menu = Menu.buildFromTemplate([
                 label: 'Build',
                 accelerator: 'Ctrl+B',
                 click: menuFunctions.build
+            },
+            {
+                label: 'Play',
+                accelerator: 'Ctrl+P',
+                click: menuFunctions.play
             }
         ]
     }
@@ -102,16 +118,33 @@ window.onload = function() {
     ipcRenderer.send('editor-app-loaded');
 }
 
+ipcRenderer.on('editor-game-preview-request', function() {
+    menuFunctions.play();
+});
+
 ipcRenderer.on('editor-build-request', function() {
     menuFunctions.build();
 });
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
 
+ipcRenderer.on('editor-unpause', function(event, data) {
+    Amble.app.unpause();
+});
+
 // var debugConsole = document.getElementById('debug-console');
 // debugConsole.addEventListener("dom-ready", function(){
 //     debugConsole.openDevTools();
 // });
+
+ipcRenderer.on('game-preview-log', function(event, data) {
+    Amble.app.debug.log(data);
+});
+
+
+ipcRenderer.on('game-preview-error', function(event, data) {
+    Amble.app.debug.error(data);
+});
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
 

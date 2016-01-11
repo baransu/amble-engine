@@ -1,6 +1,7 @@
 window.Amble = (function(){
 
     var Amble = {};
+
     Amble.app = {};
 
     /* Game */
@@ -9,39 +10,24 @@ window.Amble = (function(){
         Amble.app = this;
 
         this.debug = new Amble.Debug();
-        this.imgList = [];
 
-        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : false;
+        this.resize = typeof args['resize'] === 'boolean' ? args['resize'] : true;
+        this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
-        //wrap this things up
-        if(this.resize) {
-            window.addEventListener('resize', function(){
-
-                var camera = Amble.app.mainCamera.camera;
-                var width = parseInt(camera.context.offsetWidth);
-                var height = parseInt(camera.context.offsetHeight);
-
-                for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
-                    Amble.app.width = camera.layers[i].layer.canvas.width = width;
-                    Amble.app.height = camera.layers[i].layer.canvas.height = height;
-                }
-
-                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
-
-            });
-        }
+        this.fullscreen = args['fullscreen'] || false;
+        this.width = args['width'] || 640;
+        this.height = args['height'] || 480;
 
         this.scene = new Amble.Scene();
+        this.mainCamera = this.scene.instantiate(args['mainCamera']);
 
-        if(args['sceneCamera']) {
-            this.mainCamera = this.scene.instantiate(args['sceneCamera']);
-        }
-
-        // this.scene.instantiate(args['mainCamera']);
-
-        if(this.mainCamera) {
-            this.width = this.mainCamera.camera.size.x || 800;
-            this.height = this.mainCamera.camera.size.y || 600;
+        if(this.resize) {
+            window.addEventListener('resize', function(){
+                var camera = Amble.app.mainCamera.camera;
+                for(var i = 0; i < camera.layers.length; i++) {
+                    camera.layers[i].layer.resize();
+                }
+            });
         }
 
         //init all public game loop functions
@@ -50,61 +36,23 @@ window.Amble = (function(){
             this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
         }
 
-        this.paused = false;
-        this.pause = function() {
-            this.paused = true;
-            console.log('pause')
-        };
-
-        this.unpause = function() {
-            console.log('unpause')
-            this.paused = false;
-            gameLoop();
-        };
-
         //private game loop functions
         this.update = function(){
-
             this.mainCamera.camera.update()
             this.scene.update();
-
             //update all objects on scene
             //priorytet sort?
         };
 
+        this.defaultBgColor = args['defaultBgColor'] || 'transparent';
+
         this.render = function(){
 
             var camera = this.mainCamera.camera;
-
             for(var i = 0; i < camera.layers.length; i++) {
-                camera.layers[i].layer.clear();
+                if(i == 0) camera.layers[i].layer.clear(this.defaultBgColor);
+                else camera.layers[i].layer.clear();
             }
-
-            var layer = camera.layer(0);
-            layer.strokeStyle('white').lineWidth(0.5);
-            layer.ctx.beginPath();
-
-            var lineSpacing = 200;
-
-            var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
-            var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
-            var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
-            var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
-
-            //vertical lines
-            for(var i = -2; i < verticalLinesCount; i++) {
-                layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
-                layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
-            }
-
-            //horizonala
-            for(var i = -2; i < horizontalLinesCount; i++) {
-                layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
-                layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
-            }
-
-            layer.ctx.stroke();
-
 
             this.scene.render(camera);
         };
@@ -137,43 +85,42 @@ window.Amble = (function(){
         var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
         this.loadingInterval = setInterval(function(){
-            if(that.mainCamera) {
-                var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-                var layer = that.mainCamera.camera.layer(0);
-                layer.ctx.save();
-                var loading = [
-                    "   loading.  ",
-                    "   loading.. ",
-                    "   loading...",
-                ]
+            var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
+            var layer = that.mainCamera.camera.layer(0);
+            layer.ctx.save();
+            var loading = [
+                "   loading.  ",
+                "   loading.. ",
+                "   loading...",
+            ]
 
-                layer.clear('black')
-                    .fillStyle(color)
-                    .strokeStyle('white')
-                    .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
-                    .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
+            layer.clear('black')
+                .fillStyle(color)
+                .strokeStyle('white')
+                .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
+                .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
 
-                layer.ctx.shadowColor = "white";
-                layer.ctx.shadowBlur = 20;
+            layer.ctx.shadowColor = "white";
+            layer.ctx.shadowBlur = 20;
 
-                layer.fillStyle('white');
-                layer.ctx.textAlign = 'center';
-                layer.ctx.font = "25px Arial";
-                var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
-                layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
+            layer.fillStyle('white');
+            layer.ctx.textAlign = 'center';
+            layer.ctx.font = "25px Arial";
+            var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
+            layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
 
-                layer.ctx.font = "20px Arial";
-                text = loading[currentLoadingText];
-                layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
+            layer.ctx.font = "20px Arial";
+            text = loading[currentLoadingText];
+            layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
 
-                loadingTimer += 1/60;
-                if(loadingTimer > 1) {
-                    loadingTimer = 0;
-                    currentLoadingText++;
-                    if(currentLoadingText == loading.length) currentLoadingText = 0;
-                }
-                layer.ctx.restore();
+            loadingTimer += 1/60;
+            if(loadingTimer > 1) {
+                loadingTimer = 0;
+                currentLoadingText++;
+                if(currentLoadingText == loading.length) currentLoadingText = 0;
             }
+            layer.ctx.restore();
+
         }, 1000/60);
 
 
@@ -182,16 +129,13 @@ window.Amble = (function(){
 
         /* all loading */
         this.loader.loadAll(function(){
-
             setTimeout(function(){
                 clearInterval(that.loadingInterval);
                 Amble.Input._setListeners();
 
-
                 Amble.app.loader.audioCache = [];
-                // that.scene.start();
+                that.scene.start();
                 that.loaded();
-
                 that.start();
                 Amble.Time._lastTime = Date.now()
                 gameLoop();
@@ -201,22 +145,19 @@ window.Amble = (function(){
 
         /* hearth of the Amble/game */
         function gameLoop(){
-            if(!that.paused) {
-                // console.log('game loop')
-                var now = Date.now();
-                Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
-                if(that.mainCamera) {
-                    that.preupdate();
-                    that.update();
-                    that.postupdate();
-                    that.render();
-                    that.postrender();
-                }
+            var now = Date.now();
+            Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
-                Amble.Time._lastTime = now;
-                requestAnimationFrame(gameLoop)
-            }
+            //dafuq?
+            that.preupdate();
+            that.update();
+            that.postupdate();
+            that.render();
+            that.postrender();
+
+            Amble.Time._lastTime = now;
+            requestAnimationFrame(gameLoop)
         }
     };
 
@@ -228,8 +169,14 @@ window.Amble = (function(){
 
     Amble.Camera = function(args){
         this.position = args['position'] || new Amble.Math.Vector2({});
-        this.context = document.getElementById(args['context']) || document.body;
-        this.size =  new Amble.Math.Vector2({x: parseInt(this.context.offsetWidth), y: parseInt(this.context.offsetHeight)});
+
+        if(args['context']) {
+            this.context = document.getElementById(args['context']);
+        } else {
+            this.context = document.body;
+        }
+
+        this.size = new Amble.Math.Vector2({x: Amble.app.width, y: Amble.app.height});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
         this.layers = [];
@@ -242,7 +189,7 @@ window.Amble = (function(){
                 index = 0;
                 throw "Z-index cannot be negative!"
             }
-            var layer = this.layers.find(l => l.index == index);
+            var layer = this.layers.find(function(l) { return l.index == index });
             if(!layer) {
                 return this.addLayer(index).layer;
             } else {
@@ -251,7 +198,7 @@ window.Amble = (function(){
         },
 
         addLayer: function(index){
-            var l = this.layers.find(l => l.index == index);
+            var l = this.layers.find(function(l) { return l.index == index });
             if(!l) {
                 var layer = {
                     index: index,
@@ -278,33 +225,33 @@ window.Amble = (function(){
 
         log: function(log) {
 
-            if(EDITOR !== undefined) {
-                this.logs.push({
-                    type: 'log',
-                    message: log
-                });
-                EDITOR.refresh();
-            }
-
+            // if(EDITOR != undefined) {
+            //     this.logs.push({
+            //         type: 'log',
+            //         message: log
+            //     });
+            //     EDITOR.refresh();
+            // }
+            // console.log(ipcRenderer);
+            ipcRenderer.send('game-preview-log-request', log)
             // console.log(log)
         },
 
         error: function(err) {
 
-            if(EDITOR !== undefined) {
-                this.logs.push({
-                    type: 'error',
-                    message: err
-                });
-                EDITOR.refresh();
-            }
-
+            // if(EDITOR != undefined) {
+            //     this.logs.push({
+            //         type: 'error',
+            //         message: err
+            //     });
+            //     EDITOR.refresh();
+            // }
+            ipcRenderer.send('game-preview-error-request', err)
             // console.log(err)
 
         },
-    }
+    };
 
-    /* Utils */
     Amble.Utils = {
 
         generateID: function() {
@@ -332,7 +279,7 @@ window.Amble = (function(){
 
         getArgs: function(p) {
 
-            if(p.args.length == 1){
+            if(p.args && p.args.length == 1){
                 if(typeof p.args[0] == 'number' || typeof p.args[0] == "string" || typeof p.args[0] == 'boolean') {
                     return p.args[0];
                 } else if(p.args[0].name == "Array") {
@@ -379,30 +326,25 @@ window.Amble = (function(){
                 for(var attr in obj) {
                     if(attr == 'components') {
                         copy[attr] = [];
-                        for(var i in obj[attr]) {
-                            if(obj[attr][i].type == 'editor') {
+                        for(var i = 0; i < obj[attr].length; i++) {
+                            var cl = Amble._classes.find(function(c) { return c.name == obj[attr][i].name });
+                            if(cl) {
 
-                                var cl = Amble._classes.find(c => c.name == obj[attr][i].name);
-                                if(cl) {
-
-                                    copy[attr][i] = {
-                                        id: obj[attr][i].name,
-                                        body: this.makeClass(cl, obj[attr][i].properties)
-                                    };
-
-                                } else {
-
-                                    copy[attr][i] = {
-                                        id: obj[attr][i].name,
-                                        body: Amble.Utils.makeFunction(obj[attr][i])
-                                    }
-
-                                }
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: this.makeClass(cl, obj[attr][i].properties)
+                                };
 
                             } else {
-                                continue;
+
+                                copy[attr][i] = {
+                                    id: obj[attr][i].name,
+                                    body: Amble.Utils.makeFunction(obj[attr][i])
+                                }
                             }
                         }
+                    } else if (attr == 'renderer' && obj[attr] && obj[attr].name == "Amble.Graphics.EngineRenderer") {
+                        continue;
                     } else {
                         copy[attr] = Amble.Utils.makeFunction(obj[attr]);
                     }
@@ -413,13 +355,13 @@ window.Amble = (function(){
 
         stringToFunction: function(str) {
             var arr = str.split(".");
-            var fn = window || this;
+            var fn = window || Amble || this;
             for (var i = 0, len = arr.length; i < len; i++) {
                 fn = fn[arr[i]];
             }
 
             if (typeof fn !== "function") {
-                Amble.app.debug.error(str + 'function not found');
+                Amble.app.debug.error('stringtofunction ' + str);
                 throw new Error("function not found");
             }
 
@@ -434,13 +376,13 @@ window.Amble = (function(){
         //other are optional
         //2 types of components (user custom in components array, and engine built in components like renderer)
         // this.renderer = {};
-        this.components = [];
+        this.components = {};
     };
 
     Amble.Actor.prototype = {
 
         getComponent: function(componentName){
-            var component = this.components.find(c => c.id == componentName);
+            var component = this.components.find(function(c) { return c.id == componentName });
             return component.body;
         }
     };
@@ -455,7 +397,7 @@ window.Amble = (function(){
                 args: []
             }
 
-            if(arg !== null) {
+            if(arg != null) {
                 var n = arg.constructor.name;
                 if(n !== 'Number' && n !== 'String' && n !== 'Boolean') {
                     var b = {
@@ -478,19 +420,15 @@ window.Amble = (function(){
         };
 
         if(!obj) {
-            Amble.app.debug.error('Wrong class code!')
             throw new Error('Wrong class code!');
         } else if(typeof obj !== 'object') {
-            Amble.app.debug.error('Class must be an object!')
             throw new Error('Class must be an object!');
         } else if(!obj.name) {
-            Amble.app.debug.error('Class must have a name!')
             throw new Error('Class must have a name!');
         }
 
         var c = {
             name: obj.name,
-            _options: obj._options,
             properties: [],
         }
 
@@ -505,59 +443,35 @@ window.Amble = (function(){
             }
         }
 
-        var a = Amble._classes.find(s => s.name == c.name);
-        if(a) {
-            var index = Amble._classes.indexOf(a);
-            Amble._classes.splice(index, 1);
-        }
-
         Amble._classes.push(c);
-
-        /*
-        order:
-
-        - every class is registered in engine and can be extended?
-        - user can create custom classes which are not engine default
-
-        */
-
     };
 
     /* Scene */
     Amble.Scene = function(){
         this.children = [];
-        this.shortArray = [];
+        // this.shortArray = [];
+
+        this.started = false;
     };
 
     Amble.Scene.prototype = {
 
-        createSceneFile: function(){
-
-            var data = [];
-            for(var i = 1; i < this.children.length; i++) {
-                this.children[i].prefab.name = this.children[i].name;
-                data.push(this.children[i].prefab);
-            }
-
-            return data;
-        },
-
         getActorByName: function(name) {
-            return this.children.find(c => c.name === name)
+            return this.children.find(function(c) { return c.name === name })
         },
 
         getActorByTag: function(tag) {
-            return this.children.find(c => tag === tag);
+            return this.children.find(function(c) { return c.tag == tag });
         },
 
         getActorsByTag: function(tag) {
-            return this.children.filter(c => tag === tag);
+            return this.children.filter(function(c) { return c.tag == tag });
         },
 
         //get by tag array?
 
         getActorByID: function(id){
-            return this.children.find(c => c.sceneID === id);
+            return this.children.find(function(c) { return c.sceneID == id });
         },
 
         instantiate: function(obj){
@@ -567,9 +481,7 @@ window.Amble = (function(){
                 actor[i] = clone[i];
             }
 
-            actor.prefab = obj;
-
-            return this._add(actor);
+            return this._add(actor, obj);
         },
 
         _add: function(object, prefab) {
@@ -577,8 +489,19 @@ window.Amble = (function(){
             var sceneID = Amble.Utils.generateID();
             object.sceneID = sceneID;
 
-            if(object.components != 'undefined') {
-                for(var i in object.components) {
+            object.prefab = prefab;
+
+            if(object.components !== undefined) {
+                for(var i = 0; i < object.components.length; i++) {
+                    var _component = object.components[i].body;
+                    if(typeof _component.awake == 'function'){
+                        _component.awake(object);
+                    }
+                }
+            }
+
+            if(this.started && object.components !== undefined) {
+                for(var i = 0; i < object.components.length; i++) {
                     var _component = object.components[i].body;
                     if(typeof _component.start == 'function'){
                         _component.start(object);
@@ -588,38 +511,34 @@ window.Amble = (function(){
 
             this.children.push(object);
 
-            this.shortArray.push({
-                name: object.name,
-                sceneID: sceneID,
-                selected: false
-            });
-
             return object;
         },
 
-        remove: function(object){
+        remove: function(object, callback){
             var index = this.children.indexOf(object);
             if(index != -1) {
                 this.children.splice(index, 1);
+                if(callback) callback(this.children);
             }
         },
 
-        awake: function(){
+        start: function(){
             for(var i in this.children){
                 /* component start */
-                for(var j in this.children[i].components){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.start == 'function'){
                         _component.start(this.children[i]);
                     }
                 }
             }
+            this.started = true;
         },
 
         update: function(){
-            for(var i in this.children){
+            for(var i = 0; i < this.children.length; i++){
                 /* script update */
-                for(var j in this.children[i].components){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.update == 'function'){
                         _component.update(this.children[i]);
@@ -630,7 +549,7 @@ window.Amble = (function(){
         },
 
         render: function(camera){
-            for(var i in this.children){
+            for(var i = 0; i < this.children.length; i++){
                 /* render objects by renderer*/
                 if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {
                     this.children[i].renderer.render(this.children[i], camera)
@@ -640,8 +559,8 @@ window.Amble = (function(){
 
         //input events
         onmousewheel: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmousewheel == 'function'){
                         _component.onmousewheel(this.children[i], e);
@@ -651,8 +570,8 @@ window.Amble = (function(){
         },
 
         onmousedown: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmousedown == 'function'){
                         _component.onmousedown(this.children[i], e);
@@ -662,8 +581,8 @@ window.Amble = (function(){
         },
 
         onmouseup: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onmouseup == 'function'){
                         _component.onmouseup(this.children[i], e);
@@ -673,8 +592,8 @@ window.Amble = (function(){
         },
 
         onkeydown: function(e) {
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onkeydown == 'function'){
                         _component.onkeydown(this.children[i], e);
@@ -684,15 +603,59 @@ window.Amble = (function(){
         },
 
         onkeyup: function(e){
-            for(var i in this.children){
-                for(var j in this.children[i].components){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
                     var _component = this.children[i].components[j].body;
                     if(typeof _component.onkeyup == 'function'){
                         _component.onkeyup(this.children[i], e);
                     }
                 }
             }
-        }
+        },
+
+        oncontextmenu: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.oncontextmenu == 'function'){
+                        _component.oncontextmenu(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        ontouchstart: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchstart == 'function'){
+                        _component.ontouchstart(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        ontouchend: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchend == 'function'){
+                        _component.ontouchend(this.children[i], e);
+                    }
+                }
+            }
+        },
+
+        ontouchmove: function(e){
+            for(var i = 0; i < this.children.length; i++){
+                for(var j = 0; j < this.children[i].components.length; j++){
+                    var _component = this.children[i].components[j].body;
+                    if(typeof _component.ontouchmove == 'function'){
+                        _component.ontouchmove(this.children[i], e);
+                    }
+                }
+            }
+        },
     };
 
     /* Transform */
@@ -700,7 +663,6 @@ window.Amble = (function(){
         this.position = args['position'] || new Amble.Math.Vector2({});
         this.rotation = args['rotation'] || 0;
 
-        //move size to other component -> there rename to scale
         this.scale = args['scale'] || new Amble.Math.Vector2({x: 1, y: 1});
     };
 
@@ -713,7 +675,35 @@ window.Amble = (function(){
         this.canvas.height = height || Amble.app.height;
         this.canvas.style.position = 'absolute';
         this.canvas.style.zIndex = index.toString() || '0';
+
         this.ctx = this.canvas.getContext('2d');
+
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.mozImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.msImageSmoothingEnabled = Amble.app.antyAliasing;
+        this.ctx.imageSmoothingEnabled = Amble.app.antyAliasing;
+
+        //scale to fullscreen
+        this.resize = function() {
+            // if(Amble.app.fullscreen) {
+                var scaleX = window.innerWidth / this.canvas.width;
+                var scaleY = window.innerHeight / this.canvas.height;
+
+                var scaleToFit = Math.min(scaleX, scaleY);
+                var scaleToCover = Math.max(scaleX, scaleY);
+
+                var w = window.innerWidth - (this.canvas.width * scaleToFit);
+                var h = window.innerHeight - (this.canvas.height * scaleToFit);
+
+                this.canvas.style.top = (h/2) + 'px';
+                this.canvas.style.left = (w/2) + 'px';
+
+                this.canvas.style.transformOrigin = "0 0"; //scale from top left
+                this.canvas.style.transform = "scale(" + scaleToFit + ")";
+            // }
+        }
+
+        this.resize();
     };
 
     Amble.Graphics.Layer.prototype = {
@@ -792,14 +782,9 @@ window.Amble = (function(){
         fillText: function(text, x, y) {
             this.ctx.fillText(text, x, y);
             return this;
-        },
-
-        strokeText: function(text, x, y) {
-            this.ctx.strokeText(text, x, y);
-            return this;
         }
 
-        //more canvas methods
+        //to add more canvas methods
 
     };
 
@@ -823,9 +808,6 @@ window.Amble = (function(){
         this.size = new Amble.Math.Vector2({x: 0, y: 0})
 
         this.anchor = args['anchor'] || new Amble.Math.Vector2({x: 0.5, y: 0.5});
-
-        this.type = "animation";
-        this._editorName = "Animation Renderer"
     };
 
     Amble.Graphics.AnimationRenderer.prototype = {
@@ -880,21 +862,6 @@ window.Amble = (function(){
                         width,
                         height
                     );
-
-                    if(self.selected) {
-                        layer.ctx.save();
-                        layer.strokeStyle(
-                            'magenta'
-                        ).lineWidth(
-                            3
-                        ).strokeRect(
-                            -width/2,
-                            -height/2,
-                            width,
-                            height
-                        )
-                        layer.ctx.restore();
-                    }
                 }
 
             } else {
@@ -903,93 +870,15 @@ window.Amble = (function(){
 
             layer.ctx.restore();
 
-            if(this.play) {
-                this._updates++;
-                if(this._updates > this.updatesPerFrame) {
-                    this._updates = 0;
-                    if(this._currentFrame < this.frames - 1) this._currentFrame++;
-                    else if(this.loop) this._currentFrame = 0;
-                }
-            }
+            this._updates++;
+        	if(this._updates > this.updatesPerFrame) {
+        		this._updates = 0;
+        		if(this._currentFrame < this.frames - 1) this._currentFrame++;
+        		else if(this.loop) this._currentFrame = 0;
+        	}
         }
     };
 
-
-    Amble.Graphics.EngineRenderer = function(args) {
-
-        this.layer = args['layer'] || 0;
-        this.size = new Amble.Math.Vector2({});
-
-        this.type = "engine";
-    };
-
-    Amble.Graphics.EngineRenderer.prototype = {
-
-        render: function(self, camera) {
-
-            var layer = camera.layer(this.layer);
-
-            layer.ctx.save();
-
-            var x = self.transform.position.x - camera.view.x;
-            var y = self.transform.position.y - camera.view.y;
-
-            layer.font('30px Arial');
-
-            this.size.x = layer.ctx.measureText(self.name || 'Actor').width * 2;
-            this.size.y = 60;
-
-            layer.ctx.translate(x, y);
-
-            //scale
-            layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
-            // rotation in radians
-            layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
-
-            layer.fillStyle('green')
-            layer.ctx.beginPath();
-            layer.ctx.arc(
-                0,
-                0,
-                5,
-                0,
-                2*Math.PI
-            );
-            layer.ctx.fill();
-
-            layer.textAlign(
-                'center'
-            ).fillStyle(
-                'transparent'
-            ).fillRect(
-                -this.size.x/2,
-                -this.size.y/2,
-                this.size.x,
-                this.size.y
-            ).fillStyle(
-                'white'
-            ).fillText(
-                self.name || 'Actor',
-                0,
-                -15
-            );
-
-            if(self.selected) {
-                layer.strokeStyle(
-                    'magenta'
-                ).lineWidth(
-                    1
-                ).strokeText(
-                    self.name || 'Actor',
-                    0,
-                    -15
-                )
-            }
-
-            layer.ctx.restore();
-        }
-    };
 
     Amble.Graphics.SpriteRenderer = function(args) {
         this.sprite = args['sprite'];
@@ -1000,11 +889,8 @@ window.Amble = (function(){
 
         this.size = new Amble.Math.Vector2({})
 
-        //to implement
+        // ???
         this.anchor = new Amble.Math.Vector2({});
-
-        this.type = "sprite";
-        this._editorName = "Sprite Renderer"
     }
 
     Amble.Graphics.SpriteRenderer.prototype = {
@@ -1024,12 +910,22 @@ window.Amble = (function(){
 
                 var width = this.size.x = this._sprite.width;
                 var height = this.size.y = this._sprite.height;
+
+                this.size.x = width * self.transform.scale.x;
+                this.size.y = height * self.transform.scale.y;
+
                 var x = self.transform.position.x - camera.view.x;
                 var y = self.transform.position.y - camera.view.y;
 
                 layer.ctx.translate(x, y);
-                layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-                layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+                if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+                    layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+                }
+
+                if(self.transform.rotation != 0) {
+                    layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+                }
 
                 if(this._sprite.src) {
                     layer.ctx.drawImage(this._sprite, -width/2, -height/2);
@@ -1064,9 +960,6 @@ window.Amble = (function(){
         this.size = args['size'];
         //to implement
         this.anchor = new Amble.Math.Vector2({});
-
-        this.type = "rect";
-        this._editorName = "Rect Renderer"
     };
 
     /* Amble.Graphics.Renderer functions */
@@ -1094,19 +987,6 @@ window.Amble = (function(){
 
             // draw
             layer.fillStyle(this.color).fillRect(-width/2, -height/2, width, height);
-
-            // layer.ctx.save();
-            // layer.strokeStyle(
-            //     'black'
-            // ).lineWidth(
-            //     1
-            // ).strokeRect(
-            //     -width/2,
-            //     -height/2,
-            //     width,
-            //     height
-            // )
-            // layer.ctx.restore();
 
             if(self.selected) {
                 layer.ctx.save();
@@ -1316,49 +1196,87 @@ window.Amble = (function(){
             Amble.Input.wheelDelta.z = e.deltaZ;
 
             Amble.app.scene.onmousewheel(e);
+        },
+
+        contextmenu: function(e) {
+            e.preventDefault();
+            Amble.app.scene.oncontextmenu(e);
+        },
+
+        touchstart: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchstart(e);
+        },
+
+        touchend: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchend(e);
+        },
+
+        touchmove: function(e) {
+            e.preventDefault();
+            Amble.app.scene.ontouchmove(e);
         }
     }
 
     Amble.Input._setListeners = function(){
 
-        if(Amble.app.mainCamera) {
-            var element = Amble.app.mainCamera.camera.context;
-            document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
-            document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-            element.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-            element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-            element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-            element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
-        }
+        var element = Amble.app.mainCamera.camera.context;
+        document.addEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+        document.addEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+        element.addEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+        element.addEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+        element.addEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+        element.addEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+        element.addEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
         //touch start
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchstart, false);
         //touch end
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchend, false);
         //touch move
+        element.addEventListener("touchstart", Amble.Input._eventFunctions.touchmove, false);
     }
 
     Amble.Input._removeListeners = function(){
 
-        if(Amble.app.mainCamera) {
-            var element = Amble.app.mainCamera.camera.context;
-            if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
+        var element = Amble.app.mainCamera.camera.context;
+        if (document.removeEventListener) { // For all major browsers, except IE 8 and earlier
 
-                document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
-                document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
-                element.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
-                element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
-                element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
-                element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+            document.removeEventListener('keydown', Amble.Input._eventFunctions.keydown, false);
+            document.removeEventListener('keyup', Amble.Input._eventFunctions.keyup, false);
+            element.removeEventListener('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            element.removeEventListener('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            element.removeEventListener('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            element.removeEventListener("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.removeEventListener("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
 
-            } else if (document.detachEvent) { // For IE 8 and earlier versions
+            //touch start
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchstart, false);
+            //touch end
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchend, false);
+            //touch move
+            element.removeEventListener("touchstart", Amble.Input._eventFunctions.touchmove, false);
 
-                document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
-                document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
-                element.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
-                element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
-                element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
-                element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
 
-            }
+        } else if (document.detachEvent) { // For IE 8 and earlier versions
+
+            document.detachEvent('keydown', Amble.Input._eventFunctions.keydown, false);
+            document.detachEvent('keyup', Amble.Input._eventFunctions.keyup, false);
+            element.detachEvent('mousedown', Amble.Input._eventFunctions.mousedown, false);
+            element.detachEvent('mouseup', Amble.Input._eventFunctions.mouseup, false);
+            element.detachEvent('mousemove', Amble.Input._eventFunctions.mousemove, false);
+            element.detachEvent("wheel", Amble.Input._eventFunctions.wheel, false);
+            element.detachEvent("contextmenu", Amble.Input._eventFunctions.contextmenu, false);
+
+            //touch start
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchstart, false);
+            //touch end
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchend, false);
+            //touch move
+            element.detachEvent("touchstart", Amble.Input._eventFunctions.touchmove, false);
+
+
         }
     }
 
@@ -1368,12 +1286,11 @@ window.Amble = (function(){
     Amble.Data.Loader = function(){
         this.queue = [];
         this.types = [];
+        this.names = [];
         this.successCount = 0;
         this.errorCount = 0;
         this.cache = [];
-        this.names = [];
     };
-
 
     Amble.Data.Loader.prototype = {
         /* Supported types: image, json */
@@ -1389,7 +1306,7 @@ window.Amble = (function(){
         },
 
         getAsset: function(path){
-            var a =  this.cache.find(c => c.path == path);
+            var a =  this.cache.find(function(c) { return c.path == path });
             if(a) return a.data;
             else return undefined;
         },
@@ -1433,41 +1350,40 @@ window.Amble = (function(){
                     /* loading json file */
                     case 'json':
                         var jsonPath = this.queue[i];
+                        var name = this.names[i];
 
                         var xobj = new XMLHttpRequest();
-                        xobj.overrideMimeType("application/json");
+                        // xobj.overrideMimeType("application/json");
                         xobj.open('GET', jsonPath, true);
 
-                        xobj.addEventListener("load", function(e){
-                            var path = e.srcElement.responseURL.toString();
-                            var href = window.location.href.toString();
+                        xobj.onreadystatechange = function(){
 
-                            var path = path.split(href).pop();
-                            that.cache.push({
-                                data: e.srcElement.responseText,
-                                type: 'json',
-                                path: path
-                            });
+                            if (xobj.readyState == 4 && xobj.status == 200) { //success
 
-                            that.successCount++;
-                            if(that.isDone()) callback();
-                        }, false);
+                                that.cache.push({
+                                    data: xobj.responseText.toString(),
+                                    type: 'json',
+                                    path: name
+                                });
 
-                        xobj.addEventListener("error", function(e){
-                            var path = e.srcElement.responseURL.toString();
-                            var href = window.location.href.toString();
+                                that.successCount++;
 
-                            var path = path.split(href).pop();
+                                if(that.isDone()) callback();
 
-                            that.cache.push({
-                                data: e.srcElement.responseText,
-                                type: 'json',
-                                path: path
-                            });
+                            } else if(xobj.readyState == 4 && xobj.status == 404){ //err
 
-                            that.errorCount++;
-                            if(that.isDone()) callback();
-                        }, false);
+                                that.cache.push({
+                                    data: xobj.responseText.toString(),
+                                    type: 'json',
+                                    path: name
+                                });
+
+                                that.errorCount++;
+                                if(that.isDone()) callback();
+
+                            }
+                        }
+
                         xobj.send(null);
 
                     break;
@@ -1479,5 +1395,3 @@ window.Amble = (function(){
     return Amble;
 
 }());
-
-module.exports = window.Amble;

@@ -13,6 +13,7 @@ var builderGulp = require('./builder/js/builder-gulp.js');
 var launcherWindow = null;
 var editorWindow = null;
 var builderWindow = null;
+var gamePreviewWindow = null;
 
 var currentState = null; // ['launcher', 'editor']
 
@@ -27,8 +28,10 @@ var shortcuts = {};
 app.on('ready', function() {
     //launcher
     launcherWindow = new BrowserWindow({
-        width: 640,
-        height: 360,
+        // width: 640,
+        // height: 360,
+        width: 854,
+        height: 480,
         resizable: false
     });
 
@@ -273,6 +276,51 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
 });
 
+var gamePreviewData = null;
+ipcMain.on('editor-game-preview-respond', function(event, data) {
+
+    gamePreviewData = data;
+
+    if(!gamePreviewWindow) {
+        gamePreviewWindow = new BrowserWindow({
+            width: 1280,
+            height: 720,
+            show: false
+        });
+
+        gamePreviewWindow.loadURL('file://' + __dirname + '/game-preview/index.html');
+
+        gamePreviewWindow.setMenu(null);
+        gamePreviewWindow.center();
+        gamePreviewWindow.openDevTools()
+
+        gamePreviewWindow.on('closed', function() {
+            if(editorWindow) editorWindow.webContents.send('editor-unpause');
+            gamePreviewWindow = null;
+        });
+    } else {
+
+    }
+});
+
+//game preview
+ipcMain.on('game-preview-loaded', function(event, data) {
+    //show window
+
+    gamePreviewWindow.show();
+    gamePreviewWindow.focus();
+
+    gamePreviewWindow.webContents.send('game-preview-start', gamePreviewData);
+});
+
+ipcMain.on('game-preview-error-request',function(event, data){
+    editorWindow.webContents.send('game-preview-error', data);
+})
+
+ipcMain.on('game-preview-log-request',function(event, data){
+    editorWindow.webContents.send('game-preview-log', data);
+})
+
 //builder
 ipcMain.on('builder-dir-request', function(event, data) {
     dialog.showOpenDialog(
@@ -354,6 +402,9 @@ app.on('browser-window-focus', function(event, bWindow) {
 
         //build
         shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
+
+        //play
+        shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.play);
         break;
     }
 
@@ -367,6 +418,10 @@ var menuFunctions = {
 
     build: function() {
         editorWindow.webContents.send('editor-build-request');
+    },
+
+    play: function() {
+        editorWindow.webContents.send('editor-game-preview-request');
     }
 
 }
