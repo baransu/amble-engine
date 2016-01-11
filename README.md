@@ -13,7 +13,7 @@ npm install -g bower gulp
 
 ### Install 
 
-In cloned project folder, run the following command to download npm and bower dependecies:
+In cloned project folder, run the following commands to download npm and bower dependecies:
 
 ```bash
 npm install 
