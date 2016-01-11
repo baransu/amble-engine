@@ -4,8 +4,8 @@ Game engine written in JavaScript on top of electron (atom-shell) with visual sc
 ## Prerequisite
 
 - Install [node.js](https://nodejs.org/)
-- Install [gulp](https://github.com/gulpjs/gulp) command line tool
-- Install [bower](http://bower.io/) command line tool
+
+Next install gulp and bower via npm:
 
 ```bash
 npm install -g bower gulp
@@ -13,14 +13,18 @@ npm install -g bower gulp
 
 ### Install 
 
-In cloned project folder, run the following command to setup editor:
+In cloned project folder, run the following command to download npm and bower dependecies:
 
 ```bash
 npm install 
+```
+```bash
 bower install
 ```
 
 ### Running editor
+
+To run editor, run the following command in project folder:
 
 ```bash
 npm start
