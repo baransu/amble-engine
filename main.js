@@ -30,7 +30,7 @@ app.on('ready', function() {
     launcherWindow = new BrowserWindow({
         // width: 640,
         // height: 360,
-        width: 854,
+        width: 640,
         height: 480,
         resizable: false
     });
@@ -39,7 +39,7 @@ app.on('ready', function() {
     currentState = 'launcher';
 
     launcherWindow.setMenu(null);
-    // launcherWindow.toggleDevTools();
+    launcherWindow.toggleDevTools();
     launcherWindow.center();
 
     launcherWindow.on('closed', function() {

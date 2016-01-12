@@ -30,6 +30,8 @@ var projectData = {};
 
 var EDITOR = null;
 
+var primaryColor = '#0275d8';
+
 var menuFunctions = {
 
     save: function() {
@@ -149,7 +151,7 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
     projectData.imgs = [];
     projectData.scripts = [];
 
-    document.getElementById('list').innerHTML = "";
+    // document.getElementById('list').innerHTML = "";
 
     projectView.init();
 
@@ -180,79 +182,10 @@ var projectView = {
 
     projectStructure: [],
 
-    makeList: function(array) {
-
-        var list = document.createElement("ul");
-        list.className = "list";
-
-        for(var i = 0; i < array.length; i++) {
-            list.appendChild(this.item(array[i]));
-        }
-
-        return list;
-    },
-
-    item: function(item) {
-        var div = document.createElement("li");
-
-        div.className = "list-item"
-
-        var header = document.createElement('div');
-        header.className = 'header';
-
-        var icon = document.createElement("i");
-
-        switch(item.type) {
-            case 'folder':
-
-                var arrow = document.createElement("i");
-                arrow.className = "glyphicon glyphicon-triangle-right no-clickable triangle icon"
-                header.appendChild(arrow);
-                icon.className = "glyphicon glyphicon-folder-close no-clickable folder icon"
-
-                break;
-            case 'file':
-
-                icon.className = "glyphicon glyphicon-file no-clickable file icon"
-
-                break;
-
-        }
-
-        header.appendChild(icon);
-
-        var text = document.createElement("a");
-        text.href = "#"
-        text.className = 'list-item';
-        text.innerHTML = item.name;
-        text.addEventListener('click', this.itemOnClick, false);
-
-        header.appendChild(text);
-        div.appendChild(header);
-
-        if(item.childs.length > 0) {
-            div.appendChild(this.makeList(item.childs));
-        }
-
-        return div;
-    },
-
-    itemOnClick: function(e) {
-        e.preventDefault();
-
-        //if file else collapse/expand directory
-
-        var normal = 'header';
-        var highlighted = "header highlighted";
-
-        var parent = e.target.parentElement;
-
-        if(parent.className == normal) {
-            parent.className = highlighted;
-        } else {
-            parent.className = normal;
-        }
-
+    genID: function() {
+        return Math.floor((1 + Math.random()) * (new Date().getTime()))
+          .toString(16)
+          .substring(1);
     },
 
     processDir: function(path) {
@@ -262,33 +195,44 @@ var projectView = {
         var abc = fs.readdirSync(path)
 
         for(var i = 0; i < abc.length; i++) {
+            var f = abc[i].split('.');
+            var extension = f[f.length - 1];
+
+            if(extension == 'aproject') continue;
 
             var file = {
+                id: "id_" + this.genID(),
                 type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
                 path: path + '/' + abc[i],
-                name: abc[i],
-                childs: []
+                text: abc[i],
+                children: [],
+                li_attr: {},  // attributes for the generated LI node
+                a_attr: {} // attributes for the generated A node
             }
 
             if(file.type == 'folder') {
-                file.childs = this.processDir(path + '/' + abc[i]);
+                file.children = this.processDir(path + '/' + abc[i]);
             } else {
-                var f = abc[i].split('.');
-                var extension = f[f.length - 1];
                 for(var x in imgExtensionList) {
+
                     if(extension == imgExtensionList[x]) {
+
                         projectData.imgs.push({
                             path: path + '/' + abc[i],
                             name: abc[i]
                         })
                         break;
+
                     } else if(extension == 'js') {
+
                         projectData.scripts.push({
                             path: path + '/' + abc[i],
                             name: abc[i]
                         });
                         break;
+
                     }
+
                 }
             }
 
@@ -306,10 +250,9 @@ var projectView = {
             projectData.scripts = [];
             projectData.imgs = [];
 
-            projectView.projectStructure = projectView.processDir(projectDirectory + '/assets');
+            projectView.projectStructure = projectView.processDir(projectDirectory);
 
-            var list = document.getElementById("list");
-            list.innerHTML = "";
+            this.jstree();
 
             for(var i = 0; i < projectView.projectStructure.length; i++) {
                 list.appendChild(projectView.item(projectView.projectStructure[i]));
@@ -326,16 +269,36 @@ var projectView = {
         });
 
     },
+                // icon: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'fa fa-folder': 'fa fa-file-text-o',
+    jstree: function() {
+        $('#project-view').jstree({
+            'core' : {
+                "check_callback" : true,
+                'responsive': true,
+                'data' : projectView.projectStructure,
+            },
+            'themes' : {
+                'dots' : false // no connecting dots between dots
+            },
+            'plugins' : [ 'wholerow', 'state', 'dnd', 'sort', 'types'],
+            'types' : {
+                'folder' : {
+                    'icon' : 'fa fa-folder'
+                },
+                'file' : {
+                    'icon' : 'fa fa-file-text-o'
+                }
+            },
+        });
+    },
 
     init: function(){
 
-        this.projectStructure = this.processDir(projectDirectory + '/assets');
+        this.projectStructure = this.processDir(projectDirectory);
 
-        var list = document.getElementById("list");
-        for(var i = 0; i < this.projectStructure.length; i++) {
-            list.appendChild(this.item(this.projectStructure[i]));
-        }
+        console.log(this.projectStructure);
 
+        this.jstree();
         this.watch();
 
     }
@@ -449,7 +412,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                     a.components[j].properties.splice(index, 1);
                 }
 
-                // console.log(a.components[j].properties);
             }
         }
     };

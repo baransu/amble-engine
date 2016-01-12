@@ -17,7 +17,8 @@ html, body {
     padding: 0;
 	width: 100%;
 	height: 100%;
-    background-color: @globalBgColor;
+    overflow: hidden;
+    background-color: darken(#fff, 10%);
 }
 
 .no-clickable {
@@ -28,102 +29,7 @@ html, body {
     background-color: @mainColor;
     -webkit-user-select: none;
     user-select: none;
-    color: @fontColor;
     position: absolute;
-}
-
-.button {
-
-    height: 100%;
-    display: inline-block;
-    text-align: center;
-
-    a {
-        display:inline-block;
-        cursor:pointer;
-        background-color: @primaryColor;
-        font-family: Helvetica;
-        text-shadow: 0px 1px 0px #2f6627;
-        text-decoration: none;
-        text-align: center;
-        color: @fontColor;
-
-        //calc padding to fit gap
-        padding: 5px;
-
-        &:hover, &:focus {
-            color: @fontColor;
-        }
-
-        &:active {
-            position:relative;
-            top:1px;
-            color: @fontColor;
-            background-color: darken(@primaryColor, 3%);
-        }
-    }
-}
-
-.list-container {
-    display: inline-block;
-    margin-left: -15px;
-}
-
-.list {
-
-    margin-left: -15px;
-    font-size: @fontSize;
-
-    ul {
-        list-style-type: none;
-        line-height: 25px;
-    }
-
-    ul > li {
-        padding-left: 15px;
-    }
-
-    li > ul {
-        padding-left: 15px;
-    }
-}
-
-.list-item {
-    color: @fontColor;
-    list-style-type: none;
-    white-space: nowrap;
-
-    .icon {
-        font-size: @fontSize;
-        padding-right: 6px;
-        &.file {
-            margin-left: 11px;
-        }
-
-        &.folder { }
-        &.triangle { }
-    }
-
-    a {
-        color: @fontColor;
-        text-decoration: none;
-    }
-
-    a:hover {
-        color: @fontColor;
-    }
-
-    a:active {
-        color: @fontColor;
-    }
-
-    a:focus {
-        color: @fontColor;
-    }
-
-    a:visited {
-        color: @fontColor;
-    }
 }
 
 .header {
@@ -132,15 +38,6 @@ html, body {
     &.highlighted {
         background-color: #676767;
     }
-}
-
-#component-select {
-    border: 1px solid black;
-    .default;
-    right: calc(~'0% + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{viewMargin}');
-    width: 25%;
-    height: 50%;
 }
 
 #project-view {
@@ -155,7 +52,7 @@ html, body {
 
 #tools {
     .default;
-    background-color: transparent;
+    background-color: @mainColor;
     position: absolute;
     left: calc(~'0% + @{viewMargin}');
     top: calc(~'0% + @{viewMargin}');
@@ -191,79 +88,12 @@ html, body {
     height: calc(~'@{hierarchyHeight} - 2*@{viewMargin}');
 }
 
-.hierarchy-item {
-
-    padding: 5px;
-
-    &.highlighted {
-        background-color: darken(@mainColor, 10%);
-    }
-}
-
-.add-button {
-    // border: none;
-    color: white;
-    width: 100%;
-    text-align: center;
-    background-color: lighten(@mainColor, 10%);
-    height: @searchHeight;
-}
-
-.search {
-    width: 100%;
-    margin: 0 auto;
-    height: @searchHeight;
-
-    input {
-        height: 100%;
-        margin: 0;
-        width: 100%;
-        border: none;
-    }
-}
-
-.inspector-info {
-    margin-bottom:5%;
-}
-
 #inspector-view {
     .default;
     right: calc(~'0% + @{viewMargin}');
     top: calc(~'@{toolsHeight} + @{viewMargin}');
     width: calc(~'@{inspectorWidth} - @{viewMargin}');
     height: calc(~'@{inspectorHeight} - @{viewMargin}');
-}
-
-.transform {
-    width: 100%;
-    .row {
-        width: 100%;
-        margin: 0 auto;
-    }
-}
-
-.col {
-
-    width: 50%;
-
-    &.left {
-        float: left;
-    }
-
-    &.right {
-        float: right;
-    }
-
-    input {
-        border: none;
-        width: 100%;
-    }
-}
-
-.divider {
-    width: 90%;
-    margin: 10px auto;
-    border-bottom: 1px solid #ccc
 }
 
 #preview {
@@ -295,17 +125,17 @@ html, body {
 
 ::-webkit-scrollbar-track {
 	border-radius: 10px;
-	background-color: @mainColor;
+	background-color: #fff;
 }
 
 ::-webkit-scrollbar {
 	width: 5px;
     height: 5px;
 
-    background-color: @mainColor;
+    background-color: #fff;
 }
 
 ::-webkit-scrollbar-thumb {
 	border-radius: 5px;
-	background-color: lighten(@mainColor, 10%);
+	background-color: #b2b2b2;
 }

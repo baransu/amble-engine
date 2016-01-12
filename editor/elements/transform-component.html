@@ -4,33 +4,32 @@
 
 	<style>
 
-    .panel {
-		margin-top: 20px;
-	}
-
 	</style>
 
 	<template>
 
-        <div class="panel panel-primary">
-			<div class="panel-heading">
+        <div class="card m-t-1">
+
+			<div class="card-header">
 				<div class="row">
-					<div class="col-md-6" on-click="hide">
-						<h3 class="panel-title">Transform</h3>
+					<div class="col-md-8" on-click="hide">
+						<h3 class="card-title">Transform</h3>
 
 					</div>
-					<div class="btn-group">
-						<button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							Options <span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu">
-							<li><a href="#" on-click="reset">Reset</a></li>
-						</ul>
+					<div class="col-md-3">
+						<div class="btn-group">
+							<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Options
+							</button>
+							<div class="dropdown-menu dropdown-menu-right">
+								<a class="dropdown-item" href="#" on-click="reset">Reset</a>
+							</div>
+						</div>
 					</div>
 				</div>
-
 			</div>
-            <div class="panel-body" hidden$="{{hideConent}}">
+
+            <div class="card-block" hidden$="{{hideConent}}">
 				<div class="container-fluid">
 					<div class="row">
 						<div class="col-md-6">
@@ -101,21 +100,25 @@
 		},
 
 		reset: function() {
-			//position
-			this.actor.prefab.transform.args.position.args.x = this.actor.transform.position.x = 0;
-			this.notifyPath('actor.transform.position.x', this.actor.transform.position.x);
-			this.actor.prefab.transform.args.position.args.y = this.actor.transform.position.y = 0;
-			this.notifyPath('actor.transform.position.y', this.actor.transform.position.y);
 
-			//scale
-			this.actor.prefab.transform.args.scale.args.x = this.actor.transform.scale.x = 1;
-			this.notifyPath('actor.transform.scale.x', this.actor.transform.scale.x);
-			this.actor.prefab.transform.args.scale.args.y = this.actor.transform.scale.y = 1;
-			this.notifyPath('actor.transform.scale.y', this.actor.transform.scale.y);
+			if(this.actor) {
+				//position
+				this.actor.prefab.transform.args.position.args.x = this.actor.transform.position.x = 0;
+				this.notifyPath('actor.transform.position.x', this.actor.transform.position.x);
+				this.actor.prefab.transform.args.position.args.y = this.actor.transform.position.y = 0;
+				this.notifyPath('actor.transform.position.y', this.actor.transform.position.y);
 
-			//rotation
-			this.actor.prefab.transform.args.rotation = this.actor.transform.rotation = 0;
-			this.notifyPath('actor.transform.rotation', this.actor.transform.rotation);
+				//scale
+				this.actor.prefab.transform.args.scale.args.x = this.actor.transform.scale.x = 1;
+				this.notifyPath('actor.transform.scale.x', this.actor.transform.scale.x);
+				this.actor.prefab.transform.args.scale.args.y = this.actor.transform.scale.y = 1;
+				this.notifyPath('actor.transform.scale.y', this.actor.transform.scale.y);
+
+				//rotation
+				this.actor.prefab.transform.args.rotation = this.actor.transform.rotation = 0;
+				this.notifyPath('actor.transform.rotation', this.actor.transform.rotation);
+			}
+
 		},
 
 		valuesChange: function() {

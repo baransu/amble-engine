@@ -81,7 +81,7 @@ window.Amble = (function(){
             }
 
             var layer = camera.layer(0);
-            layer.strokeStyle('white').lineWidth(0.5);
+            layer.strokeStyle('black').lineWidth(0.5);
             layer.ctx.beginPath();
 
             var lineSpacing = 200;
@@ -884,7 +884,7 @@ window.Amble = (function(){
                     if(self.selected) {
                         layer.ctx.save();
                         layer.strokeStyle(
-                            'magenta'
+                            primaryColor
                         ).lineWidth(
                             3
                         ).strokeRect(
@@ -968,7 +968,7 @@ window.Amble = (function(){
                 this.size.x,
                 this.size.y
             ).fillStyle(
-                'white'
+                'black'
             ).fillText(
                 self.name || 'Actor',
                 0,
@@ -977,7 +977,7 @@ window.Amble = (function(){
 
             if(self.selected) {
                 layer.strokeStyle(
-                    'magenta'
+                    primaryColor
                 ).lineWidth(
                     1
                 ).strokeText(
@@ -1036,7 +1036,7 @@ window.Amble = (function(){
                     if(self.selected) {
                         layer.ctx.save();
                         layer.strokeStyle(
-                            'magenta'
+                            primaryColor
                         ).lineWidth(
                             3
                         ).strokeRect(
@@ -1111,7 +1111,7 @@ window.Amble = (function(){
             if(self.selected) {
                 layer.ctx.save();
                 layer.strokeStyle(
-                    'magenta'
+                    primaryColor
                 ).lineWidth(
                     3
                 ).strokeRect(
