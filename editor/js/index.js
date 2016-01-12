@@ -16,7 +16,8 @@ var scripts = [
 var imgExtensionList = [
     'png',
     'jpg',
-    'jpeg'
+    'jpeg',
+    'gif'
 ];
 
 for(var i in scripts) {
@@ -64,6 +65,11 @@ var menuFunctions = {
 
         Amble.app.pause();
         ipcRenderer.send('editor-game-preview-respond', data);
+    },
+
+    stop: function() {
+        console.log('stop preview - editor')
+        ipcRenderer.send('editor-game-preview-stop-request');
     }
 
 }
@@ -72,24 +78,6 @@ var menu = Menu.buildFromTemplate([
     {
         label: 'File',
         submenu: [
-            // {
-            //     label: 'New Project',
-            //     accelerator: 'Ctrl+N',
-            //     click: function(){
-            //
-            //         ipcRenderer.send('new-request');
-            //
-            //     }
-            // },
-            // {
-            //     label: 'Open',
-            //     accelerator: 'Ctrl+O',
-            //     click: function() {
-            //
-            //         ipcRenderer.send('editor-open-request');
-            //
-            //     }
-            // },
             {
                 label: 'Save',
                 accelerator: 'Ctrl+S',
@@ -103,10 +91,20 @@ var menu = Menu.buildFromTemplate([
                 accelerator: 'Ctrl+B',
                 click: menuFunctions.build
             },
+        ]
+    },
+    {
+        label: 'Game',
+        submenu: [
             {
-                label: 'Play',
+                label: 'Play (preview)',
                 accelerator: 'Ctrl+P',
                 click: menuFunctions.play
+            },
+            {
+                label: 'Stop (preview)',
+                accelerator: 'Shift+Ctrl+P',
+                click: menuFunctions.stop
             }
         ]
     }
@@ -131,11 +129,6 @@ ipcRenderer.on('editor-save-request', menuFunctions.save );
 ipcRenderer.on('editor-unpause', function(event, data) {
     Amble.app.unpause();
 });
-
-// var debugConsole = document.getElementById('debug-console');
-// debugConsole.addEventListener("dom-ready", function(){
-//     debugConsole.openDevTools();
-// });
 
 ipcRenderer.on('game-preview-log', function(event, data) {
     Amble.app.debug.log(data);

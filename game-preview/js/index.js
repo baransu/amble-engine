@@ -1,21 +1,18 @@
 const electron = require('electron');
 const ipcRenderer = electron.ipcRenderer;
 
+//vec2
+require('../editor/js/src/engine/vec2.js');
+
 window.onload = function() {
     ipcRenderer.send('game-preview-loaded');
 }
 
 ipcRenderer.on('game-preview-start', function(event, data) {
 
-    //images list
-    //scripts list (require)
-    //scene file
-
     for(var i = 0; i < data.scriptsList.length; i++) {
         require(data.scriptsList[i].path);
     }
-
-    // console.log(data)
 
     var app = new Amble.Application({
 
@@ -25,7 +22,7 @@ ipcRenderer.on('game-preview-start', function(event, data) {
         width: 1280,
         height: 720,
 
-        defaultBgColor: '#000',
+        defaultBgColor: '#37474f',
 
         mainCamera: {
             name: 'MainCamera',

@@ -3,21 +3,22 @@
     <head>
         <meta charset="utf-8">
         <title>Amble Builder</title>
+
     </head>
     <body ng-controller="builderController as builder">
 
         <!-- project name -->
-        <div>
+        <!-- <div>
             {{builder.gameTitle}}
-        </div>
+        </div> -->
 
-        <input type="text" name="name" ng-model="builder.gameTitle" placeholder="Game Title">
+        <!-- <input type="text" name="name" ng-model="builder.gameTitle" placeholder="Game Title"> -->
 
         <!-- build dir -->
-        <div>
+        <!-- <div>
             <button ng-click="builder.directorySelect()">Build directory</button>
             {{builder.buildDirectory}}
-        </div>
+        </div> -->
 
         <!-- platform selection -->
 
@@ -30,9 +31,9 @@
             </ul>
         </div> -->
 
-        <button ng-click="builder.build()">Build</button>
+        <!-- <button ng-click="builder.build()">Build</button>
 
-        <div>{{builder.errorInfo}}</div>
+        <div>{{builder.errorInfo}}</div> -->
 
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
         <script src="js/index.js" charset="utf-8"></script>
