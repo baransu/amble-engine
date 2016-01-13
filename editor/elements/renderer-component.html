@@ -4,29 +4,37 @@
 
 	<style>
 
+	.head {
+		width: 100%;
+	}
+
 	</style>
 
 	<template>
 
         <div class="card" hidden$="{{hideRenderer}}">
 
-            <div class="card-header">
+			<div class="card-header">
 				<div class="row">
-					<div class="col-md-8" on-click="hideComponent">
-						<h3 class="card-title">{{actor.renderer._editorName}}</h3>
+					<div class="col-md-9 text-xs-center">
+						<a class="btn btn-success btn-sm head" role="button" on-click="hideComponent">
+							{{actor.renderer._editorName}}
+						</a>
 					</div>
-					<div class="col-md-3">
+					<div class="col-md-2 text-xs-right">
 						<div class="btn-group">
-							<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-								Options
-							</button>
+							<button type="button" class="btn btn-primary dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						      <span class="sr-only"></span>
+						    </button>
 							<div class="dropdown-menu dropdown-menu-right">
+								<h6 class="dropdown-header">Renderer options:</h6>
+								<div class="dropdown-divider"></div>
 								<a class="dropdown-item" href="#" on-click="deleteRenderer">Delete</a>
 							</div>
 						</div>
 					</div>
 				</div>
-            </div>
+			</div>
 
             <div class="card-block" hidden$="{{hideContent}}">
 				<div class="container-fluid">

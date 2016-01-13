@@ -70,23 +70,26 @@
 
             <div id="inspector-view" class="card">
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Add
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right" >
-                                    <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                <div class="card-block">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Add
+                                    </button>
+                                    <div class="dropdown-menu dropdown-menu-right" >
+                                        <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
-                <div class="scroll inspector" id="inspector-components">
+                <div class="card-block scroll" id="components-view">
 
                     <transform-component actor="{{editor.actor}}"></transform-component>
                     <renderer-component actor="{{editor.actor}}"></renderer-component>
@@ -94,8 +97,8 @@
 
                     <!--  camera -->
                     <!--  list of components -->
-
                 </div>
+
             </div>
 
         </div>

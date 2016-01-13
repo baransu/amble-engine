@@ -8,7 +8,7 @@
         <link rel="stylesheet" href="../../amble-engine-dependencies/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
 
         <link rel="stylesheet" href="css/style.css" charset="utf-8">
-        
+
     </head>
     <body ng-controller="launcherController as launcher">
 
@@ -36,9 +36,9 @@
             </div>
 
             <div class="row m-b-1">
-                <div class="col-md-12">
+                <div class="col-md-6 text-xs-right">
+                    <button class="btn btn-primary" type="button" ng-click="launcher.openOther()">Other</button>
                     <button class="btn btn-success" type="button" ng-click="launcher.create()">Create</button>
-                    <button class="btn btn-info" type="button" ng-click="launcher.openOther()">Other</button>
                 </div>
             </div>
 
