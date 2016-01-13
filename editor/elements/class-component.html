@@ -4,10 +4,6 @@
 
 	<style>
 
-    .panel {
-		margin-top: 10px;
-	}
-
 	</style>
 
 	<template>
@@ -15,25 +11,28 @@
         <div hidden$="{{hideAll}}">
 
 			<template id="class-list" is="dom-repeat" items="{{ components }}" as="component">
-				<div class="panel panel-primary">
-					<div class="panel-heading" on-click="hide">
+				<div class="card">
+
+					<div class="card-header" on-click="hide">
 						<div class="row">
-							<div class="col-md-6">
-								<h3 class="panel-title">{{component.name}} - (script)</h3>
+							<div class="col-md-8">
+								<h3 class="card-title">{{component.name}} - (script)</h3>
 							</div>
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-									Options <span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li><a href="#" component="{{index}}" on-click="deleteClass">Delete</a></li>
-									<li><a href="#" component="{{index}}" on-click="resetClass">Reset</a></li>
-								</ul>
+							<div class="col-md-3">
+								<div class="btn-group">
+									<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										Options
+									</button>
+									<div class="dropdown-menu dropdown-menu-right">
+										<a class="dropdown-item" href="#" on-click="resetClass">Reset</a>
+										<a class="dropdown-item" href="#" on-click="deleteClass">Delete</a>
+									</div>
+								</div>
 							</div>
 						</div>
-
 					</div>
-					<div class="panel-body" hidden$="{{hideConent}}">
+
+					<div class="card-block">
 						<div class="container-fluid">
 
 							<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
@@ -359,6 +358,7 @@
 						props: p
 					});
 				}
+
 			}
 		},
 

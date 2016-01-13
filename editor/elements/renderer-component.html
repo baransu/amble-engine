@@ -4,31 +4,31 @@
 
 	<style>
 
-    .panel {
-		margin-top: 10px;
-    }
-
 	</style>
 
 	<template>
 
-        <div class="panel panel-primary" hidden$="{{hideRenderer}}">
-            <div class="panel-heading">
+        <div class="card" hidden$="{{hideRenderer}}">
+
+            <div class="card-header">
 				<div class="row">
-					<div class="col-md-6" on-click="hideComponent">
-						<h3 class="panel-title">{{actor.renderer._editorName}}</h3>
+					<div class="col-md-8" on-click="hideComponent">
+						<h3 class="card-title">{{actor.renderer._editorName}}</h3>
 					</div>
-					<div class="btn-group">
-						<button type="button" class="btn btn-default dropdown-toggle btn-xs" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							Options <span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu">
-							<li><a href="#" on-click="deleteRenderer">Delete</a></li>
-						</ul>
+					<div class="col-md-3">
+						<div class="btn-group">
+							<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Options
+							</button>
+							<div class="dropdown-menu dropdown-menu-right">
+								<a class="dropdown-item" href="#" on-click="deleteRenderer">Delete</a>
+							</div>
+						</div>
 					</div>
 				</div>
             </div>
-            <div class="panel-body" hidden$="{{hideContent}}">
+
+            <div class="card-block" hidden$="{{hideContent}}">
 				<div class="container-fluid">
 					<!-- rect renderer -->
 	                <div hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
@@ -189,7 +189,7 @@
 				Amble.app.scene.remove(this.actor);
 				this.actor = Amble.app.scene.instantiate(prefab);
 
-				this.actor.selected = true;
+				this.actor.selected = false;
 				this.actor.sceneID = sceneID;
 
 				this.isRendererPresent();

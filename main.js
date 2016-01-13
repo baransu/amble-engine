@@ -30,7 +30,7 @@ app.on('ready', function() {
     launcherWindow = new BrowserWindow({
         // width: 640,
         // height: 360,
-        width: 854,
+        width: 640,
         height: 480,
         resizable: false
     });
@@ -118,7 +118,7 @@ ipcMain.on('launcher-other-request', function(event, data) {
                 path = path[0];
                 console.log(path);
                 var p = JSON.parse(fs.readFileSync(path, 'utf-8'));
-                if(p) var data = { name: p.name, dir: p.dir + '/' + p.name};
+                if(p) var data = { name: p.name, dir: p.dir};
             } else {
                 var data = 'undefined'
             }
@@ -195,6 +195,7 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
     //load launcher loader page
     launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
+    launcherWindow.setMenu(null);
     launcherWindow.focus();
     launcherWindow.setAlwaysOnTop(true);
 
@@ -214,6 +215,9 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
     editorWindow.on('closed', function() {
         editorWindow = null;
+        if(launcherWindow) launcherWindow.close();
+        if(gamePreviewWindow) gamePreviewWindow.close();
+        if(builderWindow) builderWindow.close();
     });
 
     currentState = 'editor';
@@ -257,10 +261,8 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     //builder
     builderWindow = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        'min-width': 854,
-        'min-height': 480
+        width: 854,
+        height: 480
     });
 
     builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
@@ -313,13 +315,18 @@ ipcMain.on('game-preview-loaded', function(event, data) {
     gamePreviewWindow.webContents.send('game-preview-start', gamePreviewData);
 });
 
-ipcMain.on('game-preview-error-request',function(event, data){
+ipcMain.on('game-preview-error-request', function(event, data) {
     editorWindow.webContents.send('game-preview-error', data);
 })
 
-ipcMain.on('game-preview-log-request',function(event, data){
+ipcMain.on('game-preview-log-request', function(event, data) {
     editorWindow.webContents.send('game-preview-log', data);
 })
+
+ipcMain.on('editor-game-preview-stop-request', function(event, data) {
+    console.log('stop preview')
+    menuFunctions.stopPreview();
+});
 
 //builder
 ipcMain.on('builder-dir-request', function(event, data) {
@@ -405,6 +412,9 @@ app.on('browser-window-focus', function(event, bWindow) {
 
         //play
         shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.play);
+
+        //stop
+        shortcuts.open = globalShortcut.register('shift+ctrl+p', menuFunctions.stopPreview);
         break;
     }
 
@@ -422,156 +432,12 @@ var menuFunctions = {
 
     play: function() {
         editorWindow.webContents.send('editor-game-preview-request');
+    },
+
+    stopPreview: function() {
+        //close preview
+        gamePreviewWindow.close();
+        //send unpause
+        editorWindow.webContents.send('editor-unpause');
     }
-
 }
-
-
-// ipcMain.on('build-respond', function(event, data) {
-//
-//     dialog.showOpenDialog(
-//         mainWindow,
-//         {
-//             title: 'Select build destination',
-//             properties: ['openDirectory', 'createDirectory'],
-//         },
-//         function(path) {
-//
-//             if(!path) return;
-//
-//             buildDir = path[0];
-//
-//             var sceneFile = data.sceneFile;
-//             var imagesList = data.imagesList;
-//
-//             gulp.projectDirectory = projectDirectory;
-//             gulp.imagesList = [];
-//             gulp.scriptsList = [];
-//             gulp.outputDir = buildDir;
-//
-//             console.log(buildDir);
-//
-//             for(var i in data.imagesList) {
-//                 gulp.imagesList.push(data.imagesList[i].path);
-//             }
-//
-//             for(var i in data.scriptsList) {
-//                 gulp.scriptsList.push(data.scriptsList[i].path);
-//             }
-//
-//             gulp.start('build-game', function(){
-//                 fs.writeFileSync(buildDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-//                 fs.writeFileSync(buildDir + '/assets/js/assets-list.js', "var imagesList = " + JSON.stringify(imagesList), 'utf8');
-//                 console.log('build-game callback')
-//             });
-//
-//     });
-//
-// });
-
-//
-// var menuFunctions = {
-//
-//     new: function() {
-//         dialog.showSaveDialog(
-//             mainWindow,
-//             {
-//                 title: 'Select new project directory',
-//                 properties: ['openDirectory', 'createDirectory'],
-//                 filters: [
-//                     { name: 'Amble Project', extensions: ['aproject'] }
-//                 ]
-//             },
-//             function(path) {
-//                 if(!path) return;
-//                 //check if aproject
-//                 var a = path.split('.');
-//                 if(a[a.length - 1] != 'aproject') {
-//                     path += '.aproject';
-//                 }
-//
-//                 projectFile = path;
-//                 fs.writeFileSync(projectFile, JSON.stringify({}), 'utf8');
-//
-//                 if (path.indexOf("/") == -1) { // windows
-//                     projectDirectory = path.substring(0, path.lastIndexOf('\\'));
-//                 }
-//                 else { // unix
-//                     projectDirectory = path.substring(0, path.lastIndexOf('/'));
-//                 }
-//
-//                 mainWindow.setTitle(projectDirectory);
-//
-//                 var data = {
-//                     path: projectDirectory,
-//                     project: {
-//                         actors: [],
-//                         camera: {
-//                             x: 0,
-//                             y: 0
-//                         }
-//                     },
-//                 };
-//
-//                 mkdirp(projectDirectory + '/assets', function(err) {
-//
-//                     if(err) throw err;
-//                     mainWindow.webContents.send('open-request-renderer', data);
-//
-//                 });
-//
-//         });
-//
-//     },
-//
-//     open: function() {
-//         dialog.showOpenDialog(
-//             mainWindow,
-//             {
-//                 title: 'Select new project directory',
-//                 properties: ['openFile'],
-//                 filters: [
-//                     { name: 'Amble Project', extensions: ['aproject'] }
-//                 ]
-//             },
-//             function(path) {
-//                 if(!path) return;
-//
-//                 projectFile = path[0];
-//
-//                 var d = JSON.parse(fs.readFileSync(projectFile, 'utf8'));
-//
-//                 // console.log(d.scene);
-//
-//                 if (projectFile.indexOf("/") == -1) { // windows
-//                     projectDirectory  = projectFile.substring(0, projectFile.lastIndexOf('\\'));
-//                 }
-//                 else { // unix
-//                     projectDirectory = projectFile.substring(0, projectFile.lastIndexOf('/'));
-//                 }
-//
-//                 mainWindow.setTitle(projectDirectory);
-//
-//                 //load
-//                 var data = {
-//                     path: projectDirectory,
-//                     project: {
-//                         actors: d.scene,
-//                         camera: d.camera
-//                     },
-//                 };
-//
-//                 mainWindow.webContents.send('open-request-renderer', data);
-//
-//         });
-//     },
-//
-
-//
-//     build: function() {
-//
-//         mainWindow.webContents.send('build-request');
-//
-//     }
-//
-// }

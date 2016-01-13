@@ -3,37 +3,30 @@
     <head>
         <meta charset="utf-8">
         <title>Amble Editor</title>
-        <link rel="stylesheet" href="../bower_components/bootswatch-dist/css/bootstrap.min.css" charset="utf-8">
+
+        <link rel="stylesheet" href="../bower_components/font-awesome/css/font-awesome.css" charset="utf-8">
+
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <!-- <link rel="stylesheet" href="../../amble-engine-dependencies/bootstrap/dist/css/bootstrap.min.css" charset="utf-8"> -->
+
+        <!-- change to bower -->
+        <link rel="stylesheet" href="../bower_components/jstree/dist/themes/default/style.css" charset="utf-8">
+        <!-- <link rel="stylesheet" href="../../amble-engine-dependencies/jstree/dist/themes/default/style.css" media="screen" title="no title" charset="utf-8"> -->
+
         <link rel="stylesheet" type="text/css" href="css/style.css"/>
-        <!-- <link rel="stylesheet" type="text/css" href="css/font-awesome/css/font-awesome.min.css"/> -->
+
     </head>
     <body ng-controller="editorController as editor">
 
         <div class="container-fluid">
 
-            <div id="tools">
+            <div id="tools" class="card"></div>
 
-                <!-- <div class="row">
-                    <div class="col-md-12">
-                        <div class="btn-group" role="group" aria-label="...">
-                            <button type="button" class="btn btn-default">Left</button>
-                            <button type="button" class="btn btn-default">Middle</button>
-                            <button type="button" class="btn btn-default">Right</button>
-                        </div>
-                    </div>
-                </div> -->
+            <div id="project-view" class="scroll card"></div>
 
-            </div>
+            <div id="scene-view" class="card"></div>
 
-            <div id="project-view" class="scroll">
-                <div class="list-container">
-                    <ul id="list" class="list"></ul>
-                </div>
-            </div>
-
-            <div id="scene-view"></div>
-
-            <div id="debug-console" class="scroll">
+            <div id="debug-console" class="scroll card">
                 <div class="container-fluid" ng-repeat="log in editor.logs">
                     <div class="row">
                         <div class="col-md-12 text-danger console-message" ng-if="log.type == 'error'">
@@ -46,23 +39,23 @@
                 </div>
             </div>
 
-            <div id="hierarchy">
+            <div id="hierarchy" class="card">
 
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="input-group input-group-sm">
+                        <div class="input-group">
                             <div class="input-group-btn">
-                                <a role="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Add <span class="caret"></span></a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li ng-repeat="actor in editor.actorsToAdd" >
-                                        <a href="#" ng-click="editor.addActor(actor)">{{actor.name}}</a>
-                                    </li>
-                                </ul>
-                            </div><!-- /btn-group -->
+                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Add
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a href="#" ng-repeat="actor in editor.actorsToAdd" class="dropdown-item" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+                                </div>
+                            </div>
                             <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
-                        </div><!-- /input-group -->
-                    </div><!-- /.col-lg-6 -->
-                </div><!-- /.row -->
+                        </div>
+                    </div>
+                </div>
 
                 <div class="scroll hierarchy">
                     <div class="list-container">
@@ -75,21 +68,19 @@
                 </div>
             </div>
 
-            <div id="inspector-view">
+            <div id="inspector-view" class="card">
 
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="input-group input-group-sm">
+                        <div class="input-group">
                             <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
                             <div class="input-group-btn">
-
-                                <a class="btn btn-default dropdown-toggle" role="button" ng-click="editor.updateComponents()" data-toggle="dropdown">Add <span class="caret"></span></a>
-                                <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                                    <li ng-repeat="component in editor.componentsToAdd">
-                                        <a href="#" ng-if="!component.options.hide" ng-click="editor.addComponent(component)">{{component.name}}</a>
-                                    </li>
-                                </ul>
-
+                                <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Add
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right" >
+                                    <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -107,8 +98,6 @@
                 </div>
             </div>
 
-            <!-- <div id="preview">preview</div> -->
-
         </div>
 
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
@@ -117,7 +106,16 @@
         <script src="js/index.js" charset="utf-8"></script>
 
         <script src="../bower_components/webcomponentsjs/webcomponents.js" charset="utf-8"></script>
-        <script src="../bower_components/bootswatch-dist/js/bootstrap.min.js" charset="utf-8"></script>
+
+        <script src="../bower_components/tether/dist/js/tether.min.js" charset="utf-8"></script>
+
+        <!-- bootstrap-->
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
+        <!-- <script src="../../amble-engine-dependencies/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
+
+        <!-- change to bower -->
+        <script src="../bower_components/jstree/dist/jstree.min.js" charset="utf-8"></script>
+        <!-- <script src="../../amble-engine-dependencies/jstree/dist/jstree.min.js" charset="utf-8"></script> -->
 
         <link rel="import" href="elements/class-component.html">
         <link rel="import" href="elements/transform-component.html">
