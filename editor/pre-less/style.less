@@ -93,28 +93,23 @@ html, body {
     right: calc(~'0% + @{viewMargin}');
     top: calc(~'@{toolsHeight} + @{viewMargin}');
     width: calc(~'@{inspectorWidth} - @{viewMargin}');
-    height: calc(~'@{inspectorHeight} - @{viewMargin}');
-}
-
-#preview {
-    .default;
-    right: calc(~'0% + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{inspectorHeight} + @{viewMargin}');
-    width: calc(~'@{previewWidth} - @{viewMargin}');
-    height: calc(~'@{previewHeight} - 2*@{viewMargin}');
+    height: calc(~'@{inspectorHeight} - 2*@{viewMargin}');
 }
 
 .scroll {
     overflow: scroll;
-    height: 100%;
+    height: 90%;
+    width: 100%;
 
     &.hierarchy {
         height: 100% - 2*@searchHeight;
     }
+}
 
-    &.inspector {
-        padding: 0 5px 0 5px;
-    }
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }
 
 .console-message {

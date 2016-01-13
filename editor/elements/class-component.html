@@ -4,6 +4,10 @@
 
 	<style>
 
+	.head {
+		width: 100%;
+	}
+
 	</style>
 
 	<template>
@@ -13,17 +17,20 @@
 			<template id="class-list" is="dom-repeat" items="{{ components }}" as="component">
 				<div class="card">
 
-					<div class="card-header" on-click="hide">
+					<div class="card-header">
 						<div class="row">
-							<div class="col-md-8">
-								<h3 class="card-title">{{component.name}} - (script)</h3>
+							<div class="col-md-9 text-xs-center">
+								<a class="btn btn-warning btn-sm head" role="button">
+									{{component.name}}
+								</a>
 							</div>
-							<div class="col-md-3">
-								<div class="btn-group">
-									<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										Options
-									</button>
+							<div class="col-md-2 text-xs-right">
+								<div id="id_{{index}}"class="btn-group">
+									<button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" on-click="scrollTo">
+								    </button>
 									<div class="dropdown-menu dropdown-menu-right">
+										<h6 class="dropdown-header">Class options:</h6>
+										<div class="dropdown-divider"></div>
 										<a class="dropdown-item" href="#" on-click="resetClass">Reset</a>
 										<a class="dropdown-item" href="#" on-click="deleteClass">Delete</a>
 									</div>
@@ -31,6 +38,8 @@
 							</div>
 						</div>
 					</div>
+
+
 
 					<div class="card-block">
 						<div class="container-fluid">
@@ -165,6 +174,13 @@
 		},
 
 		ready: function () { },
+
+		scrollTo: function(e) {
+			var id = e.target.parentNode.id;
+			$('#components-view').animate({
+				scrollTop: $("#" + id).offset().top
+			}, 1000);
+		},
 
 		deleteClass: function(e) {
 			var index = e.target.component;
@@ -362,7 +378,7 @@
 			}
 		},
 
-		hide: function() {},
+		hideComponenet: function() {},
 
 	});
 
