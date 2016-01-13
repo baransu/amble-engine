@@ -18,15 +18,15 @@ window.Amble = (function(){
             window.addEventListener('resize', function(){
 
                 var camera = Amble.app.mainCamera.camera;
-                var width = parseInt(camera.context.offsetWidth);
-                var height = parseInt(camera.context.offsetHeight);
+                var width = $(camera.context).width();
+                var height = $(camera.context).height();
 
                 for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
                     Amble.app.width = camera.layers[i].layer.canvas.width = width;
                     Amble.app.height = camera.layers[i].layer.canvas.height = height;
                 }
 
-                // Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
             });
         }
@@ -199,10 +199,9 @@ window.Amble = (function(){
             }, 0);
         })
 
-        /* hearth of the Amble/game */
         function gameLoop(){
             if(!that.paused) {
-                // console.log('game loop')
+
                 var now = Date.now();
                 Amble.Time.deltaTime = (now - Amble.Time._lastTime) / 1000.0;
 
@@ -220,7 +219,6 @@ window.Amble = (function(){
         }
     };
 
-    /* Time */
     Amble.Time = {
         deltaTime: 0,
         _lastTime: 0

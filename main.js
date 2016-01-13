@@ -28,8 +28,6 @@ var shortcuts = {};
 app.on('ready', function() {
     //launcher
     launcherWindow = new BrowserWindow({
-        // width: 640,
-        // height: 360,
         width: 640,
         height: 480,
         resizable: false
@@ -203,8 +201,8 @@ ipcMain.on('launcher-open-request', function(event, data) {
     editorWindow = new BrowserWindow({
         width: 1280,
         height: 720,
-        'min-width': 854,
-        'min-height': 480,
+        'min-width': 960,
+        'min-height': 540,
         show: false
     });
 
@@ -261,15 +259,17 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     //builder
     builderWindow = new BrowserWindow({
-        width: 854,
-        height: 480
+        width: 640,
+        height: 480,
+        show: false,
+        resizable: false
     });
 
     builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
     builderWindow.setTitle(currentName + ' | ' + currentDir + ' | Amble Builder');
     builderWindow.toggleDevTools();
-    builderWindow.center();
+        // builderWindow.center();
     builderWindow.on('closed', function() {
         builderWindow = null;
     });
@@ -329,6 +329,11 @@ ipcMain.on('editor-game-preview-stop-request', function(event, data) {
 });
 
 //builder
+ipcMain.on('builder-loaded', function(event, data) {
+    builderWindow.show();
+    builderWindow.focus();
+});
+
 ipcMain.on('builder-dir-request', function(event, data) {
     dialog.showOpenDialog(
         builderWindow,
@@ -382,8 +387,11 @@ ipcMain.on('builder-build-request', function(event, data) {
         }
 
         builderGulp.start('build-game', function(err) {
+            var response = {}
             if(err) {
-                builderWindow.send('builder-build-respond', 'Game build failed - build');
+                response.type = 'error';
+                response.message = 'Game build failed - build';
+                builderWindow.send('builder-build-respond', response);
                 throw err;
             }
 
@@ -392,9 +400,10 @@ ipcMain.on('builder-build-request', function(event, data) {
 
             console.log('build-game callback')
 
-            var info = 'Game build succesful - game build to: ' + targetDir;
+            response.type = 'success';
+            response.message = 'Game build succesful - game build to: ' + targetDir;
             //send respond with respond
-            builderWindow.send('builder-build-respond', info)
+            builderWindow.send('builder-build-respond', response)
 
         });
     });

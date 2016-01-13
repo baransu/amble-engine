@@ -425,18 +425,22 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
                 editor.refresh();
 
-                if(editor.actor && editor.actor.selected) {
-                    editor.actor.selected = false;
-                }
+                if(document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
+                    if(editor.actor && editor.actor.selected) {
+                        editor.actor.selected = false;
+                    }
 
-                if(editor.previousActor) {
-                    editor.previousActor.className = 'hierarchy-item';
+                    if(editor.previousActor) {
+                        editor.previousActor.className = 'list-group-item';
+                    }
+                } else {
+                    document.activeElement.blur();
                 }
 
             break;
             case 46: //del
 
-                if(editor.actor) {
+                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
                     Amble.app.scene.remove(editor.actor)
 
@@ -533,8 +537,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
 
-        var normal = 'hierarchy-item';
-        var highlighted = "hierarchy-item highlighted";
+        var normal = 'list-group-item';
+        var highlighted = "list-group-item active";
 
         if(editor.previousActor) {
             editor.previousActor.className = normal;

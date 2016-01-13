@@ -52,15 +52,33 @@ Amble.Class({
 
     onresize: function(self) {
 
+
         var width = parseInt(self.camera.context.offsetWidth);
         var height = parseInt(self.camera.context.offsetHeight);
-        var sizeDifference = width/self.camera.size.x;
+
+        if(self.camera.scale != 1) {
+            var w = self.camera.size.x;
+            var h = self.camera.size.y;
+
+            for(var i = 0; i < self.camera.layers.length; i++) {
+                self.camera.layers[i].layer.ctx.scale(this.zoom,this.zoom);
+                self.camera.layers[i].layer.ctx.translate(
+                    -( w/2 / self.camera.scale + this.origin.x - w/2 ),
+                    -( h/2 / self.camera.scale + this.origin.y - h/2)
+                );
+            }
+
+            this.translate.x = -( w/2 / self.camera.scale + this.origin.x - w/2 );
+            this.translate.y = -( h/2 / self.camera.scale + this.origin.y - h/2 );
+
+            this.origin.x = ( w/2 / self.camera.scale + this.origin.x - w/2 );
+            this.origin.y = ( h/2 / self.camera.scale + this.origin.y - h/2 );
+
+            self.camera.scale = 1;
+        }
 
         self.camera.size = new Vec2(width, height);
-        self.camera.view = new Vec2(self.camera.position.x - width, self.camera.position.y - height);
-
-        this.maxZoom *= sizeDifference;
-        this.minZoom *= sizeDifference;
+        self.camera.update();
     },
 
     onmousedown: function(self, e) {
@@ -106,7 +124,8 @@ Amble.Class({
 
         var zoomToX = self.camera.size.x/2;
         var zoomToY = self.camera.size.y/2;
-        var wheel = e.wheelDelta/120;
+        var wheelSpeed = 8; //highter is slower
+        var wheel = e.wheelDelta/(120 * wheelSpeed);
         this.zoom = Math.pow(1 + Math.abs(wheel)/2 , wheel > 0 ? 1 : -1);
 
         for(var i = 0; i < self.camera.layers.length; i++) {
