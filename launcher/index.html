@@ -4,8 +4,8 @@
         <meta charset="utf-8">
         <title>Amble Engine Launcher</title>
 
-        <!-- <link rel="stylesheet" href="../bootstrap/dist/css/bootstrap.min.css" charset="utf-8"> -->
-        <link rel="stylesheet" href="../../amble-engine-dependencies/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <!-- <link rel="stylesheet" href="../../amble-engine-dependencies/bootstrap/dist/css/bootstrap.min.css" charset="utf-8"> -->
 
         <link rel="stylesheet" href="css/style.css" charset="utf-8">
 
@@ -56,8 +56,8 @@
 
             <div class="row m-b-1">
                 <div class="col-md-12">
-                    <div class="list-group" ng-repeat="project in launcher.projects">
-                        <a href="#" class="list-group-item" ng-click="launcher.openProject($event, project)">
+                    <div class="list-group">
+                        <a href="#" ng-repeat="project in launcher.projects" class="list-group-item" ng-click="launcher.openProject($event, project)">
                             <h3 class="list-group-item-heading">{{project.name}}</h3>
                             <p class="list-group-item-text">{{project.dir}}</p>
                         </a>

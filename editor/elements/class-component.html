@@ -14,7 +14,7 @@
 
         <div hidden$="{{hideAll}}">
 
-			<template id="class-list" is="dom-repeat" items="{{ components }}" as="component">
+			<template is="dom-repeat" items="{{ components }}" as="component">
 				<div class="card">
 
 					<div class="card-header">
@@ -25,14 +25,14 @@
 								</a>
 							</div>
 							<div class="col-md-4 text-xs-right">
-								<div id="id_{{index}}"class="btn-group">
+								<div id="id_{{index}}" class="btn-group">
 									<button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" on-click="scrollTo">
 								    </button>
 									<div class="dropdown-menu dropdown-menu-right">
 										<h6 class="dropdown-header">Class options:</h6>
 										<div class="dropdown-divider"></div>
-										<a class="dropdown-item" href="#" on-click="resetClass">Reset</a>
-										<a class="dropdown-item" href="#" on-click="deleteClass">Delete</a>
+										<a class="dropdown-item" href="#" on-click="resetClass" component="{{index}}">Reset</a>
+										<a class="dropdown-item" href="#" on-click="deleteClass" component="{{index}}">Delete</a>
 									</div>
 								</div>
 							</div>
@@ -44,98 +44,130 @@
 					<div class="card-block">
 						<div class="container-fluid">
 
-							<template id="class-list" is="dom-repeat" items="{{ component.props }}" as="p">
+							<template id="class-list" is="dom-repeat" items="{{ component.properties }}" filter="show" as="p">
 
 								<!-- vector -->
-								<div class="row" hidden$="{{hideProperty('vec2', p)}}">
+								<div class="row" hidden$="{{hideProperty('Vec2', p)}}">
 
-									<div class="row">
-										{{p.name}} (vec2):</br>
-										<template id="class-list" is="dom-repeat" items="{{ p.value.value }}" as="v">
-											<div class="col-md-6">
-												<form class="form-horizontal">
-													<div class="form-group form-group-sm">
-														<input class="form-control" type="number" placeholder="{{v.name}}" property="{{p.name}}" id="{{v.name}}" step= "0.1" component="{{component.index}}" on-change="valuesChange" value="{{v.value}}">
-													</div>
-												</form>
+									{{p.name}} (vec2):</br>
+									<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+										<div class="col-md-6">
+											<div class="form-group form-group-sm">
+												<input class="form-control" type="number" step= "0.1" on-change="updateComponents" value="{{v::input}}">
 											</div>
-										</template>
-						            </div>
+										</div>
+									</template>
 
 								</div>
 
 								<!-- simple properties -->
-								<div class="row" hidden$="{{hideProperty('simple-number', p)}}">
+								<div class="row" hidden$="{{hideProperty('Number', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (number)</label>
-										<input class="form-control" type="number" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" value="{{p.value}}">
+										<input class="form-control" type="number" on-change="updateComponents" value="{{p.value::input}}">
 									</div>
 								</div>
 
-								<div class="row" hidden$="{{hideProperty('simple-bool', p)}}">
+								<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (bool)</label>
-										<input class="checkbox" type="checkbox" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" checked="{{p.value}}">
+										<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{p.value::checked}}">
 									</div>
 								</div>
 
 
-								<div class="row" hidden$="{{hideProperty('simple-string', p)}}">
+								<div class="row" hidden$="{{hideProperty('String', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (string)</label>
-										<input class="form-control" type="text" property="{{p.name}}" component="{{component.index}}" on-change="valuesChange" value="{{p.value}}">
+										<input class="form-control" type="text" on-change="updateComponents" value="{{p.value::input}}">
 									</div>
 								</div>
 
-								<!-- array of simple -->
-								<div class="row" hidden$="{{hideProperty('array', p)}}">
+								<!-- array -->
+								<div hidden$="{{hideProperty('Array', p)}}">
 									{{p.name}} (array)</br>
-									<template is="dom-repeat" items="{{ p.values }}" as="v">
-										<div class="row" hidden$="{{hideProperty('simple-number', v)}}">
+									<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+
+										<div class="row" hidden$="{{hideProperty('String', v)}}">
+											<div class="col-md-12">
+												<input class="form-control" type="number" on-change="updateComponents" value="{{v.value::input}}"></br>
+											</div>
+										</div>
+
+										<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+											<div class="col-md-12">
+												<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{v.value::checked}}"></br>
+											</div>
+										</div>
+
+										<div class="row" hidden$="{{hideProperty('String', v)}}">
+											<div class="col-md-12">
+												<input class="form-control" type="text" on-change="updateComponents" value="{{v.value::input}}"></br>
+											</div>
+										</div>
+
+
+										<div hidden$="{{hideProperty('Vec2', v)}}">
+
+											<div class="row">
+												<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
+													<div class="col-md-6">
+														<div class="form-group form-group-sm">
+															<input class="form-control" type="number" step= "0.1" on-change="updateComponents" value="{{vv::input}}">
+														</div>
+													</div>
+												</template>
+								            </div>
+
+										</div>
+
+
+									</template>
+								</div>
+
+								<!-- object -->
+								<div hidden$="{{hideProperty('Object', p)}}">
+									{{p.name}} (object)</br>
+									<template is="dom-repeat" items="{{ toArray(p.value, 'Object') }}" as="v">
+
+										<div class="row" hidden$="{{hideProperty('Number', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (number)</label>
-												<input class="form-control" type="number" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+												<input class="form-control" type="number" on-change="updateComponents" value="{{v.value::input}}"></br>
 											</div>
 										</div>
 
-										<div class="row" hidden$="{{hideProperty('simple-bool', v)}}">
+										<div class="row" hidden$="{{hideProperty('Boolean', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (bool)</label>
-												<input class="checkbox" type="checkbox" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" checked="{{v.value}}"></br>
+												<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{v.value::checked}}"></br>
 											</div>
 										</div>
 
-										<div class="row" hidden$="{{hideProperty('simple-string', v)}}">
+										<div class="row" hidden$="{{hideProperty('String', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (string)</label>
-												<input class="form-control" type="text" property="{{p.name}}" index="{{v.name}}" component="{{component.index}}" on-change="valuesChange" value="{{v.value::input}}"></br>
+												<input class="form-control" type="text" on-change="updateComponents" value="{{v.value::input}}"></br>
 											</div>
 										</div>
 
-									</template>
-								</div>
 
-								<!-- array of vec2 -->
-								<div class="row" hidden$="{{hideProperty('vec2-array', p)}}">
-									{{p.name}} (array)</br>
-									<template is="dom-repeat" items="{{ p.values }}" as="v">
+										<div class="row" hidden$="{{hideProperty('Vec2', v)}}">
 
-										<div class="row">
-											{{v.name}}</br>
-											<template id="class-list" is="dom-repeat" items="{{ v.value.value }}" as="vv">
+											{{v.name}} (vec2):</br>
+											<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
 												<div class="col-md-6">
-													<form class="form-horizontal">
-														<div class="form-group form-group-sm">
-															<input class="form-control" placeholder="{{vv.name}}" type="number" property="{{p.name}}" index="{{v.name}}" id="{{vv.name}}" step= "0.1" component="{{component.index}}" on-change="valuesChange" value="{{vv.value}}">
-														</div>
-													</form>
+													<div class="form-group form-group-sm">
+														<input class="form-control" type="number" step="0.1" on-change="updateComponents" value="{{vv::input}}">
+													</div>
 												</div>
 											</template>
-						                </div>
+
+										</div>
+
+
 									</template>
 								</div>
-
-								<div class="divider"></div>
 
 							</template>
 						</div>
@@ -144,7 +176,9 @@
 
 			</template>
         </div>
+
 	</template>
+
 </dom-module>
 
 <script>
@@ -161,46 +195,32 @@
 				observer: 'refreshActor'
 			},
 
+			components: {
+				type: Array,
+				value: []
+			},
+
 			hideAll: {
 				type: Boolean,
 				value: true
 			},
 
-			components: {
-				type: Array,
-				value: []
-			}
-
 		},
 
 		ready: function () { },
 
-		scrollTo: function(e) {
-			var id = e.target.parentNode.id;
-			$('#components-view').animate({
-				scrollTop: $("#" + id).offset().top
-			}, 1000);
-		},
+		// scrollTo: function(e) {
+		// 	var id = e.target.parentNode.id;
+		// 	$('#components-view').animate({
+		// 		scrollTop: $("#" + id).offset().top
+		// 	}, 1000);
+		// },
 
 		deleteClass: function(e) {
 			var index = e.target.component;
-
 			if(this.actor) this.actor.prefab.components.splice(index, 1);
 
-			this.components = [];
-			for(var i in this.actor.prefab.components) {
-				var c = this.actor.prefab.components[i];
-				var p = [];
-				for(var x in c.properties) {
-					var a = this.decodeProperties(c.properties[x]);
-					p.push(a);
-				}
-
-				this.push('components', {
-					name: c.name,
-					props: p
-				});
-			}
+			this.rebindComponents()
 		},
 
 		resetClass: function(e) {
@@ -212,142 +232,45 @@
 					this.actor.prefab.components[index].properties[x] = JSON.parse(JSON.stringify(c.properties[x]));
 				}
 
-				this.components = [];
-				for(var i in this.actor.prefab.components) {
-					var c = this.actor.prefab.components[i];
-					var p = [];
-					for(var x in c.properties) {
-						var a = this.decodeProperties(c.properties[x]);
-						p.push(a);
-					}
-
-					this.push('components', {
-						name: c.name,
-						props: p
-					});
-				}
+				this.rebindComponents()
 			}
 		},
 
-		hideProperty: function(type, p) {
-
-			switch(type) {
-
-				case 'simple-number':
-					return !(typeof p.value == 'number')
-				break;
-
-				case 'simple-bool':
-					return !(typeof p.value == 'boolean')
-				break;
-
-				case 'simple-string':
-					return !(typeof p.value == 'string')
-				break;
-
-				case 'vec2':
-					return !(p.value && p.value.type && p.value.type === 'Vec2');
-				break;
-
-				case 'array':
-					return !(Array.isArray(p.values) && typeof p.values[0].value != 'object');
-				break;
-
-				case 'vec2-array':
-					return !(Array.isArray(p.values) && typeof p.values[0].value == 'object');
-				break;
-
-				default:
-				return true;
-
-				break;
-			}
-
+		show: function(item) {
+			return (item && item.name && item.value && item.type);
 		},
 
-		propertyUpdate: function(p, e) {
-			if(typeof p.args[0] == 'number' || typeof p.args[0] == 'boolean' || typeof p.args[0] == 'string') {
-				switch(e.target.type) {
-					case 'number':
-						return p.args[0] = Number(e.target.value)
-					break;
+		toArray: function(obj, type) {
+			if(Array.isArray(obj)) {
+				return obj;
+			} else if(type && type == 'Object'){
+	            return Object.keys(obj).map(function(key) {
+	                return {
+	                    name: key,
+	                    value: obj[key]
+	                };
+	            });
 
-					case 'text':
-						return p.args[0] = e.target.value
-					break;
-
-					case 'checkbox':
-						return p.args[0] = e.target.checked;
-					break;
-				}
-			} else if (p.args[0].name == 'Array') { //array
-
-				var index = Number(e.target.index);
-				return p.args[0].args[index].args[0] = this.propertyUpdate(p.args[0].args[index], e);
-
-			} else if(p.args[0].name == 'Vec2' ){
-				var type = e.target.id;
-				if(type == 'x') {
-					p.args[0].args[0].args[0] = this.propertyUpdate(p.args[0].args[0], e)
-				} else {
-					p.args[0].args[1].args[0] = this.propertyUpdate(p.args[0].args[1], e)
-				}
-				return p.args[0];
+			} else {
+				return [];
 			}
 		},
 
-		valuesChange: function(e) {
-			//apply object changes to prefab
-			console.log('value change')
-			var index = e.target.component;
-			var property = e.target.property;
-			var component = this.actor.prefab.components[index];
+		hideProperty: function(type, property) {
 
-			if(component) {
-
-				var p = component.properties.find(p => p.name == property)
-				p = this.propertyUpdate(p, e);
-
+			if(type === 'Vec2') {
+				console.log(property)
 			}
 
+			if(property.type) {
+				return type != property.type;
+			} else {
+				return typeof property != type.toLowerCase();
+			}
 		},
 
-		decodeProperties: function(obj) {
-
-			var o = {}
-			for(var i in obj.args) {
-
-				o.name = obj.name;
-
-				if(typeof obj.args[i] == 'number' || typeof obj.args[i] == 'boolean' || typeof obj.args[i] == 'string') {
-
-					o.value = obj.args[i];
-
-				} else if(obj.args[i].name == 'Array') { //array
-
-					o.values = [];
-					for(var x in obj.args[i].args) {
-						o.values.push(this.decodeProperties(obj.args[i].args[x]));
-					}
-
-				} else if(obj.args[i].name == "Vec2") { //object - for now vec2 only
-
-					o.value = {
-						type: 'Vec2',
-						value: [
-							{
-								name: 'x',
-								value: obj.args[i].args[0].args[0]
-							},
-							{
-								name: 'y',
-								value: obj.args[i].args[1].args[0]
-							}
-						]
-					}
-				}
-			}
-			return o;
+		updateComponents: function(e) {
+			this.actor.prefab.components = this.components;
 		},
 
 		refreshActor: function() {
@@ -356,26 +279,18 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = Amble.app.scene.getActorByID(sceneID);
 
-				this.hideAll = !(this.actor.prefab.components.length > 0);
+				this.hideAll = this.actor.prefab.components.length == 0;
 
-				this.components = [];
-
-				for(var i = 0; i < this.actor.prefab.components.length; i++) {
-					var c = this.actor.prefab.components[i];
-					var p = [];
-					for(var x in c.properties) {
-						var a = this.decodeProperties(c.properties[x]);
-						p.push(a);
-					}
-
-					this.push('components', {
-						index: i,
-						name: c.name,
-						props: p
-					});
-				}
-
+				this.rebindComponents()
 			}
+		},
+
+		rebindComponents: function() {
+			this.components = [];
+			for(var i in this.actor.prefab.components) {
+				this.push('components', this.actor.prefab.components[i]);
+			}
+
 		},
 
 		hideComponenet: function() {},

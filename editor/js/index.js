@@ -30,7 +30,7 @@ var projectData = {};
 
 var EDITOR = null;
 
-var primaryColor = '#0275d8';
+var primaryColor = '#e91e63';
 
 var menuFunctions = {
 
@@ -245,6 +245,8 @@ var projectView = {
 
     watch: function(){
 
+        var that = this;
+
         watch(projectDirectory + '/assets', function(filename){
 
             projectData.scripts = [];
@@ -252,11 +254,7 @@ var projectView = {
 
             projectView.projectStructure = projectView.processDir(projectDirectory);
 
-            this.jstree();
-
-            for(var i = 0; i < projectView.projectStructure.length; i++) {
-                list.appendChild(projectView.item(projectView.projectStructure[i]));
-            }
+            that.jstree();
 
             for(var i in projectData.scripts) {
                 require.reload(projectData.scripts[i].path);
@@ -498,9 +496,11 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             if(component.type == 'renderer') {
                 editor.actor.prefab.renderer = component.body;
             } else if(component.type == 'class'){
-                console.log(editor.actor.prefab);
                 editor.actor.prefab.components.push(component.body);
+                console.log(editor.actor.prefab);
             }
+
+
 
             var sceneID = editor.actor.sceneID;
             var prefab = editor.actor.prefab;
@@ -536,6 +536,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         editor.sceneID = _actor.sceneID;
 
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
+
+        console.log(editor.actor.prefab.components)
 
         var normal = 'list-group-item';
         var highlighted = "list-group-item active";
@@ -574,7 +576,7 @@ var application = {
             context: "scene-view"
         }},
         components: [
-            { type:'editor', name: "Camera", args: {}}
+            { type:'editor', name: "Camera", properties: []}
         ]
     },
 

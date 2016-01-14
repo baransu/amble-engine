@@ -15,7 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "polymer": "Polymer/polymer#~1.2.1",
+    "polymer": "Polymer/polymer#~1.2.3",
     "iron-list": "PolymerElements/iron-list#~1.1.5",
     "jstree": "git://github.com/Baransu/jstree.git#master",
     "bootstrap": "git://github.com/Baransu/bootstrap.git#v4-dev",
