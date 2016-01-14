@@ -16,7 +16,6 @@
   ],
   "dependencies": {
     "polymer": "Polymer/polymer#~1.2.3",
-    "iron-list": "PolymerElements/iron-list#~1.1.5",
     "jstree": "git://github.com/Baransu/jstree.git#master",
     "bootstrap": "git://github.com/Baransu/bootstrap.git#v4-dev",
     "font-awesome": "git://github.com/FortAwesome/Font-Awesome.git#~4.5.0",
