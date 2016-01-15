@@ -370,6 +370,7 @@ window.Amble = (function(){
             for(var i in _class) {
                 if(i == 'name') continue;
                 if(typeof _class[i] === 'function') {
+                    console.log(_class[i])
                     o[i] = _class[i];
                 } else if(i == 'properties') {
                     if(obj.properties != undefined || obj.properties == {}) {
@@ -377,7 +378,6 @@ window.Amble = (function(){
                     }
 
                     for(var x in obj.properties) {
-                        console.log(obj.properties[x])
                         o[obj.properties[x].name] = Amble.Utils.deStringify(obj.properties[x]);
                     }
                 }
@@ -427,7 +427,7 @@ window.Amble = (function(){
             return  fn;
         },
 
-        stringify: function(obj, name) {
+        stringify: function(obj) {
 
             if(obj !== null) {
                 if(obj.type && obj.type.name) {
@@ -436,15 +436,11 @@ window.Amble = (function(){
 
                 if(obj.value && (Array.isArray(obj.value) || typeof obj.value == 'object')) {
                     for(var i in obj.value) {
-                        obj.value[i] = this.stringify(obj.value[i], i);
+                        obj.value[i] = this.stringify(obj.value[i]);
                     }
                 }
-
-                obj.name = name;
-
-            } else {
-                obj = { name: name }
             }
+
             return obj;
         },
 
@@ -476,8 +472,6 @@ window.Amble = (function(){
                     }
 
                 }
-
-                if(!obj.value) obj = null;
             }
 
             return obj;
@@ -523,8 +517,47 @@ window.Amble = (function(){
             properties: [],
         }
 
+        this.validate = function(obj, name) {
+            if(typeof obj == 'string' || typeof obj == 'number' || typeof obj == 'boolean') {
+                var value = obj;
+                obj = {
+                    name: name,
+                    value: value,
+                    type: value.constructor
+                };
+            } else if(obj === null) {
+                obj = {
+                    name: name,
+                    value: null,
+                    type: Object
+                };
+            } else {
+
+                if(typeof obj.value === 'undefined' && typeof obj.type === 'undefined') {
+                    var val = obj;
+                    obj = {
+                        value: val,
+                        type: val.constructor
+                    };
+                }
+
+                if(typeof obj.type === 'undefined') {
+                    obj.type = obj.value.constructor;
+                }
+
+                if(typeof obj.name === 'undefined') {
+                    obj.name = name;
+                }
+
+            }
+            return obj;
+        };
+
         for(var i in obj.properties) {
-            obj.properties[i] = Amble.Utils.stringify(obj.properties[i], i);
+
+            obj.properties[i] = this.validate(obj.properties[i], i)
+
+            obj.properties[i] = Amble.Utils.stringify(obj.properties[i]);
         }
 
         for(var i in obj.properties) {

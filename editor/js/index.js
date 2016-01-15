@@ -391,11 +391,16 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 var c = Amble._classes.find(c => c.name == a.components[j].name);
                 if(!c) continue;
                 for(var x in c.properties) {
-                    if(!a.components[j].properties[x]) {
-                        var p = JSON.stringify(c.properties[x])
-                        a.components[j].properties[x] = JSON.parse(p);
+                    console.log(x)
+                    var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
+                    if(typeof property === 'undefined') {
+                        a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
                     }
                 }
+
+                console.log(a.components[j].properties)
+
+                //force polymer to update;
 
                 var toDel = [];
                 for(var x in a.components[j].properties) {
@@ -496,11 +501,10 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             if(component.type == 'renderer') {
                 editor.actor.prefab.renderer = component.body;
             } else if(component.type == 'class'){
-                editor.actor.prefab.components.push(component.body);
+                var c = JSON.parse(JSON.stringify(component.body))
+                editor.actor.prefab.components.push(c);
                 console.log(editor.actor.prefab);
             }
-
-
 
             var sceneID = editor.actor.sceneID;
             var prefab = editor.actor.prefab;
