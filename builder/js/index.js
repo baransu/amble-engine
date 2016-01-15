@@ -3,7 +3,13 @@ const ipcRenderer = electron.ipcRenderer;
 // const remote = electron.remote;
 // const Menu = remote.Menu;
 
+global.jQuery = $ = require('jquery');
+
 var BUILDER = null;
+
+window.onload = function() {
+    ipcRenderer.send('builder-loaded');
+};
 
 var builderApp = angular.module('builderApp', []);
 builderApp.controller('builderController', ['$scope', function($scope) {
@@ -11,7 +17,7 @@ builderApp.controller('builderController', ['$scope', function($scope) {
     var builder = BUILDER = this;
 
     builder.gameTitle = '';
-    builder.buildDirectory = 'undefined';
+    builder.buildDirectory = '';
     builder.errorInfo = ''
 
     builder.refresh = function() {
@@ -24,7 +30,7 @@ builderApp.controller('builderController', ['$scope', function($scope) {
 
     builder.build = function() {
 
-        if(builder.gameTitle && builder.buildDirectory != 'undefined') {
+        if(builder.gameTitle && builder.buildDirectory != '') {
 
             ipcRenderer.send('builder-build-request', {
                 name: builder.gameTitle,
@@ -32,10 +38,20 @@ builderApp.controller('builderController', ['$scope', function($scope) {
 
             });
 
-        } else if(!builder.gameTitle){
-            builder.errorInfo = 'Dude, your game must have a good name!';
+        } else if(!builder.gameTitle) {
+
+            builder.errorInfo = {
+                type: 'error',
+                message: 'Dude, your game must have a cool name!'
+            };
+
         } else if(builder.builDirectory == 'undefined') {
-            builder.errorInfo = 'You must select build destination!';
+
+            builder.errorInfo = {
+                type: 'error',
+                message: 'You must select build destination!'
+            };
+
         }
     };
 

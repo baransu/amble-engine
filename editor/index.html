@@ -20,7 +20,11 @@
 
         <div class="container-fluid">
 
-            <div id="tools" class="card"></div>
+            <div id="tools" class="card">
+                <div class="card-block">
+
+                </div>
+            </div>
 
             <div id="project-view" class="scroll card"></div>
 
@@ -41,30 +45,30 @@
 
             <div id="hierarchy" class="card">
 
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="input-group">
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Add
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a href="#" ng-repeat="actor in editor.actorsToAdd" class="dropdown-item" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+                <div class="card-block">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Add
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a href="#" ng-repeat="actor in editor.actorsToAdd" class="dropdown-item" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+                                    </div>
                                 </div>
+                                <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
                             </div>
-                            <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
                         </div>
                     </div>
                 </div>
 
-                <div class="scroll hierarchy">
-                    <div class="list-container">
-                        <ul id="hierarchy-list" class="list" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }">
-                            <li class="list-item">
-                                <a href="#" id="id_{{actor.sceneID}}"class="hierarchy-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
-                            </li>
-                        </ul>
+                <div class="scroll card-block">
+
+                    <div class="list-group">
+                        <a href="#" id="id_{{actor.sceneID}}"  ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }" class="list-group-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
                     </div>
+
                 </div>
             </div>
 

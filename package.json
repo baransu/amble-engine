@@ -1,6 +1,6 @@
 {
   "name": "amble-engine",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "JavaScript game engine for web and mobile",
   "main": "main.js",
   "scripts": {

@@ -30,7 +30,7 @@ var projectData = {};
 
 var EDITOR = null;
 
-var primaryColor = '#0275d8';
+var primaryColor = '#e91e63';
 
 var menuFunctions = {
 
@@ -245,6 +245,8 @@ var projectView = {
 
     watch: function(){
 
+        var that = this;
+
         watch(projectDirectory + '/assets', function(filename){
 
             projectData.scripts = [];
@@ -252,11 +254,7 @@ var projectView = {
 
             projectView.projectStructure = projectView.processDir(projectDirectory);
 
-            this.jstree();
-
-            for(var i = 0; i < projectView.projectStructure.length; i++) {
-                list.appendChild(projectView.item(projectView.projectStructure[i]));
-            }
+            that.jstree();
 
             for(var i in projectData.scripts) {
                 require.reload(projectData.scripts[i].path);
@@ -393,11 +391,16 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 var c = Amble._classes.find(c => c.name == a.components[j].name);
                 if(!c) continue;
                 for(var x in c.properties) {
-                    if(!a.components[j].properties[x]) {
-                        var p = JSON.stringify(c.properties[x])
-                        a.components[j].properties[x] = JSON.parse(p);
+                    console.log(x)
+                    var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
+                    if(typeof property === 'undefined') {
+                        a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
                     }
                 }
+
+                console.log(a.components[j].properties)
+
+                //force polymer to update;
 
                 var toDel = [];
                 for(var x in a.components[j].properties) {
@@ -425,18 +428,22 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
                 editor.refresh();
 
-                if(editor.actor && editor.actor.selected) {
-                    editor.actor.selected = false;
-                }
+                if(document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
+                    if(editor.actor && editor.actor.selected) {
+                        editor.actor.selected = false;
+                    }
 
-                if(editor.previousActor) {
-                    editor.previousActor.className = 'hierarchy-item';
+                    if(editor.previousActor) {
+                        editor.previousActor.className = 'list-group-item';
+                    }
+                } else {
+                    document.activeElement.blur();
                 }
 
             break;
             case 46: //del
 
-                if(editor.actor) {
+                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
                     Amble.app.scene.remove(editor.actor)
 
@@ -494,8 +501,9 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             if(component.type == 'renderer') {
                 editor.actor.prefab.renderer = component.body;
             } else if(component.type == 'class'){
+                var c = JSON.parse(JSON.stringify(component.body))
+                editor.actor.prefab.components.push(c);
                 console.log(editor.actor.prefab);
-                editor.actor.prefab.components.push(component.body);
             }
 
             var sceneID = editor.actor.sceneID;
@@ -533,8 +541,10 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
 
-        var normal = 'hierarchy-item';
-        var highlighted = "hierarchy-item highlighted";
+        console.log(editor.actor.prefab.components)
+
+        var normal = 'list-group-item';
+        var highlighted = "list-group-item active";
 
         if(editor.previousActor) {
             editor.previousActor.className = normal;
@@ -570,7 +580,7 @@ var application = {
             context: "scene-view"
         }},
         components: [
-            { type:'editor', name: "Camera", args: {}}
+            { type:'editor', name: "Camera", properties: []}
         ]
     },
 

@@ -4,39 +4,67 @@
         <meta charset="utf-8">
         <title>Amble Builder</title>
 
+        <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.min.css" charset="utf-8">
+        <!-- <link rel="stylesheet" href="../../amble-engine-dependencies/bootstrap/dist/css/bootstrap.min.css" charset="utf-8"> -->
+
+        <link rel="stylesheet" href="css/style.css" charset="utf-8">
+
     </head>
     <body ng-controller="builderController as builder">
 
-        <!-- project name -->
-        <!-- <div>
-            {{builder.gameTitle}}
-        </div> -->
+        <div class="container-fluid">
 
-        <!-- <input type="text" name="name" ng-model="builder.gameTitle" placeholder="Game Title"> -->
+            <!-- game name -->
+            <div class="row m-y-2">
+                <div class="col-md-12 ">
+                    <h1 class="text-xs-center">{{builder.gameTitle}}</h1>
+                </div>
+            </div>
 
-        <!-- build dir -->
-        <!-- <div>
-            <button ng-click="builder.directorySelect()">Build directory</button>
-            {{builder.buildDirectory}}
-        </div> -->
+            <!-- game name input -->
+            <div class="row m-b-1">
+                <div class="col-md-12">
+                    <input class="form-control" type="text" maxlength="50" ng-model="builder.gameTitle" placeholder="Game Title">
+                </div>
+            </div>
 
-        <!-- platform selection -->
+            <!-- build directory -->
+            <div class="row m-b-1">
+                <div class="col-md-12 ">
+                    <div class="input-group">
+                        <input class="form-control" type="text" maxlength="50" ng-model="builder.buildDirectory">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="button" ng-click="builder.directorySelect()">Build directory</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-        <!-- loop build properties which depends on platform-->
-        <!-- <div>
-            <ul ng-repeat="project in launcher.projects">
-                <li>
-                    <a href="#" ng-click="launcher.openProject($event, project)">{{project.name}} | {{project.dir}}</a>
-                </li>
-            </ul>
-        </div> -->
+            <div class="row m-b-1">
+                <div class="col-md-6 text-xs-right">
+                    <button class="btn btn-success" type="button" ng-click="builder.build()">Build</button>
+                </div>
+            </div>
 
-        <!-- <button ng-click="builder.build()">Build</button>
+            <div class="row m-b-1">
+                <div class="col-md-12">
+                    <h3 class="text-xs-center text-danger" ng-if="builder.errorInfo.type == 'error'">{{builder.errorInfo.message}}</h3>
+                    <h3 class="text-xs-center text-success" ng-if="builder.errorInfo.type == 'success'">{{builder.errorInfo.message}}</h3>
+                </div>
+            </div>
 
-        <div>{{builder.errorInfo}}</div> -->
+            <!-- platform selection -->
+            <!-- loop build properties which depends on platform-->
+        </div>
 
         <script src="../node_modules/angular/angular.min.js" charset="utf-8"></script>
         <script src="js/index.js" charset="utf-8"></script>
+
+        <script src="../bower_components/tether/dist/js/tether.min.js" charset="utf-8"></script>
+
+        <!-- bootstrap-->
+        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
+        <!-- <script src="../../amble-engine-dependencies/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
 
     </body>
 </html>

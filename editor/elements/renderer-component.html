@@ -16,12 +16,12 @@
 
 			<div class="card-header">
 				<div class="row">
-					<div class="col-md-9 text-xs-center">
+					<div class="col-md-8 text-xs-center">
 						<a class="btn btn-success btn-sm head" role="button" on-click="hideComponent">
 							{{actor.renderer._editorName}}
 						</a>
 					</div>
-					<div class="col-md-2 text-xs-right">
+					<div class="col-md-4 text-xs-right">
 						<div class="btn-group">
 							<button type="button" class="btn btn-primary dropdown-toggle  btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 						      <span class="sr-only"></span>
@@ -43,20 +43,16 @@
 
 						<div class="row">
 							<div class="col-md-6">
-								<form class="form-horizontal">
-									<div class="form-group form-group-sm">
-										<label>size x</label>
-				                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
-									</div>
-								</form>
+								<div class="form-group form-group-sm">
+									<label>size x</label>
+			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
+								</div>
 							</div>
 							<div class="col-md-6">
-								<form class="form-horizontal">
-									<div class="form-group form-group-sm">
-										<label>size y</label>
-				                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
-				                    </div>
-								</form>
+								<div class="form-group form-group-sm">
+									<label>size y</label>
+			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
+			                    </div>
 							</div>
 						</div>
 
@@ -168,6 +164,11 @@
 				observer: 'refreshActor'
 			},
 
+			lastActorID: {
+				type: String,
+				value: ''
+			},
+
 			sprites: {
 				type: Array,
 				value: [],
@@ -176,7 +177,7 @@
 
 			hideContent: {
 				type: Boolean,
-				value: true
+				value: false
 			},
 
 			hideRenderer: {
@@ -271,13 +272,18 @@
 		isRendererPresent: function(){
 
 			if(this.actor.renderer && !(this.actor.renderer instanceof Amble.Graphics.EngineRenderer)) {
-				this.hideContent = false;
+
+				if(this.lastActorID != this.actor.sceneID)
+					this.hideContent = false;
+
+				this.lastActorID = this.actor.sceneID;
+
 				this.hideRenderer = false;
 
 				this.spriteUpdate();
 
 			} else {
-				this.hideContent = true;
+				// this.hideContent = true;
 				this.hideRenderer = true;
 			}
 		},
