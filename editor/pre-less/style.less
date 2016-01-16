@@ -15,10 +15,10 @@ html, body {
     font-family: Helvetica;
     margin: 0;
     padding: 0;
-	width: 100%;
-	height: 100%;
+	width: 100vw;
+	height: 100vh;
     overflow: hidden;
-    background-color: darken(#fff, 10%);
+    background-color: #13191c;
 }
 
 .no-clickable {
@@ -26,18 +26,9 @@ html, body {
 }
 
 .default {
-    background-color: @mainColor;
     -webkit-user-select: none;
     user-select: none;
     position: absolute;
-}
-
-.header {
-    background-color: transparent;
-    width: 100%;
-    &.highlighted {
-        background-color: #676767;
-    }
 }
 
 #project-view {
@@ -52,7 +43,6 @@ html, body {
 
 #tools {
     .default;
-    background-color: @mainColor;
     position: absolute;
     left: calc(~'0% + @{viewMargin}');
     top: calc(~'0% + @{viewMargin}');
@@ -120,17 +110,17 @@ html, body {
 
 ::-webkit-scrollbar-track {
 	border-radius: 10px;
-	background-color: #fff;
+	background-color: transparent;
 }
 
 ::-webkit-scrollbar {
 	width: 5px;
     height: 5px;
 
-    background-color: #fff;
+    background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
 	border-radius: 5px;
-	background-color: #b2b2b2;
+	background-color: #bcbebf;
 }

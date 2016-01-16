@@ -409,14 +409,22 @@ window.Amble = (function(){
                     }
 
                     if(obj.value && (Array.isArray(obj.value) || typeof obj.value == 'object')) {
+                        console.log(obj.value)
                         for(var i in obj.value) {
                             obj.value[i] = this.deStringify(obj.value[i]);
                         }
                     }
 
+                    if(obj.value == null && obj.type == 'Object') {
+                        return null;
+                    }
+
                     if(func) {
-                        console.log(obj.value)
-                        return new func(obj.value);
+                        if(obj.value != null) {
+                            return new func(obj.value);
+                        } else {
+                            return new func();
+                        }
                     }
 
                 }
@@ -473,7 +481,7 @@ window.Amble = (function(){
                     value: value,
                     type: value.constructor
                 };
-            } else if(obj === null) {
+            } else if(obj == null) {
                 obj = {
                     name: name,
                     value: null,
@@ -487,18 +495,20 @@ window.Amble = (function(){
                         value: val,
                         type: val.constructor
                     };
+                } else if( typeof obj.value === 'undefined') {
+                    obj.value == null;
                 }
 
                 if(typeof obj.type === 'undefined') {
                     obj.type = obj.value.constructor;
                 }
 
+
                 if(typeof obj.name === 'undefined') {
                     obj.name = name;
                 }
 
             }
-
             return obj;
         };
 

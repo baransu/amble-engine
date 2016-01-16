@@ -375,8 +375,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         var cam = Amble.app.scene.getActorByName('SceneCamera');
         if(cam) {
-            var cameraScript = cam.getComponent('Camera');
-            cameraScript.editor = this;
+            editor.cameraScript = cam.getComponent('Camera');
+            editor.cameraScript.editor = this;
         }
 
         editor.updateActors();
@@ -456,10 +456,15 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             break;
             case 70: // f
 
-                if(e.shiftKey && editor.actor.transform) {
+                if(e.shiftKey && !e.ctrlKey && editor.actor.transform ) {
                     Amble.app.mainCamera.camera.position.x = editor.actor.transform.position.x;
                     Amble.app.mainCamera.camera.position.y = editor.actor.transform.position.y;
                 }
+                //
+                // if(e.shiftKey && e.ctrlKey) {
+                //     console.log('resize')
+                //     Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                // }
 
             break;
 
@@ -541,7 +546,9 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
 
-        console.log(editor.actor.prefab.components)
+        // editor.cameraScript.actorToMove = editor.actor;
+        //
+        // // console.log(editor.actor.prefab.components)
 
         var normal = 'list-group-item';
         var highlighted = "list-group-item active";

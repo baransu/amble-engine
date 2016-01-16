@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
 
 <dom-module id="renderer-component">
 
@@ -45,13 +46,13 @@
 							<div class="col-md-6">
 								<div class="form-group form-group-sm">
 									<label>size x</label>
-			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.x::input}}">
+			                        <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.size.x}}">
 								</div>
 							</div>
 							<div class="col-md-6">
 								<div class="form-group form-group-sm">
 									<label>size y</label>
-			                        <input class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.renderer.size.y::input}}">
+			                        <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.size.y}}">
 			                    </div>
 							</div>
 						</div>
@@ -59,14 +60,14 @@
 						<div class="row">
 							<div class="col-md-12">
 								<label>layer</label>
-								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}">
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}">
 							</div>
 						</div>
 
 						<div class="row">
 							<div class="col-md-12">
 								<label>color</label>
-								<input class="form-control" type="text" on-change="valuesChange" value="{{actor.renderer.color::input}}">
+								<input class="form-control" type="text" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.color}}">
 							</div>
 						</div>
 					</div>
@@ -77,7 +78,7 @@
 						<div class="row">
 							<div class="col-md-12">
 								<label>layer</label>
-								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}"></br>
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}"></br>
 							</div>
 						</div>
 
@@ -109,21 +110,21 @@
 						<div class="row">
 							<div class="col-md-12">
 								<label>layer</label>
-			                    <input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.layer::input}}">
+			                    <input class="form-control" type="number" step="1" min="0" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}">
 							</div>
 						</div>
 
 						<div class="row">
 							<div class="col-md-12">
 								<label>frames</label>
-								<input class="form-control" type="number" step="1" min="1" on-change="valuesChange" value="{{actor.renderer.frames::input}}">
+								<input class="form-control" type="number" step="1" min="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.frames}}">
 							</div>
 						</div>
 
 						<div class="row">
 							<div class="col-md-12">
 								<label>updatesPerFrame</label>
-								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" value="{{actor.renderer.updatesPerFrame::input}}">
+								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.updatesPerFrame}}">
 							</div>
 						</div>
 

@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
 
 <dom-module id="transform-component">
 
@@ -43,13 +44,13 @@
 						<div class="col-md-6">
 							<div class="form-group form-group-sm">
 								<label>position.x</label>
-								<input id="posx" class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.y::input}}">
+								<input id="posx" class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.position.y}}">
 							</div>
 						</div>
 						<div class="col-md-6">
 							<div class="form-group form-group-sm">
 								<label>position.y</label>
-								<input id="posy" class="form-control" type="number" step="1" on-change="valuesChange" value="{{actor.transform.position.x::input}}">
+								<input id="posy" class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.position.x}}">
 							</div>
 						</div>
 					</div>
@@ -57,13 +58,13 @@
 						<div class="col-md-6">
 							<div class="form-group form-group-sm">
 								<label>scale.x</label>
-								<input id="scalex" class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.x::input}}">
+								<input id="scalex" class="form-control" type="number" step="0.01" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.scale.x}}">
 							</div>
 						</div>
 						<div class="col-md-6">
 							<div class="form-group form-group-sm">
 								<label>scale.y</label>
-								<input id="scaley" class="form-control" type="number" step="0.01" on-change="valuesChange" value="{{actor.transform.scale.y::input}}">
+								<input id="scaley" class="form-control" type="number" step="0.01" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.scale.y}}">
 							</div>
 						</div>
 					</div>
@@ -72,7 +73,7 @@
 						<div class="col-md-12">
 
 		                    <label>rotation</label>
-		                    <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" value="{{actor.transform.rotation::input}}">
+		                    <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
 
 						</div>
 	                </div>

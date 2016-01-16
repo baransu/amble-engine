@@ -1,4 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
 
 <dom-module id="class-component">
 
@@ -53,7 +54,7 @@
 									<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
 										<div class="col-md-6">
 											<div class="form-group form-group-sm">
-												<input class="form-control" type="number" step= "0.1" on-change="updateComponents" value="{{v::input}}">
+												<input class="form-control" type="number" is="iron-input" step= "0.1" on-change="updateComponents" bind-value="{{v}}">
 											</div>
 										</div>
 									</template>
@@ -64,14 +65,14 @@
 								<div class="row" hidden$="{{hideProperty('Number', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (number)</label>
-										<input class="form-control" type="number" on-change="updateComponents" value="{{p.value::input}}">
+										<input class="form-control" type="number" is="iron-input" on-change="updateComponents" bind-value="{{p.value}}">
 									</div>
 								</div>
 
 								<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (bool)</label>
-										<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{p.value::checked}}">
+										<input class="checkbox" type="checkbox" on-change="updateComponents" is="iron-input" bind-value="{{p.value}}">
 									</div>
 								</div>
 
@@ -79,7 +80,7 @@
 								<div class="row" hidden$="{{hideProperty('String', p)}}">
 									<div class="col-md-12">
 										<label>{{p.name}} (string)</label>
-										<input class="form-control" type="text" on-change="updateComponents" value="{{p.value::input}}">
+										<input class="form-control" type="text" on-change="updateComponents" is="iron-input" bind-value="{{p.value}}">
 									</div>
 								</div>
 
@@ -90,19 +91,19 @@
 
 										<div class="row" hidden$="{{hideProperty('String', v)}}">
 											<div class="col-md-12">
-												<input class="form-control" type="number" on-change="updateComponents" value="{{v.value::input}}"></br>
+												<input class="form-control" type="number" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
 											<div class="col-md-12">
-												<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{v.value::checked}}"></br>
+												<input class="checkbox" type="checkbox" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('String', v)}}">
 											<div class="col-md-12">
-												<input class="form-control" type="text" on-change="updateComponents" value="{{v.value::input}}"></br>
+												<input class="form-control" type="text" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
@@ -113,7 +114,7 @@
 												<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
 													<div class="col-md-6">
 														<div class="form-group form-group-sm">
-															<input class="form-control" type="number" step= "0.1" on-change="updateComponents" value="{{vv::input}}">
+															<input class="form-control" type="number" step= "0.1" on-change="updateComponents" is="iron-input" bind-value="{{vv}}">
 														</div>
 													</div>
 												</template>
@@ -133,21 +134,21 @@
 										<div class="row" hidden$="{{hideProperty('Number', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (number)</label>
-												<input class="form-control" type="number" on-change="updateComponents" value="{{v.value::input}}"></br>
+												<input class="form-control" type="number" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('Boolean', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (bool)</label>
-												<input class="checkbox" type="checkbox" on-change="updateComponents" checked="{{v.value::checked}}"></br>
+												<input class="checkbox" type="checkbox" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
 										<div class="row" hidden$="{{hideProperty('String', v.value)}}">
 											<div class="col-md-12">
 												<label>{{v.name}} (string)</label>
-												<input class="form-control" type="text" on-change="updateComponents" value="{{v.value::input}}"></br>
+												<input class="form-control" type="text" on-change="updateComponents" is="iron-input" bind-value="{{v.value}}"></br>
 											</div>
 										</div>
 
@@ -158,7 +159,7 @@
 											<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
 												<div class="col-md-6">
 													<div class="form-group form-group-sm">
-														<input class="form-control" type="number" step="0.1" on-change="updateComponents" value="{{vv::input}}">
+														<input class="form-control" type="number" step="0.1" on-change="updateComponents" is="iron-input" bind-value="{{vv}}">
 													</div>
 												</div>
 											</template>

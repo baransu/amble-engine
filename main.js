@@ -380,6 +380,12 @@ ipcMain.on('builder-build-request', function(event, data) {
 
     console.log(builderGulp.scriptsList);
 
+    if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
+        response.type = 'error';
+        response.message = 'Game build failed - wrong directory';
+        builderWindow.send('builder-build-respond', response);
+    }
+
     builderGulp.start('prepare', function(err) {
         if(err) {
             builderWindow.send('builder-build-respond', 'Game build failed - preparation');

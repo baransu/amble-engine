@@ -44,7 +44,6 @@ Amble.Class({
         }
 
         if(Amble.Input.isMousePressed(1) && this.actorToMove) {
-            console.log(this.actorToMove)
             this.actorToMove.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
             this.actorToMove.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
             this.editor.refresh();
@@ -137,11 +136,11 @@ Amble.Class({
 
         var nextScale = self.camera.scale * this.zoom
 
-        if(nextScale > this.minZoom) {
-            nextScale = this.minZoom;
-        } else if (nextScale < this.maxZoom) {
-            nextScale = this.maxZoom;
-        }
+        // if(nextScale > this.minZoom) {
+        //     nextScale = this.minZoom;
+        // } else if (nextScale < this.maxZoom) {
+        //     nextScale = this.maxZoom;
+        // }
 
         this.zoom = nextScale/self.camera.scale;
 

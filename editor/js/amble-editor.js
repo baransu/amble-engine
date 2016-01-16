@@ -27,9 +27,9 @@ window.Amble = (function(){
                 }
 
                 Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
-
-                console.log(width, Amble.app.mainCamera.camera.size.x);
-                console.log(height, Amble.app.mainCamera.camera.size.y);
+                //
+                // console.log(width, Amble.app.mainCamera.camera.size.x);
+                // console.log(height, Amble.app.mainCamera.camera.size.y);
 
             });
         }
@@ -76,13 +76,14 @@ window.Amble = (function(){
         this.render = function(){
 
             var camera = this.mainCamera.camera;
+            var linesColor = '#eceff1'
 
             for(var i = 0; i < camera.layers.length; i++) {
                 camera.layers[i].layer.clear();
             }
 
             var layer = camera.layer(0);
-            layer.strokeStyle('black').lineWidth(0.5);
+            layer.strokeStyle(linesColor).lineWidth(0.5);
             layer.ctx.beginPath();
 
             var lineSpacing = 200;
@@ -108,6 +109,19 @@ window.Amble = (function(){
 
 
             this.scene.render(camera);
+
+            layer.ctx.save();
+            //draw camera viewport (sroke rect)
+            layer.strokeStyle(primaryColor);
+            layer.lineWidth(1.5)
+            var x = -1280/2 - camera.view.x;
+            var y = -720/2 - camera.view.y;
+            layer.strokeRect(x, y, 1280,  720)
+
+            layer.ctx.restore();
+
+
+
         };
 
         /* setting loader */
@@ -117,8 +131,6 @@ window.Amble = (function(){
         var currentLoadingText = 0;
 
         var colors = [
-            "#e53935",
-            "#e91e63",
             "#8e24aa",
             "#5e35b1",
             "#3949ab",
@@ -130,9 +142,9 @@ window.Amble = (function(){
             "#7cb342",
             "#c0ca33",
             "#fbc02d",
-            "#6d4c41",
             "#ff6f00",
-            "#546e7a"
+            "#e53935",
+            "#e91e63"
         ];
 
         var color = colors[Math.floor(Math.random() * colors.length - 1)];
@@ -370,7 +382,7 @@ window.Amble = (function(){
             for(var i in _class) {
                 if(i == 'name') continue;
                 if(typeof _class[i] === 'function') {
-                    console.log(_class[i])
+                    // console.log(_class[i])
                     o[i] = _class[i];
                 } else if(i == 'properties') {
                     if(obj.properties != undefined || obj.properties == {}) {
@@ -394,7 +406,7 @@ window.Amble = (function(){
                         copy[attr] = [];
                         for(var i in obj[attr]) {
                             if(obj[attr][i].type == 'editor') {
-                                console.log(obj[attr][i].name)
+                                // console.log(obj[attr][i].name)
                                 copy[attr][i] = {
                                     id: obj[attr][i].name,
                                     body: this.makeClass(obj[attr][i])
@@ -467,8 +479,16 @@ window.Amble = (function(){
                         }
                     }
 
+                    if(obj.value == null && obj.type == 'Object') {
+                        return null;
+                    }
+
                     if(func) {
-                        return new func(obj.value);
+                        if(obj.value != null) {
+                            return new func(obj.value);
+                        } else {
+                            return new func();
+                        }
                     }
 
                 }
@@ -525,7 +545,7 @@ window.Amble = (function(){
                     value: value,
                     type: value.constructor
                 };
-            } else if(obj === null) {
+            } else if(obj == null) {
                 obj = {
                     name: name,
                     value: null,
@@ -539,11 +559,14 @@ window.Amble = (function(){
                         value: val,
                         type: val.constructor
                     };
+                } else if( typeof obj.value === 'undefined') {
+                    obj.value == null;
                 }
 
                 if(typeof obj.type === 'undefined') {
                     obj.type = obj.value.constructor;
                 }
+
 
                 if(typeof obj.name === 'undefined') {
                     obj.name = name;
@@ -576,7 +599,6 @@ window.Amble = (function(){
             Amble._classes.splice(index, 1);
         }
 
-        console.log(c)
         Amble._classes.push(c);
 
     };
@@ -1026,7 +1048,7 @@ window.Amble = (function(){
                 this.size.x,
                 this.size.y
             ).fillStyle(
-                'black'
+                '#bcbebf'
             ).fillText(
                 self.name || 'Actor',
                 0,
