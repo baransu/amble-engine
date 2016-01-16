@@ -12,7 +12,7 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
 
     var launcher = LAUNCHER = this;
 
-    launcher.projectName = 'New Amble Project';
+    launcher.projectName = '';
     launcher.projectDirectory = '';
     launcher.errorInfo = '';
 
@@ -55,6 +55,12 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
     };
 
 }]);
+
+ipcRenderer.on('launcher-error', function(event, data) {
+    LAUNCHER.errorInfo = "Project doesn't exist in it's direcotry!";
+    LAUNCHER.refresh();
+});
+
 ipcRenderer.on('launcher-projects-respond', function(event, data) {
     LAUNCHER.projects = data;
     LAUNCHER.refresh();
