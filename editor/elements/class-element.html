@@ -1,0 +1,70 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="class-component.html">
+
+<dom-module id="class-element">
+
+	<style>
+
+	.head {
+		width: 100%;
+	}
+
+	</style>
+
+	<template>
+
+        <template is="dom-repeat" items="{{ _components }}">
+
+            <class-component index="{{index}}" actor="{{actor}}"></class-component>
+
+        </template>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'class-element',
+
+		properties: {
+
+            actor: {
+                type: Object,
+                notify: true,
+                value: null,
+                observer: 'refreshActor'
+            },
+
+			_components: {
+				type: Array,
+				value: [],
+				notify: true,
+				reflectToAttribute: true,
+			},
+
+		},
+
+		ready: function () { },
+
+        refreshActor: function() {
+            if(this.actor) {
+                var id = this.actor.sceneID;
+                this.actor = Amble.app.scene.getActorByID(id);
+                this._components = [];
+
+                for(var i = 0; i < this.actor.prefab.components.length; i++) {
+                    this.push('_components', this.actor.prefab.components[i]);
+                }
+
+                var a = document.querySelectorAll('class-component');
+    			for(var i = 0; i < a.length; i++) {
+    				a[i].refreshComponent();
+    			}
+            }
+        }
+
+	});
+
+</script>

@@ -451,6 +451,7 @@ window.Amble = (function(){
                         obj.value[i] = this.stringify(obj.value[i]);
                     }
                 }
+
             }
 
             return obj;
@@ -482,6 +483,11 @@ window.Amble = (function(){
                     if(obj.value == null && obj.type == 'Object') {
                         return null;
                     }
+                    // else if(Array.isArray(obj.value) && obj.type == 'Object') {
+                    //     for(var i in obj.value) {
+                    //         obj.value[obj.value[i].name] = obj.value[i].value;
+                    //     }
+                    // }
 
                     if(func) {
                         if(obj.value != null) {

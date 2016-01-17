@@ -391,7 +391,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 var c = Amble._classes.find(c => c.name == a.components[j].name);
                 if(!c) continue;
                 for(var x in c.properties) {
-                    console.log(x)
                     var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
                     if(typeof property === 'undefined') {
                         a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
