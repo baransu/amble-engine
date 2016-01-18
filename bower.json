@@ -19,6 +19,9 @@
     "jstree": "git://github.com/Baransu/jstree.git#master",
     "bootstrap": "git://github.com/Baransu/bootstrap.git#v4-dev",
     "font-awesome": "git://github.com/FortAwesome/Font-Awesome.git#~4.5.0",
-    "tether": "~1.1.1"
+    "tether": "~1.1.1",
+    "iron-input": "PolymerElements/iron-input#~1.0.8",
+    "paper-checkbox": "PolymerElements/paper-checkbox#~1.1.0",
+    "iron-collapse": "PolymerElements/iron-collapse#~1.0.5"
   }
 }

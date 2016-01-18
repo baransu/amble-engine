@@ -25,9 +25,13 @@ var projectBuildData = null;
 
 var shortcuts = {};
 
+const DEVELOPMENT = true;
+
 app.on('ready', function() {
     //launcher
     launcherWindow = new BrowserWindow({
+        icon: __dirname + '/icon.png',
+        title: 'Amble Engine Launcher',
         width: 640,
         height: 480,
         resizable: false
@@ -37,7 +41,7 @@ app.on('ready', function() {
     currentState = 'launcher';
 
     launcherWindow.setMenu(null);
-    launcherWindow.toggleDevTools();
+    if(DEVELOPMENT) launcherWindow.toggleDevTools();
     launcherWindow.center();
 
     launcherWindow.on('closed', function() {
@@ -77,7 +81,6 @@ ipcMain.on('launcher-projects-request', function(event, data) {
         }
 
         console.log(projects);
-
         projects.sort((a, b) => b.time - a.time);
 
         launcherWindow.webContents.send('launcher-projects-respond', projects);
@@ -176,49 +179,73 @@ ipcMain.on('launcher-open-request', function(event, data) {
     currentName = data.name;
     currentDir = data.dir;
 
-    var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
-    if(f && f.projects) {
-        var p = f.projects.find(pr => pr.name == currentName && pr.dir == currentDir)
-        if(p) p.time = Date.now();
-        else {
-            f.projects.push({
-                time: Date.now(),
-                name: currentName,
-                dir: currentDir
+    fs.access(currentDir + '/' + currentName + '.aproject', fs.F_OK, function(err) {
+        if (err) {
+
+            //update project js
+            var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
+            if(f && f.projects) {
+                var p = f.projects.find(pr => pr.name == currentName && pr.dir == currentDir)
+                if(p) {
+                    var index = f.projects.indexOf(p);
+                    f.projects.splice(index, 1);
+                    fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify(f), 'utf-8')
+
+                }
+
+                launcherWindow.webContents.send('launcher-projects-respond', f.projects);
+            }
+
+            var error = { type: 'error', message: err};
+            launcherWindow.webContents.send('launcher-error', error);
+
+        } else {
+            var f = JSON.parse(fs.readFileSync(app.getPath('userData') + '/projectsData.json', 'utf-8'));
+            if(f && f.projects) {
+                var p = f.projects.find(pr => pr.name == currentName && pr.dir == currentDir)
+                if(p) p.time = Date.now();
+                else {
+                    f.projects.push({
+                        time: Date.now(),
+                        name: currentName,
+                        dir: currentDir
+                    });
+                }
+            }
+
+            fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify(f), 'utf-8')
+
+            //load launcher loader page
+            launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
+            launcherWindow.setMenu(null);
+            launcherWindow.focus();
+            launcherWindow.setAlwaysOnTop(true);
+
+            //editor
+            editorWindow = new BrowserWindow({
+                icon: __dirname + '/icon.png',
+                width: 1280,
+                height: 720,
+                'min-width': 960,
+                'min-height': 540,
+                show: false
             });
+
+            editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
+
+            if(DEVELOPMENT) editorWindow.toggleDevTools();
+            editorWindow.center();
+
+            editorWindow.on('closed', function() {
+                editorWindow = null;
+                if(launcherWindow) launcherWindow.close();
+                if(gamePreviewWindow) gamePreviewWindow.close();
+                if(builderWindow) builderWindow.close();
+            });
+
+            currentState = 'editor';
         }
-    }
-
-    fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify(f), 'utf-8')
-
-    //load launcher loader page
-    launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
-    launcherWindow.setMenu(null);
-    launcherWindow.focus();
-    launcherWindow.setAlwaysOnTop(true);
-
-    //editor
-    editorWindow = new BrowserWindow({
-        width: 1280,
-        height: 720,
-        'min-width': 960,
-        'min-height': 540,
-        show: false
     });
-
-    editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
-
-    editorWindow.toggleDevTools();
-    editorWindow.center();
-
-    editorWindow.on('closed', function() {
-        editorWindow = null;
-        if(launcherWindow) launcherWindow.close();
-        if(gamePreviewWindow) gamePreviewWindow.close();
-        if(builderWindow) builderWindow.close();
-    });
-
-    currentState = 'editor';
 
 });
 
@@ -259,6 +286,8 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     //builder
     builderWindow = new BrowserWindow({
+        icon: __dirname + '/icon.png',
+        title: currentName + ' | ' + currentDir + ' | Amble Builder',
         width: 640,
         height: 480,
         show: false,
@@ -267,9 +296,8 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
-    builderWindow.setTitle(currentName + ' | ' + currentDir + ' | Amble Builder');
-    builderWindow.toggleDevTools();
-        // builderWindow.center();
+    if(DEVELOPMENT) builderWindow.toggleDevTools();
+
     builderWindow.on('closed', function() {
         builderWindow = null;
     });
@@ -285,6 +313,7 @@ ipcMain.on('editor-game-preview-respond', function(event, data) {
 
     if(!gamePreviewWindow) {
         gamePreviewWindow = new BrowserWindow({
+            icon: __dirname + '/icon.png',
             width: 1280,
             height: 720,
             show: false
@@ -379,6 +408,12 @@ ipcMain.on('builder-build-request', function(event, data) {
     }
 
     console.log(builderGulp.scriptsList);
+
+    if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
+        response.type = 'error';
+        response.message = 'Game build failed - wrong directory';
+        builderWindow.send('builder-build-respond', response);
+    }
 
     builderGulp.start('prepare', function(err) {
         if(err) {

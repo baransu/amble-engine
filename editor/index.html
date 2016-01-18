@@ -65,8 +65,8 @@
 
                 <div class="scroll card-block">
 
-                    <div class="list-group">
-                        <a href="#" id="id_{{actor.sceneID}}"  ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search }" class="list-group-item" ng-click="editor.actorSelected(actor,$event)">{{actor.name}}</a>
+                    <div class="list-group" >
+                        <a href="#" id="id_{{actor.sceneID}}" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search } | orderBy:'name'" class="list-group-item" ng-click="editor.actorSelected(actor, $event)">{{actor.name}}</a>
                     </div>
 
                 </div>
@@ -97,7 +97,8 @@
 
                     <transform-component actor="{{editor.actor}}"></transform-component>
                     <renderer-component actor="{{editor.actor}}"></renderer-component>
-                    <class-component actor="{{editor.actor}}"> </class-component>
+
+                    <class-element actor="{{editor.actor}}"></class-element>
 
                     <!--  camera -->
                     <!--  list of components -->
@@ -117,14 +118,14 @@
         <script src="../bower_components/tether/dist/js/tether.min.js" charset="utf-8"></script>
 
         <!-- bootstrap-->
-        <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
-        <!-- <script src="../../amble-engine-dependencies/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
+        <!-- <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script> -->
+        <script src="../../amble-engine-dependencies/bootstrap/dist/js/bootstrap.min.js" charset="utf-8"></script>
 
         <!-- change to bower -->
-        <script src="../bower_components/jstree/dist/jstree.min.js" charset="utf-8"></script>
-        <!-- <script src="../../amble-engine-dependencies/jstree/dist/jstree.min.js" charset="utf-8"></script> -->
+        <!-- <script src="../bower_components/jstree/dist/jstree.min.js" charset="utf-8"></script> -->
+        <script src="../../amble-engine-dependencies/jstree/dist/jstree.min.js" charset="utf-8"></script>
 
-        <link rel="import" href="elements/class-component.html">
+        <link rel="import" href="elements/class-element.html">
         <link rel="import" href="elements/transform-component.html">
         <link rel="import" href="elements/renderer-component.html">
     </body>

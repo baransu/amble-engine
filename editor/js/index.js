@@ -375,8 +375,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         var cam = Amble.app.scene.getActorByName('SceneCamera');
         if(cam) {
-            var cameraScript = cam.getComponent('Camera');
-            cameraScript.editor = this;
+            editor.cameraScript = cam.getComponent('Camera');
+            editor.cameraScript.editor = this;
         }
 
         editor.updateActors();
@@ -391,7 +391,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
                 var c = Amble._classes.find(c => c.name == a.components[j].name);
                 if(!c) continue;
                 for(var x in c.properties) {
-                    console.log(x)
                     var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
                     if(typeof property === 'undefined') {
                         a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
@@ -456,10 +455,15 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             break;
             case 70: // f
 
-                if(e.shiftKey && editor.actor.transform) {
+                if(e.shiftKey && !e.ctrlKey && editor.actor.transform ) {
                     Amble.app.mainCamera.camera.position.x = editor.actor.transform.position.x;
                     Amble.app.mainCamera.camera.position.y = editor.actor.transform.position.y;
                 }
+                //
+                // if(e.shiftKey && e.ctrlKey) {
+                //     console.log('resize')
+                //     Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
+                // }
 
             break;
 
@@ -541,7 +545,9 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.actor = Amble.app.scene.getActorByID(_actor.sceneID);
 
-        console.log(editor.actor.prefab.components)
+        // editor.cameraScript.actorToMove = editor.actor;
+        //
+        // // console.log(editor.actor.prefab.components)
 
         var normal = 'list-group-item';
         var highlighted = "list-group-item active";
@@ -588,7 +594,6 @@ var application = {
 
         //load actors to scene
         for(var i in projectData.actors) {
-            console.log(projectData.actors[i])
             this.scene.instantiate(projectData.actors[i]);
             EDITOR.updateActors();
         }
