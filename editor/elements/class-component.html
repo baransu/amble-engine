@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/iron-input/iron-input.html">
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="amble-checkbox.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 
 <dom-module id="class-component">
 
@@ -20,7 +21,7 @@
 			<div class="card-header">
 				<div class="row">
 					<div class="col-md-8 text-xs-center">
-						<a class="btn btn-warning btn-sm head" role="button">
+						<a class="btn btn-warning btn-sm head" role="button" on-click="toggle">
 							{{component.name}}
 						</a>
 					</div>
@@ -39,121 +40,124 @@
 				</div>
 			</div>
 
-			<div class="card-block">
-				<div class="container-fluid">
+      <iron-collapse id="collapse">
+  			<div class="card-block">
+  				<div class="container-fluid">
 
-					<template id="class-list" is="dom-repeat" items="{{ component.properties }}" as="p">
+  					<template id="class-list" is="dom-repeat" items="{{ component.properties }}" as="p">
 
-						<!-- vector -->
-						<div class="row" hidden$="{{hideProperty('Vec2', p)}}">
+  						<!-- vector -->
+  						<div class="row" hidden$="{{hideProperty('Vec2', p)}}">
 
-							{{p.name}} (vec2):</br>
-							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
-								<div class="col-md-6">
-									<div class="form-group form-group-sm">
-										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
-									</div>
-								</div>
-							</template>
+  							{{p.name}} (vec2):</br>
+  							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+  								<div class="col-md-6">
+  									<div class="form-group form-group-sm">
+  										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
+  									</div>
+  								</div>
+  							</template>
 
-						</div>
+  						</div>
 
-						<!-- simple properties -->
-						<div class="row" hidden$="{{hideProperty('Number', p)}}">
-							<div class="col-md-12">
-								<label>{{p.name}} (number)</label>
-								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
-							</div>
-						</div>
+  						<!-- simple properties -->
+  						<div class="row" hidden$="{{hideProperty('Number', p)}}">
+  							<div class="col-md-12">
+  								<label>{{p.name}} (number)</label>
+  								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
+  							</div>
+  						</div>
 
-						<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
-							<div class="col-md-12 m-t-1" >
-								<amble-checkbox checked="{{p.value}}">{{p.name}} (bool)</amble-checkbox>
-							</div>
-						</div>
+  						<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
+  							<div class="col-md-12 m-t-1" >
+  								<amble-checkbox checked="{{p.value}}">{{p.name}} (bool)</amble-checkbox>
+  							</div>
+  						</div>
 
-						<div class="row" hidden$="{{hideProperty('String', p)}}">
-							<div class="col-md-12">
-								<label>{{p.name}} (string)</label>
-								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
-							</div>
-						</div>
+  						<div class="row" hidden$="{{hideProperty('String', p)}}">
+  							<div class="col-md-12">
+  								<label>{{p.name}} (string)</label>
+  								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
+  							</div>
+  						</div>
 
-						<!-- array -->
-						<div hidden$="{{hideProperty('Array', p)}}">
-							{{p.name}} (array)</br>
-							<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+  						<!-- array -->
+  						<div hidden$="{{hideProperty('Array', p)}}">
+  							{{p.name}} (array)</br>
+  							<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
 
-								<div class="row" hidden$="{{hideProperty('String', v)}}">
-									<div class="col-md-12">
-										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
-									</div>
-								</div>
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
+  									</div>
+  								</div>
 
-								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
-									<div class="col-md-12">
-										<amble-checkbox checked="{{v.value}}"></amble-checkbox>
-									</div>
-								</div>
+  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+  									<div class="col-md-12">
+  										<amble-checkbox checked="{{v.value}}"></amble-checkbox>
+  									</div>
+  								</div>
 
-								<div class="row" hidden$="{{hideProperty('String', v)}}">
-									<div class="col-md-12">
-										<input class="form-control" type="text" is="iron-input" bind-value="{{v.value}}"></br>
-									</div>
-								</div>
-
-
-								<div hidden$="{{hideProperty('Vec2', v)}}">
-
-									<div class="row">
-										<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
-											<div class="col-md-6">
-												<div class="form-group form-group-sm">
-													<input class="form-control" type="number" step= "0.1" is="iron-input" bind-value="{{vv}}">
-												</div>
-											</div>
-										</template>
-						            </div>
-
-								</div>
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<input class="form-control" type="text" is="iron-input" bind-value="{{v.value}}"></br>
+  									</div>
+  								</div>
 
 
-							</template>
-						</div>
+  								<div hidden$="{{hideProperty('Vec2', v)}}">
 
-						<!-- object -->
-						<div hidden$="{{hideProperty('Object', p)}}">
-							<h5 class="m-t-1">{{p.name}} (object):</h5>
-							<template is="dom-repeat" items="{{ toArray(p.value, 'Object') }}" as="v">
+  									<div class="row">
+  										<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
+  											<div class="col-md-6">
+  												<div class="form-group form-group-sm">
+  													<input class="form-control" type="number" step= "0.1" is="iron-input" bind-value="{{vv}}">
+  												</div>
+  											</div>
+  										</template>
+				            </div>
 
-								<div class="row" hidden$="{{hideProperty('Number', v)}}">
-									<div class="col-md-12">
-										<label>{{v.name}} (number)</label>
-										<input class="form-control" type="number" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
-									</div>
-								</div>
+  								</div>
 
-								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
-									<div class="col-md-12">
-										<amble-checkbox on-update="updateComponentsDeep" checked="{{v.value}}" parent="{{p.name}}" name="{{v.name}}">{{v.name}} (bool)</amble-checkbox>
-									</div>
-								</div>
 
-								<div class="row" hidden$="{{hideProperty('String', v)}}">
-									<div class="col-md-12">
-										<label>{{v.name}} (string)</label>
-										<input class="form-control" type="text" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
-									</div>
-								</div>
+  							</template>
+  						</div>
 
-							</template>
-						</div>
+  						<!-- object -->
+  						<div hidden$="{{hideProperty('Object', p)}}">
+  							<h5 class="m-t-1">{{p.name}} (object):</h5>
+  							<template is="dom-repeat" items="{{ toArray(p.value, 'Object') }}" as="v">
 
-					</template>
-				</div>
-			</div>
-        </div>
+  								<div class="row" hidden$="{{hideProperty('Number', v)}}">
+  									<div class="col-md-12">
+  										<label>{{v.name}} (number)</label>
+  										<input class="form-control" type="number" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+  									</div>
+  								</div>
 
+  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+  									<div class="col-md-12">
+  										<amble-checkbox on-update="updateComponentsDeep" checked="{{v.value}}" parent="{{p.name}}" name="{{v.name}}">{{v.name}} (bool)</amble-checkbox>
+  									</div>
+  								</div>
+
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<label>{{v.name}} (string)</label>
+  										<input class="form-control" type="text" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+  									</div>
+  								</div>
+
+  							</template>
+  						</div>
+
+  					</template>
+  				</div>
+  			</div>
+
+      </iron-collapse>
+
+    </div>
 
 	</template>
 
@@ -189,7 +193,9 @@
 
 		},
 
-		ready: function () { },
+		ready: function () {
+      this.toggle();
+    },
 
 		deleteClass: function(e) {
 			var id = this.actor.sceneID;
@@ -271,8 +277,11 @@
 			var id = this.actor.sceneID;
 			this.actor = Amble.app.scene.getActorByID(id);
 			this.component = this.actor.prefab.components[this.index];
-			console.log(this.index, this.component)
 		},
+
+    toggle: function() {
+      this.$.collapse.toggle();
+    }
 
 	});
 

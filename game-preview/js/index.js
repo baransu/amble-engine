@@ -72,7 +72,7 @@ ipcRenderer.on('game-preview-start', function(event, data) {
 
         postrender: function(){
 
-            var layer = this.mainCamera.camera.layer(0);
+            var layer = this.mainCamera.camera.layer;
             layer.ctx.save();
             layer.textAlign('left');
             layer.font('30px Arial');

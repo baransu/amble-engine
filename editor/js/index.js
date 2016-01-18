@@ -594,7 +594,6 @@ var application = {
 
         //load actors to scene
         for(var i in projectData.actors) {
-            console.log(projectData.actors[i])
             this.scene.instantiate(projectData.actors[i]);
             EDITOR.updateActors();
         }

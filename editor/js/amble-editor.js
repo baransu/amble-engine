@@ -15,23 +15,17 @@ window.Amble = (function(){
 
         //wrap this things up
         if(this.resize) {
-            window.addEventListener('resize', function(){
+          window.addEventListener('resize', function(){
 
-                var camera = Amble.app.mainCamera.camera;
-                var width = $(camera.context).width();
-                var height = $(camera.context).height();
+            var width = $(camera.context).width();
+            var height = $(camera.context).height();
 
-                for(var i = 0; i < Amble.app.mainCamera.camera.layers.length; i++) {
-                    Amble.app.width = camera.layers[i].layer.canvas.width = width;
-                    Amble.app.height = camera.layers[i].layer.canvas.height = height;
-                }
+            Amble.app.width = Amble.app.mainCamera.camera.layer.canvas.width = width;
+            Amble.app.height = Amble.app.mainCamera.camera.layer.canvas.height = height;
 
-                Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
-                //
-                // console.log(width, Amble.app.mainCamera.camera.size.x);
-                // console.log(height, Amble.app.mainCamera.camera.size.y);
+            Amble.app.mainCamera.getComponent('Camera').onresize(Amble.app.mainCamera);
 
-            });
+          });
         }
 
         this.scene = new Amble.Scene();
@@ -41,8 +35,8 @@ window.Amble = (function(){
         }
 
         if(this.mainCamera) {
-            this.width = this.mainCamera.camera.size.x || 800;
-            this.height = this.mainCamera.camera.size.y || 600;
+          this.width = this.mainCamera.camera.size.x || 800;
+          this.height = this.mainCamera.camera.size.y || 600;
         }
 
         //init all public game loop functions
@@ -78,11 +72,9 @@ window.Amble = (function(){
             var camera = this.mainCamera.camera;
             var linesColor = '#eceff1'
 
-            for(var i = 0; i < camera.layers.length; i++) {
-                camera.layers[i].layer.clear();
-            }
+            camera.layer.clear();
+            var layer = camera.layer;
 
-            var layer = camera.layer(0);
             layer.strokeStyle(linesColor).lineWidth(0.5);
             layer.ctx.beginPath();
 
@@ -152,7 +144,7 @@ window.Amble = (function(){
         this.loadingInterval = setInterval(function(){
             if(that.mainCamera) {
                 var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-                var layer = that.mainCamera.camera.layer(0);
+                var layer = that.mainCamera.camera.layer;
                 layer.ctx.save();
                 var loading = [
                     "   loading.  ",
@@ -244,42 +236,42 @@ window.Amble = (function(){
         this.size =  new Amble.Math.Vector2({x: $(this.context).width(), y: $(this.context).height()});
         this.view = new Amble.Math.Vector2(this.position.x - this.size.x, this.position.y - this.size.y);
         this.scale = 1;
-        this.layers = [];
+        this.layer = new Amble.Graphics.Layer(this.size.x, this.size.y);
+        this.layer.appendTo(this.context);
     };
 
     Amble.Camera.prototype = {
 
-        layer: function(index){
-            if(index < 0) {
-                index = 0;
-                throw "Z-index cannot be negative!"
-            }
-            var layer = this.layers.find(l => l.index == index);
-            if(!layer) {
-                return this.addLayer(index).layer;
-            } else {
-                return layer.layer;
-            }
-        },
-
-        addLayer: function(index){
-            var l = this.layers.find(l => l.index == index);
-            if(!l) {
-                var layer = {
-                    index: index,
-                    layer: new Amble.Graphics.Layer(this.size.x, this.size.y, index)
-                }
-                layer.layer.appendTo(this.context)
-                this.layers.push(layer);
-
-                return layer;
-            }
-        },
+        // layer: function(index){
+        //     if(index < 0) {
+        //         index = 0;
+        //         throw "Z-index cannot be negative!"
+        //     }
+        //     var layer = this.layers.find(l => l.index == index);
+        //     if(!layer) {
+        //         return this.addLayer(index).layer;
+        //     } else {
+        //         return layer.layer;
+        //     }
+        // },
+        //
+        // addLayer: function(index){
+        //     var l = this.layers.find(l => l.index == index);
+        //     if(!l) {
+        //         var layer = {
+        //             index: index,
+        //             layer: new Amble.Graphics.Layer(this.size.x, this.size.y, index)
+        //         }
+        //         layer.layer.appendTo(this.context)
+        //         this.layers.push(layer);
+        //
+        //         return layer;
+        //     }
+        // },
 
         update: function(){
-            this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x/2, y: this.position.y - this.size.y/2});
-
-            return this;
+          this.view = new Amble.Math.Vector2({x: this.position.x - this.size.x/2, y: this.position.y - this.size.y/2});
+          return this;
         }
     };
 
@@ -483,18 +475,13 @@ window.Amble = (function(){
                     if(obj.value == null && obj.type == 'Object') {
                         return null;
                     }
-                    // else if(Array.isArray(obj.value) && obj.type == 'Object') {
-                    //     for(var i in obj.value) {
-                    //         obj.value[obj.value[i].name] = obj.value[i].value;
-                    //     }
-                    // }
 
                     if(func) {
-                        if(obj.value != null) {
-                            return new func(obj.value);
-                        } else {
-                            return new func();
-                        }
+                      if(obj.value != null) {
+                        return new func(obj.value);
+                      } else {
+                        return new func();
+                      }
                     }
 
                 }
@@ -674,6 +661,14 @@ window.Amble = (function(){
 
             this.children.push(object);
 
+            this.sort();
+
+            // for(var i = 0; i < this.children.length; i++) {
+            //   if(this.children[i].renderer) {
+            //     console.log(this.children[i].renderer.layer);
+            //   }
+            // }
+
             this.shortArray.push({
                 name: object.name,
                 sceneID: sceneID,
@@ -681,6 +676,17 @@ window.Amble = (function(){
             });
 
             return object;
+        },
+
+        sort: function() {
+          //sort by layer
+          this.children.sort(function(a, b) {
+            if(!a.renderer || !b.renderer) {
+              return 0;
+            } else {
+              return a.renderer.layer - b.renderer.layer;
+            }
+          });
         },
 
         remove: function(object){
@@ -793,12 +799,11 @@ window.Amble = (function(){
     /* Graphics */
     Amble.Graphics = {};
 
-    Amble.Graphics.Layer = function(width, height, index){
+    Amble.Graphics.Layer = function(width, height){
         this.canvas = document.createElement('canvas');
         this.canvas.width = width || Amble.app.width;
         this.canvas.height = height || Amble.app.height;
         this.canvas.style.position = 'absolute';
-        this.canvas.style.zIndex = index.toString() || '0';
         this.ctx = this.canvas.getContext('2d');
     };
 
@@ -807,11 +812,6 @@ window.Amble = (function(){
         appendTo: function(element){
             this.parent = element;
             element.appendChild(this.canvas);
-            return this;
-        },
-
-        setZIndex: function(zIndex){
-            this.canvas.style.zIndex = zIndex;
             return this;
         },
 
@@ -918,7 +918,7 @@ window.Amble = (function(){
 
         render: function(self, camera) {
 
-            var layer = camera.layer(this.layer);
+            var layer = camera.layer;
 
             layer.ctx.save();
 
@@ -1013,7 +1013,7 @@ window.Amble = (function(){
 
         render: function(self, camera) {
 
-            var layer = camera.layer(this.layer);
+            var layer = camera.layer;
 
             layer.ctx.save();
 
@@ -1097,7 +1097,7 @@ window.Amble = (function(){
 
         render: function(self, camera) {
 
-            var layer = camera.layer(this.layer);
+            var layer = camera.layer;
 
             layer.ctx.save();
 
@@ -1160,7 +1160,7 @@ window.Amble = (function(){
 
         render: function(self, camera){
 
-            var layer = camera.layer(this.layer);
+            var layer = camera.layer;
 
             var width = this.size.x;
             var height = this.size.y;
