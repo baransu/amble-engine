@@ -1,0 +1,289 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../../../bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="amble-checkbox.html">
+<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="class-component">
+
+	<style>
+
+	.head {
+		width: 100%;
+	}
+
+	</style>
+
+	<template>
+
+		<div class="card">
+
+			<div class="card-header">
+				<div class="row">
+					<div class="col-md-8 text-xs-center">
+						<a class="btn btn-warning btn-sm head" role="button" on-click="toggle">
+							{{component.name}}
+						</a>
+					</div>
+					<div class="col-md-4 text-xs-right">
+						<div class="btn-group">
+							<button type="button" class="btn btn-primary dropdown-toggle btn-sm" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						    </button>
+							<div class="dropdown-menu dropdown-menu-right">
+								<h6 class="dropdown-header">Class options:</h6>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="#" on-click="resetClass">Reset</a>
+								<a class="dropdown-item" href="#" on-click="deleteClass">Delete</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+      <iron-collapse id="collapse">
+  			<div class="card-block">
+  				<div class="container-fluid">
+
+  					<template id="class-list" is="dom-repeat" items="{{ component.properties }}" as="p">
+
+  						<!-- vector -->
+  						<div class="row" hidden$="{{hideProperty('Vec2', p)}}">
+
+  							{{p.name}} (vec2):</br>
+  							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+  								<div class="col-md-6">
+  									<div class="form-group form-group-sm">
+  										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
+  									</div>
+  								</div>
+  							</template>
+
+  						</div>
+
+  						<!-- simple properties -->
+  						<div class="row" hidden$="{{hideProperty('Number', p)}}">
+  							<div class="col-md-12">
+  								<label>{{p.name}} (number)</label>
+  								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
+  							</div>
+  						</div>
+
+  						<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
+  							<div class="col-md-12 m-t-1" >
+  								<amble-checkbox checked="{{p.value}}">{{p.name}} (bool)</amble-checkbox>
+  							</div>
+  						</div>
+
+  						<div class="row" hidden$="{{hideProperty('String', p)}}">
+  							<div class="col-md-12">
+  								<label>{{p.name}} (string)</label>
+  								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
+  							</div>
+  						</div>
+
+  						<!-- array -->
+  						<div hidden$="{{hideProperty('Array', p)}}">
+  							{{p.name}} (array)</br>
+  							<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
+  									</div>
+  								</div>
+
+  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+  									<div class="col-md-12">
+  										<amble-checkbox checked="{{v.value}}"></amble-checkbox>
+  									</div>
+  								</div>
+
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<input class="form-control" type="text" is="iron-input" bind-value="{{v.value}}"></br>
+  									</div>
+  								</div>
+
+
+  								<div hidden$="{{hideProperty('Vec2', v)}}">
+
+  									<div class="row">
+  										<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
+  											<div class="col-md-6">
+  												<div class="form-group form-group-sm">
+  													<input class="form-control" type="number" step= "0.1" is="iron-input" bind-value="{{vv}}">
+  												</div>
+  											</div>
+  										</template>
+				            </div>
+
+  								</div>
+
+
+  							</template>
+  						</div>
+
+  						<!-- object -->
+  						<div hidden$="{{hideProperty('Object', p)}}">
+  							<h5 class="m-t-1">{{p.name}} (object):</h5>
+  							<template is="dom-repeat" items="{{ toArray(p.value, 'Object') }}" as="v">
+
+  								<div class="row" hidden$="{{hideProperty('Number', v)}}">
+  									<div class="col-md-12">
+  										<label>{{v.name}} (number)</label>
+  										<input class="form-control" type="number" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+  									</div>
+  								</div>
+
+  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+  									<div class="col-md-12">
+  										<amble-checkbox on-update="updateComponentsDeep" checked="{{v.value}}" parent="{{p.name}}" name="{{v.name}}">{{v.name}} (bool)</amble-checkbox>
+  									</div>
+  								</div>
+
+  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  									<div class="col-md-12">
+  										<label>{{v.name}} (string)</label>
+  										<input class="form-control" type="text" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+  									</div>
+  								</div>
+
+  							</template>
+  						</div>
+
+  					</template>
+  				</div>
+  			</div>
+
+      </iron-collapse>
+
+    </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'class-component',
+
+		properties: {
+
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				reflectToAttribute: true
+			},
+
+			component: {
+				type: Object,
+				value: null,
+				notify: true,
+				reflectToAttribute: true,
+			},
+
+			index: {
+				type: Number,
+				value: -1,
+				notify: true,
+				observer: 'refreshComponent'
+			},
+
+		},
+
+		ready: function () {
+      this.toggle();
+    },
+
+		deleteClass: function(e) {
+			var id = this.actor.sceneID;
+			this.actor = AMBLE.scene.getActorByID(id);
+			this.actor.prefab.components.splice(this.index, 1);
+			var a = document.querySelectorAll('class-element');
+			for(var i = 0; i < a.length; i++) {
+				a[i].refreshActor();
+			}
+		},
+
+		resetClass: function(e) {
+
+			var id = this.actor.sceneID;
+			this.actor = AMBLE.scene.getActorByID(id);
+			var c = Amble.CLASSES.find(cl => cl.name == this.component.name);
+			if(c) {
+
+				for(var i = 0; i < c.properties.length; i++) {
+					this.actor.prefab.components[this.index].properties[i] = JSON.parse(JSON.stringify(c.properties[i]));
+					// this.notifyPath('component.properties' + [x], this.component.properties[x]);
+				}
+				//
+				// delete this.actor.prefab.components[this.index].$$hashKey;
+				// this.component = this.actor.prefab.components[this.index];
+
+				// console.log(this.actor.prefab.components[this.index])
+				var a = document.querySelectorAll('class-element');
+				for(var i = 0; i < a.length; i++) {
+					a[i].refreshActor();
+				}
+			}
+		},
+
+		toArray: function(obj, type) {
+      console.log(obj)
+			if(Array.isArray(obj)) {
+				return obj;
+			} else if(obj != undefined && obj != null && type == 'Object'){
+          var oo = Object.keys(obj).map(function(key) {
+            var o = {
+              name: key,
+              value: obj[key],
+              type: obj[key].constructor.name
+            }
+            return o;
+          });
+				return oo;
+			} else {
+				return [];
+			}
+		},
+
+		hideProperty: function(type, property) {
+			if(property.type) {
+				return type != property.type;
+			} else {
+				return typeof property != type.toLowerCase();
+			}
+		},
+
+		updateComponentsDeep: function(e) {
+
+			console.log(e.target.parent, e.target.name);
+			var property = this.component.properties.find(c => c.name == e.target.parent);
+			console.log(property);
+			if(e.target.nodeName.toLowerCase() == 'amble-checkbox') {
+				var val = e.target.checked;
+			} else if(e.target.type == 'number') {
+				var val = Number(e.target.value);
+			} else {
+				var val = e.target.value;
+			}
+
+			property.value[e.target.name] = val;
+
+		},
+
+		refreshComponent: function() {
+			var id = this.actor.sceneID;
+			this.actor = AMBLE.scene.getActorByID(id);
+			this.component = this.actor.prefab.components[this.index];
+		},
+
+    toggle: function() {
+      this.$.collapse.toggle();
+    }
+
+	});
+
+</script>
