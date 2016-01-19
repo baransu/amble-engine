@@ -44,14 +44,14 @@ gulp.task('amble-editor-build', function() {
 
 gulp.task('amble-src-build', function() {
   return gulp.src(engineFiles)
-    .pipe(preprocess({ context: { NODE_ENV: 'production', SRC: true }}))
+    .pipe(preprocess({ context: { NODE_ENV: 'production', SRC: true, GAME: true}}))
     .pipe(concat('amble.js'))
     .pipe(gulp.dest('./build/src/'))
 });
 
 gulp.task('amble-game-preview-build', function() {
   return gulp.src(engineFiles)
-    .pipe(preprocess({ context: { NODE_ENV: 'production', PREVIEW: true }}))
+    .pipe(preprocess({ context: { NODE_ENV: 'production', PREVIEW: true, GAME: true}}))
     .pipe(concat('amble.js'))
     .pipe(gulp.dest('./build/game-preview/'))
 });
@@ -81,6 +81,29 @@ gulp.task('launcher-html', function() {
 // BUILDER
 
 // GAME PREVIEW
+
+gulp.task('preview-less', function() {
+  return gulp.src('./src/game-preview/less/*.less')
+    .pipe(less())
+    .pipe(gulp.dest('./build/game-preview/css/'))
+});
+
+var previewJsFiles = [
+  './src/game-preview/js/index.js',
+  './src/game-preview/js/polyfill.js',
+  './src/game-preview/js/cordova.js',
+  './src/game-preview/js/cordova_plugins.js'
+];
+
+gulp.task('preview-js', function() {
+  return gulp.src(previewJsFiles)
+    .pipe(gulp.dest('./build/game-preview/js/'))
+});
+
+gulp.task('preview-html', function() {
+  return gulp.src('./src/game-preview/*.html')
+    .pipe(gulp.dest('./build/game-preview/'))
+});
 
 // SRC
 
@@ -122,8 +145,9 @@ gulp.task('clean', function() {
 gulp.task('build-engine', [ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ]);
 gulp.task('build-launcher', [ 'launcher-less', 'launcher-js', 'launcher-html' ]);
 gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-html', 'editor-elements' ]);
+gulp.task('build-preview', [ 'preview-less', 'preview-js', 'preview-html' ]);
 
-gulp.task('default', [ 'build-engine', 'build-launcher', 'build-editor' ])
+gulp.task('default', [ 'build-engine', 'build-launcher', 'build-editor', 'build-preview' ]);
 
 //build editor
 //build game core

@@ -3,7 +3,7 @@ var Class = (function() {
 
   var Class = function Class(body) {
 
-    console.log(body);
+    // console.log(body);
 
     if(!body) {
         // Amble.app.debug.error('Wrong class code!')

@@ -1,10 +1,10 @@
-var Vec3 = (function(){
+var Vec3 = (function() {
 
   var Vec3 = function Vec3(x, y, z) {
     if(typeof x == 'object') {
-      this.x = 0;
-      this.y = 0;
-      this.z = 0;
+      this.x = x['x'] || 0;
+      this.y = x['y'] || 0;
+      this.z = x['z'] || 0;
     } else if(Array.isArray(x)) {
       this.x = x[0];
       this.y = x[1];

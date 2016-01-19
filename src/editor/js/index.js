@@ -516,15 +516,14 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.addActor = function(actor) {
 
-        var a = JSON.parse(JSON.stringify(this.actorsToAdd.find(a => a.name == actor.name)));
-        if(a) {
-            delete a.$$hashKey;
-            a.name += editor.actors.length;
-            AMBLE.scene.instantiate(a);
-        }
+      var _actor = JSON.parse(JSON.stringify(this.actorsToAdd.find(a => a.name == actor.name)));
+      if(_actor) {
+        delete _actor.$$hashKey;
+        _actor.name += editor.actors.length;
+        AMBLE.scene.instantiate(_actor);
+      }
 
-        console.log(AMBLE.scene.children)
-        editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
+      editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
     };
 
     editor.actorSelected = function(_actor, $e) {
@@ -536,10 +535,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         editor.sceneID = _actor.sceneID;
 
         editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
-
-        // editor.cameraScript.actorToMove = editor.actor;
-        //
-        // // console.log(editor.actor.prefab.components)
 
         var normal = 'list-group-item';
         var highlighted = "list-group-item active";

@@ -47,52 +47,54 @@ var Utils = (function(){
       }
     },
 
-    makeClass: function makeClass(obj) {
+    makeClass: function(obj) {
       var o = {};
-      console.log(obj.name)
+
       if(obj.name) {
-        console.log(CLASSES)
-        var _class = CLASSES.find(function(c) { return c.name == obj.name});
-        console.log(_class)
+        var _class =  CLASSES.find(function(c) { return c.name == obj.name});
         if(!_class) {
           AMBLE.debug.error('Cannot find class');
           throw new Error('Cannot find class')
         }
+      } else {
+        AMBLE.debug.error('Cannot find class');
+        throw new Error('Cannot find class')
       }
 
       for(var i in _class) {
         if(i == 'name') continue;
         if(typeof _class[i] === 'function') {
-          // console.log(_class[i])
           o[i] = _class[i];
         } else if(i == 'properties') {
-          if(obj.properties != undefined || obj.properties == {}) {
-            obj.properties = JSON.parse(JSON.stringify(_class[i]));
+          // console.log(obj[i])
+          if(typeof obj[i] === 'undefined' || obj[i].length == 0) {
+            obj[i] = JSON.parse(JSON.stringify(_class[i]));
           }
 
-          for(var x in obj.properties) {
-            o[obj.properties[x].name] = this.deStringify(obj.properties[x]);
+          for(var x in obj[i]) {
+            o[obj[i][x].name] = this.deStringify(obj[i][x]);
           }
         }
       }
+
       return o;
     },
 
     clone: function clone(obj) {
       var copy = {};
-      console.log(obj)
       if (obj instanceof Object || obj instanceof Array) {
         for(var attr in obj) {
+          // @ifdef GAME
+          if(attr == 'renderer' && obj[attr].name == 'EngineRenderer') continue;
+          // @endif
+
           if(attr == 'components') {
             copy[attr] = [];
             for(var i in obj[attr]) {
               // @ifdef EDITOR
               if(obj[attr][i].type == 'editor') {
               // @endif
-              // @ifdef SRC
-              if(obj[attr][i].type == 'noneditor') {
-              // @endif
-              // @ifdef PREVIEW
+              // @ifdef GAME
               if(obj[attr][i].type == 'noneditor') {
               // @endif
 
@@ -117,12 +119,13 @@ var Utils = (function(){
       var arr = str.split(".");
       var fn = window || this;
       for (var i = 0, len = arr.length; i < len; i++) {
-          fn = fn[arr[i]];
+        fn = fn[arr[i]];
       }
 
       if (typeof fn !== "function") {
+        console.log(str);
           // Amble.app.debug.error(str + 'function not found');
-          throw new Error("function not found");
+        throw new Error("function not found");
       }
 
       return  fn;

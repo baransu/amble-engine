@@ -231,7 +231,7 @@
 		},
 
 		toArray: function(obj, type) {
-      console.log(obj)
+      // console.log(obj)
 			if(Array.isArray(obj)) {
 				return obj;
 			} else if(obj != undefined && obj != null && type == 'Object'){
@@ -258,10 +258,10 @@
 		},
 
 		updateComponentsDeep: function(e) {
-
-			console.log(e.target.parent, e.target.name);
+      console.log(this.actor = AMBLE.scene.getActorByID(this.actor.sceneID));
+			// console.log(e.target.parent, e.target.name);
 			var property = this.component.properties.find(c => c.name == e.target.parent);
-			console.log(property);
+			// console.log(property);
 			if(e.target.nodeName.toLowerCase() == 'amble-checkbox') {
 				var val = e.target.checked;
 			} else if(e.target.type == 'number') {
