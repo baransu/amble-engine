@@ -8,7 +8,7 @@ const dialog = electron.dialog;
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 
-var builderGulp = require('./builder/js/builder-gulp.js');
+var builderGulp = require('./build/utils/builder.js');
 
 var launcherWindow = null;
 var editorWindow = null;
@@ -37,7 +37,7 @@ app.on('ready', function() {
         resizable: false
     });
 
-    launcherWindow.loadURL('file://' + __dirname + '/launcher/index.html');
+    launcherWindow.loadURL('file://' + __dirname + '/build/launcher/index.html');
     currentState = 'launcher';
 
     launcherWindow.setMenu(null);
@@ -216,7 +216,7 @@ ipcMain.on('launcher-open-request', function(event, data) {
             fs.writeFileSync(app.getPath('userData') + '/projectsData.json', JSON.stringify(f), 'utf-8')
 
             //load launcher loader page
-            launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
+            launcherWindow.loadURL('file://' + __dirname + '/build/launcher/loader.html')
             launcherWindow.setMenu(null);
             launcherWindow.focus();
             launcherWindow.setAlwaysOnTop(true);
@@ -231,7 +231,7 @@ ipcMain.on('launcher-open-request', function(event, data) {
                 show: false
             });
 
-            editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
+            editorWindow.loadURL('file://' + __dirname + '/build/editor/index.html');
 
             if(DEVELOPMENT) editorWindow.toggleDevTools();
             editorWindow.center();
@@ -286,7 +286,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
     //builder
     builderWindow = new BrowserWindow({
-        icon: __dirname + '/icon.png',
+        icon: __dirname + '/build/icon/icon.png',
         title: currentName + ' | ' + currentDir + ' | Amble Builder',
         width: 640,
         height: 480,
@@ -294,7 +294,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
         resizable: false
     });
 
-    builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
+    builderWindow.loadURL('file://' + __dirname + '/build/builder/index.html');
 
     if(DEVELOPMENT) builderWindow.toggleDevTools();
 
@@ -319,7 +319,7 @@ ipcMain.on('editor-game-preview-respond', function(event, data) {
             show: false
         });
 
-        gamePreviewWindow.loadURL('file://' + __dirname + '/game-preview/index.html');
+        gamePreviewWindow.loadURL('file://' + __dirname + '/build/game-preview/index.html');
 
         gamePreviewWindow.setMenu(null);
         gamePreviewWindow.center();

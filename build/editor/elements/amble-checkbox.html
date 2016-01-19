@@ -1,0 +1,105 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="amble-checkbox">
+
+	<style>
+
+	:host {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: flex-start;
+
+		white-space: nowrap;
+		text-align: left;
+
+		cursor: pointer;
+	}
+/*
+	:host[pressed] #box {
+		opacity: 0.7;
+	}*/
+
+	#icon {
+		width: 100%;
+		height: 100%;
+		color: #e91e63;
+		opacity: 0;
+		transition: opacity 0.1s ease;
+		background: none;
+	}
+
+	#box {
+		display: inline-block;
+		padding: 0 1% 0 1%;
+		border: 1px solid #888;
+		text-align: center;
+		cursor: pointer;
+	}
+
+	.text {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		text-indent: 5px;
+	}
+
+	:host[checked] #icon {
+		opacity: 1;
+	}
+
+	:host[disabled] {
+		pointer-events: none;
+		opacity: 0.5;
+	}
+
+	</style>
+
+	<template>
+		<div id="box">
+			<i class="fa fa-check" id="icon"></i>
+		</div>
+		<span class="text">
+			<content></content>
+		</span>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'amble-checkbox',
+
+		properties: {
+            checked: {
+                type: Boolean,
+                value: false,
+                notify: true,
+                reflectToAttribute: true
+            },
+
+			disabled: {
+				type: Boolean,
+				value: false,
+				notify: true,
+                reflectToAttribute: true
+			}
+		},
+
+        listeners: {
+            'click': '_onClick'
+        },
+
+        _onClick: function(e) {
+            e.stopPropagation();
+
+            this.checked = !this.checked;
+			this.async(() => this.fire('update'), 1);
+        },
+
+
+	});
+
+</script>
