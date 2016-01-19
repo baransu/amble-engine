@@ -42,7 +42,7 @@ var Scene = (function() {
 
       actor.prefab = obj;
 
-      console.log(actor);
+      // console.log(actor);
       return this._add(actor);
     },
 
