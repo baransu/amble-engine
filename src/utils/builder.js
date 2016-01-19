@@ -4,8 +4,8 @@ var rimraf = require('gulp-rimraf');
 // var minifyCss = require('gulp-minify-css');
 // var less = require('gulp-less');
 
-var core = ['./core/build-src/**/*'];
-var engineSrc = ['./editor/js/src/engine/*.js'];
+var core = ['./build/src/**/*'];
+// var engineSrc = ['./editor/js/src/engine/*.js'];
 
 gulp.imagesList = [];
 gulp.scriptsList = [];
@@ -46,6 +46,6 @@ gulp.task('build-user', function() {
 });
 
 gulp.task('prepare', ['clear-output']);
-gulp.task('build-game', ['core-move', 'img-move', 'build-user', 'build-engine']);
+gulp.task('build-game', ['core-move', 'img-move', 'build-user']);
 
 module.exports = gulp;

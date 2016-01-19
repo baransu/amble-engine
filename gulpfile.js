@@ -9,7 +9,7 @@ var rimraf = require('gulp-rimraf');
 
 // ENGINE
 
-var engineFiles = [
+var engineJSFiles = [
   './src/engine/vec2.js',
   './src/engine/vec3.js',
   './src/engine/mathf.js',
@@ -36,21 +36,21 @@ var engineFiles = [
 ];
 
 gulp.task('amble-editor-build', function() {
-  return gulp.src(engineFiles)
+  return gulp.src(engineJSFiles)
     .pipe(concat('amble.js'))
     .pipe(preprocess({ context: { NODE_ENV: 'production', EDITOR: true}}))
     .pipe(gulp.dest('./build/editor/'))
 });
 
 gulp.task('amble-src-build', function() {
-  return gulp.src(engineFiles)
+  return gulp.src(engineJSFiles)
     .pipe(preprocess({ context: { NODE_ENV: 'production', SRC: true, GAME: true}}))
     .pipe(concat('amble.js'))
     .pipe(gulp.dest('./build/src/'))
 });
 
 gulp.task('amble-game-preview-build', function() {
-  return gulp.src(engineFiles)
+  return gulp.src(engineJSFiles)
     .pipe(preprocess({ context: { NODE_ENV: 'production', PREVIEW: true, GAME: true}}))
     .pipe(concat('amble.js'))
     .pipe(gulp.dest('./build/game-preview/'))
@@ -64,12 +64,12 @@ gulp.task('launcher-less', function() {
     .pipe(gulp.dest('./build/launcher/css/'))
 });
 
-var launcherJsFiles = [
+var launcherJSFiles = [
   './src/launcher/js/index.js'
 ];
 
 gulp.task('launcher-js', function() {
-  return gulp.src(launcherJsFiles)
+  return gulp.src(launcherJSFiles)
     .pipe(gulp.dest('./build/launcher/js/'))
 });
 
@@ -79,6 +79,25 @@ gulp.task('launcher-html', function() {
 });
 
 // BUILDER
+gulp.task('builder-less', function() {
+  return gulp.src('./src/builder/less/*.less')
+    .pipe(less())
+    .pipe(gulp.dest('./build/builder/css/'))
+});
+
+var builderJSFiles = [
+  './src/builder/js/index.js'
+];
+
+gulp.task('builder-js', function() {
+  return gulp.src(builderJSFiles)
+    .pipe(gulp.dest('./build/builder/js/'))
+});
+
+gulp.task('builder-html', function() {
+  return gulp.src('./src/builder/*.html')
+    .pipe(gulp.dest('./build/builder/'))
+});
 
 // GAME PREVIEW
 
@@ -88,7 +107,7 @@ gulp.task('preview-less', function() {
     .pipe(gulp.dest('./build/game-preview/css/'))
 });
 
-var previewJsFiles = [
+var previewJSFiles = [
   './src/game-preview/js/index.js',
   './src/game-preview/js/polyfill.js',
   './src/game-preview/js/cordova.js',
@@ -96,7 +115,7 @@ var previewJsFiles = [
 ];
 
 gulp.task('preview-js', function() {
-  return gulp.src(previewJsFiles)
+  return gulp.src(previewJSFiles)
     .pipe(gulp.dest('./build/game-preview/js/'))
 });
 
@@ -107,6 +126,34 @@ gulp.task('preview-html', function() {
 
 // SRC
 
+gulp.task('src-less', function() {
+  return gulp.src('./src/src/less/*.less')
+    .pipe(less())
+    .pipe(gulp.dest('./build/src/css/'))
+});
+
+var srcJSFiles = [
+  './src/src/js/index.js',
+  './src/src/js/polyfill.js',
+  './src/src/js/cordova.js',
+  './src/src/js/cordova_plugins.js'
+];
+
+gulp.task('src-js', function() {
+  return gulp.src(srcJSFiles)
+    .pipe(gulp.dest('./build/src/js/'))
+});
+
+gulp.task('src-move', function() {
+  return gulp.src('./src/src/assets/**/')
+    .pipe(gulp.dest('./build/src/assets'))
+});
+
+gulp.task('src-html', function() {
+  return gulp.src('./src/src/*.html')
+    .pipe(gulp.dest('./build/src/'))
+});
+
 // EDITOR
 
 gulp.task('editor-less', function() {
@@ -115,13 +162,13 @@ gulp.task('editor-less', function() {
     .pipe(gulp.dest('./build/editor/css/'))
 });
 
-var editorJsFiles = [
+var editorJSFiles = [
   './src/editor/js/index.js',
   './src/editor/js/camera.js'
 ];
 
 gulp.task('editor-js', function() {
-  return gulp.src(editorJsFiles)
+  return gulp.src(editorJSFiles)
     .pipe(gulp.dest('./build/editor/js/'))
 });
 
@@ -135,6 +182,17 @@ gulp.task('editor-elements', function() {
     .pipe(gulp.dest('./build/editor/elements/'))
 });
 
+// UTILS
+
+var utilsJSFiles = [
+  './src/utils/builder.js'
+];
+
+gulp.task('build-utils', function() {
+  return gulp.src(utilsJSFiles)
+    .pipe(gulp.dest('./build/utils/'))
+});
+
 // OTHER
 
 gulp.task('clean', function() {
@@ -146,8 +204,11 @@ gulp.task('build-engine', [ 'amble-editor-build', 'amble-src-build', 'amble-game
 gulp.task('build-launcher', [ 'launcher-less', 'launcher-js', 'launcher-html' ]);
 gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-html', 'editor-elements' ]);
 gulp.task('build-preview', [ 'preview-less', 'preview-js', 'preview-html' ]);
+gulp.task('build-builder', [ 'builder-less', 'builder-js', 'builder-html' ]);
+gulp.task('build-src', [ 'src-less', 'src-js', 'src-html', 'src-move' ]);
 
-gulp.task('default', [ 'build-engine', 'build-launcher', 'build-editor', 'build-preview' ]);
+
+gulp.task('default', [ 'build-engine', 'build-launcher', 'build-editor', 'build-preview', 'build-builder', 'build-utils', 'build-src' ]);
 
 //build editor
 //build game core

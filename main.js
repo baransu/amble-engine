@@ -8,7 +8,7 @@ const dialog = electron.dialog;
 var fs = require('fs');
 var mkdirp = require('mkdirp');
 
-// var builderGulp = require('./builder/js/builder-gulp.js');
+var builderGulp = require('./build/utils/builder.js');
 
 var launcherWindow = null;
 var editorWindow = null;

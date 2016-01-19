@@ -124,7 +124,6 @@ var Utils = (function(){
 
       if (typeof fn !== "function") {
         console.log(str);
-          // Amble.app.debug.error(str + 'function not found');
         throw new Error("function not found");
       }
 

@@ -61,8 +61,8 @@ var AnimationRenderer = (function() {
             0,
             width,
             height,
-            (-width * this.anchor.x) | 0,
-            (-height * this.anchor.y) | 0,
+            -width/2 | 0,
+            -height/2 | 0,
             width,
             height
           );

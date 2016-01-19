@@ -33,8 +33,12 @@ var SpriteRenderer = (function() {
         var y = self.transform.position.y - camera.view.y;
 
         layer.ctx.translate(x, y);
+
+        // TODO: add if
         layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-        layer.ctx.rotate(-self.transform.rotation * Amble.Math.TO_RADIANS);
+
+        // TODO: add if
+        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         if(this._sprite.src) {
           layer.ctx.drawImage(this._sprite, -width/2, -height/2);
@@ -67,5 +71,6 @@ var SpriteRenderer = (function() {
     }
   };
 
+  return SpriteRenderer;
 
 }());

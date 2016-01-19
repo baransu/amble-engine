@@ -8,6 +8,32 @@ var Layer = (function() {
       this.canvas.style.position = 'absolute';
       this.ctx = this.canvas.getContext('2d');
 
+      this.ctx.imageSmoothingEnabled = AMBLE.antyAliasing;
+      this.ctx.mozImageSmoothingEnabled = AMBLE.antyAliasing;
+      this.ctx.msImageSmoothingEnabled = AMBLE.antyAliasing;
+
+      // @ifdef GAME
+      //scale to fullscreen
+      this.resize = function() {
+        var scaleX = window.innerWidth / this.canvas.width;
+        var scaleY = window.innerHeight / this.canvas.height;
+
+        var scaleToFit = Math.min(scaleX, scaleY);
+        var scaleToCover = Math.max(scaleX, scaleY);
+
+        var w = window.innerWidth - (this.canvas.width * scaleToFit);
+        var h = window.innerHeight - (this.canvas.height * scaleToFit);
+
+        this.canvas.style.top = (h/2) + 'px';
+        this.canvas.style.left = (w/2) + 'px';
+
+        this.canvas.style.transformOrigin = "0 0"; //scale from top left
+        this.canvas.style.transform = "scale(" + scaleToFit + ")";
+      }
+
+      this.resize();
+      // @endif
+
     };
 
     Layer.prototype = {
