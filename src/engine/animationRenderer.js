@@ -24,7 +24,7 @@ var AnimationRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       layer.ctx.save();
 
@@ -41,8 +41,8 @@ var AnimationRenderer = (function() {
         this.size.x = width * self.transform.scale.x;
         this.size.y = height * self.transform.scale.y;
 
-        var x = (self.transform.position.x - camera.view.x)// | 0 <- round for optymalization
-        var y = (self.transform.position.y - camera.view.y)// | 0 <- round for optymalization
+        var x = (self.transform.position.x - camera.camera.view.x)// | 0 <- round for optymalization
+        var y = (self.transform.position.y - camera.camera.view.y)// | 0 <- round for optymalization
 
         layer.ctx.translate(x, y);
 

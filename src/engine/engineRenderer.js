@@ -12,12 +12,12 @@ var EngineRenderer = (function() {
 
       render: function render(self, camera) {
 
-        var layer = camera.layer;
+        var layer = camera.camera.layer;
 
         layer.ctx.save();
 
-        var x = self.transform.position.x - camera.view.x;
-        var y = self.transform.position.y - camera.view.y;
+        var x = self.transform.position.x - camera.camera.view.x;
+        var y = self.transform.position.y - camera.camera.view.y;
         layer.font('30px Arial');
 
         this.size.x = layer.ctx.measureText(self.name || 'Actor').width * 2;

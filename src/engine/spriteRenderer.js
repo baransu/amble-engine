@@ -17,7 +17,7 @@ var SpriteRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       layer.ctx.save();
 
@@ -29,8 +29,8 @@ var SpriteRenderer = (function() {
 
         var width = this.size.x = this._sprite.width;
         var height = this.size.y = this._sprite.height;
-        var x = self.transform.position.x - camera.view.x;
-        var y = self.transform.position.y - camera.view.y;
+        var x = self.transform.position.x - camera.camera.view.x;
+        var y = self.transform.position.y - camera.camera.view.y;
 
         layer.ctx.translate(x, y);
 

@@ -251,7 +251,9 @@
 
 						//size
 						this.actor.prefab.renderer.args.size.args.x = this.actor.renderer.size.x;
+            this.notifyPath('actor.prefab.renderer.args.size.args.y', this.actor.prefab.renderer.args.size.args.y);
 						this.actor.prefab.renderer.args.size.args.y = this.actor.renderer.size.y;
+            this.notifyPath('actor.prefab.renderer.args.size.args.y', this.actor.prefab.renderer.args.size.args.y);
 
 					break;
 				}

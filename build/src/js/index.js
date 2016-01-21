@@ -4,22 +4,7 @@ window.onload = function() {
 
     var app = new Application({
 
-        resize: true,
-        fullscreen: true,
         antyAliasing: false,
-        width: 1280,
-        height: 720,
-
-        defaultBgColor: '#37474f',
-
-        mainCamera: {
-            name: 'MainCamera',
-            tag: ['mainCamera'],
-            options: {},
-            camera: { name: "MainCamera", args: {
-                position: { name: "Vec2", args: {x:0 ,y:0}}
-            }}
-        },
 
         preload: function(){
 
@@ -39,12 +24,16 @@ window.onload = function() {
         //instantiate scene objects
         loaded: function(){
 
-            var scene = JSON.parse(this.loader.getAsset('scene.json'));
+          var scene = JSON.parse(this.loader.getAsset('scene.json'));
 
-            //instantiate all object
-            for(var i = 0; i < scene.length; i++) {
-                this.scene.instantiate(scene[i]);
+          //instantiate all object
+          for(var i = 0; i < scene.length; i++) {
+            if(scene[i].tag == 'mainCamera') {
+              this.mainCamera = this.scene.instantiate(scene[i]);
+            } else {
+              this.scene.instantiate(scene[i]);
             }
+          }
         },
 
         //actual start function

@@ -1,0 +1,138 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="camera-component">
+
+	<style>
+
+	.head {
+		width: 100%;
+	}
+
+	</style>
+
+	<template>
+
+    <div class="card" hidden$="{{hideComponent}}">
+
+			<div class="card-header">
+				<div class="row">
+					<div class="col-md-12 text-xs-center">
+						<a class="btn btn-success btn-sm head" role="button" on-click="toggle">Camera</a>
+					</div>
+				</div>
+			</div>
+
+      <iron-collapse id="collapse">
+        <div class="card-block">
+  				<div class="container-fluid">
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group form-group-sm">
+                  <label>size x</label>
+                  <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.size.x}}">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group form-group-sm">
+                  <label>size y</label>
+                  <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.size.y}}">
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <label>bgColor</label>
+                <input class="form-control" type="text" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.bgColor}}">
+              </div>
+            </div>
+
+          </div>
+  			</div>
+
+      </iron-collapse>
+
+    </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'camera-component',
+
+		properties: {
+
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				observer: 'refreshActor'
+			},
+
+			hideComponent: {
+				type: Boolean,
+				value: true
+			}
+		},
+
+		ready: function(){
+			this.isCameraPresent();
+      this.toggle();
+		},
+
+		valuesChange: function() {
+
+			if(this.actor) {
+
+				// size
+        this.actor.prefab.camera.args.size.args.x = Number(this.actor.camera.size.x);
+        this.notifyPath('actor.prefab.camera.args.size.args.y', this.actor.prefab.camera.args.size.args.y);
+        this.actor.prefab.camera.args.size.args.y = Number(this.actor.camera.size.y);
+        // console.log(this.actor.prefab.camera.args.size.args.x, this.actor.prefab.camera.args.size.args.y)
+        this.notifyPath('actor.prefab.camera.args.size.args.y', this.actor.prefab.camera.args.size.args.y);
+
+        // bg color
+        this.actor.prefab.camera.args.bgColor = this.actor.camera.bgColor;
+			}
+		},
+
+		isCameraPresent: function(){
+
+			if(typeof this.actor.camera !== 'undefined') {
+				this.hideComponent = false;
+			} else {
+				this.hideComponent = true;
+			}
+		},
+
+		refreshActor: function() {
+
+			if(this.actor.sceneID && this.actor.camera) {
+
+				var sceneID = this.actor.sceneID;
+				this.actor = AMBLE.scene.getActorByID(sceneID);
+
+				this.valuesChange();
+			}
+
+			this.isCameraPresent();
+
+    },
+
+		selected: function(item, type){
+			return type == item;
+		},
+
+    toggle: function() {
+      this.$.collapse.toggle();
+    }
+
+	});
+
+</script>

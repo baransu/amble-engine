@@ -19,7 +19,11 @@ var engineJSFiles = [
   './src/engine/actor.js',
   './src/engine/animationRenderer.js',
   './src/engine/debug.js',
+
+  //editor only
   './src/engine/engineRenderer.js',
+  './src/engine/cameraRenderer.js',
+
   './src/engine/input.js',
   './src/engine/layer.js',
   './src/engine/loader.js',
@@ -172,8 +176,8 @@ gulp.task('editor-js', function() {
     .pipe(gulp.dest('./build/editor/js/'))
 });
 
-gulp.task('editor-html', function() {
-  return gulp.src('./src/editor/*.html')
+gulp.task('editor-move', function() {
+  return gulp.src('./src/editor/*.*')
     .pipe(gulp.dest('./build/editor/'))
 });
 
@@ -202,7 +206,7 @@ gulp.task('clean', function() {
 
 gulp.task('build-engine', [ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ]);
 gulp.task('build-launcher', [ 'launcher-less', 'launcher-js', 'launcher-html' ]);
-gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-html', 'editor-elements' ]);
+gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-move', 'editor-elements' ]);
 gulp.task('build-preview', [ 'preview-less', 'preview-js', 'preview-html' ]);
 gulp.task('build-builder', [ 'builder-less', 'builder-js', 'builder-html' ]);
 gulp.task('build-src', [ 'src-less', 'src-js', 'src-html', 'src-move' ]);
