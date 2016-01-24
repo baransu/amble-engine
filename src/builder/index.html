@@ -28,20 +28,58 @@
               </div>
           </div>
 
+          <!-- author  -->
+          <div class="row m-b-1">
+              <div class="col-md-12">
+                  <input class="form-control" type="text" ng-model="builder.projectAuthor" placeholder="Game Author">
+              </div>
+          </div>
+
+          <!-- description  -->
+          <div class="row m-b-1">
+              <div class="col-md-12">
+                  <input class="form-control" type="text" ng-model="builder.projectDescription" placeholder="Game Description">
+              </div>
+          </div>
+
+          <!-- game android id -->
+          <div class="row m-b-1">
+            <div class="col-md-12">
+              <input class="form-control" type="text" ng-model="builder.gameID" placeholder="com.amble.game">
+            </div>
+          </div>
+
+          <!-- project version id -->
+          <div class="row m-b-1">
+              <div class="col-md-12">
+                  <input class="form-control" type="text" ng-model="builder.projectVersion" placeholder="project version">
+              </div>
+          </div>
+
           <!-- build directory -->
           <div class="row m-b-1">
               <div class="col-md-12 ">
                   <div class="input-group">
-                      <input class="form-control" type="text" maxlength="50" ng-model="builder.buildDirectory">
                       <span class="input-group-btn">
                           <button class="btn btn-primary" type="button" ng-click="builder.directorySelect()">Build directory</button>
                       </span>
+                      <input class="form-control" type="text" maxlength="50" ng-model="builder.buildDirectory">
                   </div>
               </div>
           </div>
 
+          <!-- target platform -->
           <div class="row m-b-1">
-              <div class="col-md-6 text-xs-right">
+              <div class="col-md-12 ">
+                  <select ng-model="builder.targetPlatform" class="form-control">
+                    <option value="web" selected>Web</option>
+                    <option value="android">Android</option>
+                  </select>
+              </div>
+          </div>
+
+          <div class="row m-b-1">
+              <div class="col-md-6">
                   <button class="btn btn-success" type="button" ng-click="builder.build()">Build</button>
               </div>
           </div>

@@ -7,6 +7,7 @@ const dialog = electron.dialog;
 
 var fs = require('fs');
 var mkdirp = require('mkdirp');
+var rmdir = require('rmdir');
 
 var builderGulp = require('./build/utils/builder.js');
 
@@ -336,49 +337,49 @@ ipcMain.on('editor-game-preview-respond', function(event, data) {
 
 //game preview
 ipcMain.on('game-preview-loaded', function(event, data) {
-    //show window
+  //show window
 
-    gamePreviewWindow.show();
-    gamePreviewWindow.focus();
+  gamePreviewWindow.show();
+  gamePreviewWindow.focus();
 
-    gamePreviewWindow.webContents.send('game-preview-start', gamePreviewData);
+  gamePreviewWindow.webContents.send('game-preview-start', gamePreviewData);
 });
 
 ipcMain.on('game-preview-error-request', function(event, data) {
-    editorWindow.webContents.send('game-preview-error', data);
+  editorWindow.webContents.send('game-preview-error', data);
 })
 
 ipcMain.on('game-preview-log-request', function(event, data) {
-    editorWindow.webContents.send('game-preview-log', data);
+  editorWindow.webContents.send('game-preview-log', data);
 })
 
 ipcMain.on('editor-game-preview-stop-request', function(event, data) {
-    console.log('stop preview')
-    menuFunctions.stopPreview();
+  console.log('stop preview')
+  menuFunctions.stopPreview();
 });
 
 //builder
 ipcMain.on('builder-loaded', function(event, data) {
-    builderWindow.show();
-    builderWindow.focus();
+  builderWindow.show();
+  builderWindow.focus();
 });
 
 ipcMain.on('builder-dir-request', function(event, data) {
-    dialog.showOpenDialog(
-        builderWindow,
-        {
-            title: 'Select build destination',
-            properties: ['openDirectory', 'createDirectory'],
-        },
-        function(path) {
+  dialog.showOpenDialog(
+    builderWindow,
+    {
+      title: 'Select build destination',
+      properties: ['openDirectory', 'createDirectory'],
+    },
+    function(path) {
 
-            if(path != undefined) path = path[0];
-            else path = 'undefined';
+      if(path != undefined) path = path[0];
+      else path = 'undefined';
 
-            buildDir = path;
+      buildDir = path;
 
-            builderWindow.webContents.send('builder-dir-respond', path);
-    });
+      builderWindow.webContents.send('builder-dir-respond', path);
+  });
 });
 
 ipcMain.on('builder-build-request', function(event, data) {
@@ -397,91 +398,99 @@ ipcMain.on('builder-build-request', function(event, data) {
     builderGulp.scriptsList = [];
     builderGulp.outputDir = targetDir;
 
-    console.log(targetDir);
+    builderGulp.projectName = gameTitle;
+    builderGulp.projectID = data.gameID;
+
+    builderGulp.projectVersion = data.version;
+
+    builderGulp.projectDescription = data.description;
+    builderGulp.projectAuthor = data.author;
 
     for(var i = 0; i < imagesList.length; i++) {
-        builderGulp.imagesList.push(imagesList[i].path);
+      builderGulp.imagesList.push(imagesList[i].path);
     }
 
     for(var i = 0; i < scriptsList.length; i++) {
-        builderGulp.scriptsList.push(scriptsList[i].path);
+      builderGulp.scriptsList.push(scriptsList[i].path);
     }
-
-    console.log(builderGulp.scriptsList);
 
     if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
-        response.type = 'error';
-        response.message = 'Game build failed - wrong directory';
-        builderWindow.send('builder-build-respond', response);
+      response.type = 'error';
+      response.message = 'Game build failed - wrong directory';
+      builderWindow.send('builder-build-respond', response);
     }
 
-    builderGulp.start('prepare', function(err) {
+    builderGulp.start('build-move-' + data.targetPlatform, function() {
+
+      if(data.targetPlatform == 'android') {
+        fs.writeFileSync(targetDir + '/_temp/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+        fs.writeFileSync(targetDir + '/_temp/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+      } else {
+        fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+        fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+      }
+
+      builderGulp.start('build-game-' + data.targetPlatform, function(err) {
+        rmdir(__dirname + '/.cordova', function() {});
+        var respond = {};
         if(err) {
-            builderWindow.send('builder-build-respond', 'Game build failed - preparation');
-            throw err;
+          console.log(err)
+          respond.type = 'error';
+          respond.message = 'Game build failed - build';
+          builderWindow.send('builder-build-respond', respond);
+          throw err;
         }
 
-        builderGulp.start('build-game', function(err) {
-            var response = {}
-            if(err) {
-                response.type = 'error';
-                response.message = 'Game build failed - build';
-                builderWindow.send('builder-build-respond', response);
-                throw err;
-            }
+        console.log('build-game callback')
 
-            fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-            fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+        respond.type = 'success';
+        respond.message = 'Game build succesful - game build to: ' + targetDir;
 
-            console.log('build-game callback')
+        builderWindow.send('builder-build-respond', respond)
 
-            response.type = 'success';
-            response.message = 'Game build succesful - game build to: ' + targetDir;
-            //send respond with respond
-            builderWindow.send('builder-build-respond', response)
-
-        });
+      });
     });
+
 });
 
 app.on('browser-window-focus', function(event, bWindow) {
 
-    switch(currentState) {
-        case 'editor':
-        //save
-        shortcuts.open = globalShortcut.register('ctrl+s', menuFunctions.save);
+  switch(currentState) {
+    case 'editor':
+    //save
+    shortcuts.open = globalShortcut.register('ctrl+s', menuFunctions.save);
 
-        //build
-        shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
+    //build
+    shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
 
-        //play
-        shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.play);
+    //play
+    shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.play);
 
-        //stop
-        shortcuts.open = globalShortcut.register('shift+ctrl+p', menuFunctions.stopPreview);
-        break;
-    }
+    //stop
+    shortcuts.open = globalShortcut.register('shift+ctrl+p', menuFunctions.stopPreview);
+    break;
+  }
 
 });
 
 var menuFunctions = {
 
-    save: function() {
-        editorWindow.webContents.send('editor-save-request');
-    },
+  save: function() {
+    editorWindow.webContents.send('editor-save-request');
+  },
 
-    build: function() {
-        editorWindow.webContents.send('editor-build-request');
-    },
+  build: function() {
+    editorWindow.webContents.send('editor-build-request');
+  },
 
-    play: function() {
-        editorWindow.webContents.send('editor-game-preview-request');
-    },
+  play: function() {
+    editorWindow.webContents.send('editor-game-preview-request');
+  },
 
-    stopPreview: function() {
-        //close preview
-        gamePreviewWindow.close();
-        //send unpause
-        editorWindow.webContents.send('editor-unpause');
-    }
+  stopPreview: function() {
+    //close preview
+    gamePreviewWindow.close();
+    //send unpause
+    editorWindow.webContents.send('editor-unpause');
+  }
 }

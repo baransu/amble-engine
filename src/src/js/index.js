@@ -6,6 +6,11 @@ window.onload = function() {
 
         antyAliasing: false,
 
+        prePreload: function() {
+            //load scene (json)
+            this.loader.load('json', './assets/json/scene.json', 'scene.json');
+        },
+
         preload: function(){
 
             document.title = gameTitle || 'untitled';
@@ -15,10 +20,9 @@ window.onload = function() {
                 this.loader.load('image', './assets/img/' + imagesList[i].name, imagesList[i].name);
             }
 
-            //load audio
-
             //load scene (json)
             this.loader.load('json', './assets/json/scene.json', 'scene.json');
+
         },
 
         //instantiate scene objects
@@ -28,9 +32,7 @@ window.onload = function() {
 
           //instantiate all object
           for(var i = 0; i < scene.length; i++) {
-            if(scene[i].tag == 'mainCamera') {
-              this.mainCamera = this.scene.instantiate(scene[i]);
-            } else {
+            if(scene[i].tag != 'mainCamera') {
               this.scene.instantiate(scene[i]);
             }
           }

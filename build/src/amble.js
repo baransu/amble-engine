@@ -1260,6 +1260,7 @@ var Application  = (function() {
     this.fullscreen = args['fullscreen'] || false;
 
     this.scene = new Scene();
+
     if(args.mainCamera) {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
@@ -1268,14 +1269,14 @@ var Application  = (function() {
     window.addEventListener('resize', function() {
 
 
-      that.mainCamera.camera.layer.resize();
-
-      that.mainCamera.camera.layer.resize();
+      if(that.mainCamera) {
+        that.mainCamera.camera.layer.resize();
+      }
 
     });
 
     //init all public game loop functions
-    var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
+    var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
     }
@@ -1322,66 +1323,87 @@ var Application  = (function() {
 
     var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
-    this.loadingInterval = setInterval(function(){
-      if(that.mainCamera) {
-        var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-        var layer = that.mainCamera.camera.layer;
-        layer.ctx.save();
-        var loading = [
-            "   loading.  ",
-            "   loading.. ",
-            "   loading...",
-        ]
+    this.prePreload();
+    this.loader.loadAll(function() {
 
-        layer.clear('black')
-            .fillStyle(color)
-            .strokeStyle('white')
-            .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
-            .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
-
-        layer.ctx.shadowColor = "white";
-        layer.ctx.shadowBlur = 20;
-
-        layer.fillStyle('white');
-        layer.ctx.textAlign = 'center';
-        layer.ctx.font = "25px Arial";
-        var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
-        layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
-
-        layer.ctx.font = "20px Arial";
-        text = loading[currentLoadingText];
-        layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
-
-        loadingTimer += 1/60;
-        if(loadingTimer > 1) {
-          loadingTimer = 0;
-          currentLoadingText++;
-          if(currentLoadingText == loading.length) currentLoadingText = 0;
+      var scene = JSON.parse(that.loader.getAsset('scene.json'));
+      console.log('scene load')
+      for(var i = 0; i < scene.length; i++) {
+        if(scene[i].tag == 'mainCamera') {
+          that.mainCamera = that.scene.instantiate(scene[i]);
+          break;
         }
-        layer.ctx.restore();
       }
-    }, 1000/60);
+
+      that.loader = new Loader();
 
 
-    this.preload();
+      that.loadingInterval = setInterval(function() {
 
-    this.loader.loadAll(function(){
+        if(that.mainCamera) {
+          // console.log('loading interval')
+          var width = that.mainCamera.camera.size.x;
+          var height = that.mainCamera.camera.size.y;
 
-      var delay = 0;
-      delay = 1000;
+          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
-      setTimeout(function(){
-        clearInterval(that.loadingInterval);
-        Input._setListeners();
+          var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
+          var layer = that.mainCamera.camera.layer;
+          layer.ctx.save();
+          var loading = [
+              "   loading.  ",
+              "   loading.. ",
+              "   loading...",
+          ];
 
-        that.scene.start();
-        that.loaded();
+          layer.clear('black')
+              .fillStyle(color)
+              .strokeStyle('white')
+              .fillRect(width/8, height/2 - height/16, x, height/8)
+              .strokeRect(width/8, height/2 - height/16, (width - width/4), height/8);
 
-        that.start();
-        Time._lastTime = Date.now()
-        gameLoop();
+          layer.ctx.shadowColor = "white";
+          layer.ctx.shadowBlur = 20;
 
-      }, delay);
+          layer.fillStyle('white');
+          layer.ctx.textAlign = 'center';
+          layer.ctx.font = "25px Arial";
+          var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
+          layer.ctx.fillText(text, width/2, height/2 + 7)
+
+          layer.ctx.font = "20px Arial";
+          text = loading[currentLoadingText];
+          layer.ctx.fillText(text, width/2, 2*height/3 + 10)
+
+          loadingTimer += 1/60;
+          if(loadingTimer > 1) {
+            loadingTimer = 0;
+            currentLoadingText++;
+            if(currentLoadingText == loading.length) currentLoadingText = 0;
+          }
+          layer.ctx.restore();
+        }
+      }, 1000/60);
+
+      that.preload();
+      that.loader.loadAll(function() {
+
+        var delay = 0;
+        delay = 1000;
+
+        setTimeout(function(){
+          clearInterval(that.loadingInterval);
+          Input._setListeners();
+
+          that.scene.start();
+          that.loaded();
+
+          that.start();
+          Time._lastTime = Date.now()
+          gameLoop();
+
+        }, delay);
+      });
     });
 
     function gameLoop(){
