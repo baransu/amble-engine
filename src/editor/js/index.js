@@ -7,20 +7,12 @@ var fs = require('fs');
 var watch = require('node-watch');
 global.jQuery = $ = require('jquery');
 
-// var scripts = [
-//     './js/camera.js',
-// ];
-
 var imgExtensionList = [
     'png',
     'jpg',
     'jpeg',
     'gif'
 ];
-//
-// for(var i in scripts) {
-//     require(scripts[i]);
-// }
 
 var projectDirectory = null;
 
@@ -38,8 +30,8 @@ var menuFunctions = {
         data.time = Date.now();
         data.scene = AMBLE.scene.createSceneFile();
         data.camera = {
-            x: AMBLE.mainCamera.camera.position.x,
-            y: AMBLE.mainCamera.camera.position.y
+            x: AMBLE.mainCamera.transform.position.x,
+            y: AMBLE.mainCamera.transform.position.y
         };
 
         ipcRenderer.send('editor-save-respond', JSON.stringify(data));
@@ -350,19 +342,36 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         //default actors type to add
         this.actorsToAdd = [
-            {
-                name: 'actor',
-                tag: ['actor'],
-                options: {},
-                selected: false,
-                transform: { name: "Transform", args: {
-                    position: { name: "Vec2", args: {}},
-                    scale: { name: "Vec2", args: {x: 1, y:1}},
-                    rotation: 0
-                }},
-                renderer: { name: 'EngineRenderer', args: {}},
-                components: []
-            }
+          {
+            name: 'actor',
+            tag: ['actor'],
+            options: {},
+            selected: false,
+            transform: { name: "Transform", args: {
+                position: { name: "Vec2", args: {}},
+                scale: { name: "Vec2", args: {x: 1, y:1}},
+                rotation: 0
+            }},
+            renderer: { name: 'EngineRenderer', args: {}},
+            components: []
+          },
+          {
+            name: 'camera',
+            tag: 'mainCamera',
+            options: {},
+            transform: { name: "Transform", args: {
+                position: { name: "Vec2", args: {}},
+                scale: { name: "Vec2", args: {x: 1, y:1}},
+                rotation: 0
+            }},
+            renderer: { name: 'CameraRenderer', args: {}},
+            camera: { name: "MainCamera", args: {
+                scale: 1,
+                size: { name: 'Vec2', args: {x: 1280, y: 720}},
+                bgColor: '#37474f',
+            }},
+            components: []
+          },
         ];
 
         var cam = AMBLE.scene.getActorByName('SceneCamera');
@@ -377,37 +386,37 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.updateClass = function() {
 
-        for(var i in editor.actors) {
-            var a = editor.actors[i].prefab;
-            for(var j in a.components) {
-                var c = CLASSES.find(c => c.name == a.components[j].name);
-                if(!c) continue;
-                for(var x in c.properties) {
-                    var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
-                    if(typeof property === 'undefined') {
-                        a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
-                    }
-                }
-
-                console.log(a.components[j].properties)
-
-                //force polymer to update;
-
-                var toDel = [];
-                for(var x in a.components[j].properties) {
-                    var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
-                    if(!aa) {
-                        toDel.push(a.components[j].properties[x].name);
-                    }
-                }
-
-                for(var x in toDel) {
-                    var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
-                    a.components[j].properties.splice(index, 1);
-                }
-
+      for(var i in editor.actors) {
+        var a = editor.actors[i].prefab;
+        for(var j in a.components) {
+          var c = CLASSES.find(c => c.name == a.components[j].name);
+          if(!c) continue;
+          for(var x in c.properties) {
+            var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
+            if(typeof property === 'undefined') {
+              a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
             }
+          }
+
+          console.log(a.components[j].properties)
+
+          //force polymer to update;
+
+          var toDel = [];
+          for(var x in a.components[j].properties) {
+            var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
+            if(!aa) {
+              toDel.push(a.components[j].properties[x].name);
+            }
+          }
+
+          for(var x in toDel) {
+            var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
+            a.components[j].properties.splice(index, 1);
+          }
+
         }
+      }
     };
 
     editor.update();
@@ -520,6 +529,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       if(_actor) {
         delete _actor.$$hashKey;
         _actor.name += editor.actors.length;
+        console.log(_actor)
         AMBLE.scene.instantiate(_actor);
       }
 
@@ -560,29 +570,36 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 //scane view
 var application = {
 
-    resize: true,
-
+    // resize: true,
     mainCamera: {
-        name: 'SceneCamera',
-        tag: ['sceneCamera'],
-        options: {
-            hideInHierarchy: true
-        },
-        camera: { name: "MainCamera", args: {
-            position: { name: "Vec2", args: {}},
-            context: "scene-view"
-        }},
-        components: [
-            { type:'editor', name: "Camera", properties: []}
-        ]
+      name: 'SceneCamera',
+      tag: ['sceneCamera'],
+      options: {
+        hideInHierarchy: true
+      },
+      transform: { name: "Transform", args: {
+        position: { name: "Vec2", args: {}},
+        scale: { name: "Vec2", args: {x: 1, y:1}},
+        rotation: 0
+      }},
+      camera: { name: "MainCamera", args: {
+        context: "scene-view",
+        layer: true,
+        bgColor: 'transparent',
+        size: { name: 'Vec2', args: {x: 1280, y: 720}}
+      }},
+      components: [
+        { type:'editor', name: "Camera", properties: []}
+      ]
     },
 
     preload: function(){
 
         //load actors to scene
         for(var i in projectData.actors) {
-            this.scene.instantiate(projectData.actors[i]);
-            EDITOR.updateActors();
+          console.log(projectData.actors[i]);
+          this.scene.instantiate(projectData.actors[i]);
+          EDITOR.updateActors();
         }
 
         // load imgs
@@ -598,8 +615,8 @@ var application = {
     loaded: function(){
 
         if(projectData.camera) {
-            this.mainCamera.camera.position.x = projectData.camera.x;
-            this.mainCamera.camera.position.y = projectData.camera.y;
+            this.mainCamera.transform.position.x = projectData.camera.x;
+            this.mainCamera.transform.position.y = projectData.camera.y;
         }
 
     },

@@ -85,7 +85,7 @@ var Utils = (function(){
       if (obj instanceof Object || obj instanceof Array) {
         for(var attr in obj) {
           // @ifdef GAME
-          if(attr == 'renderer' && obj[attr].name == 'EngineRenderer') continue;
+          if(attr == 'renderer' && (obj[attr].name == 'EngineRenderer' || obj[attr].name == 'CameraRenderer')) continue;
           // @endif
 
           if(attr == 'components') {

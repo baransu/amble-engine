@@ -1,10 +1,10 @@
 var Layer = (function() {
 
-    var Layer = function Layer(width, height) {
+    var Layer = function Layer(camera) {
 
       this.canvas = document.createElement('canvas');
-      this.canvas.width = width || AMBLE.width;
-      this.canvas.height = height || AMBLE.height;
+      this.canvas.width = camera.size.x;
+      this.canvas.height = camera.size.y;
       this.canvas.style.position = 'absolute';
       this.ctx = this.canvas.getContext('2d');
 
@@ -53,7 +53,7 @@ var Layer = (function() {
 
         this.ctx.save();
         this.ctx.setTransform(1,0,0,1,0,0);
-        if (color) {
+        if (color && color != 'transparent') {
             this.ctx.fillStyle = color;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         } else {

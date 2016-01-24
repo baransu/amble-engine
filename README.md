@@ -35,3 +35,7 @@ To run editor, run the following command in project folder:
 ```bash
 npm start
 ```
+
+### Game build
+
+For android build, Amble Engine use [Apache Cordova](https://cordova.apache.org/) and [Crosswalk Project](https://crosswalk-project.org/). To build to android you must fulfill their requirements.

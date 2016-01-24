@@ -15,12 +15,12 @@ var RectRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       var width = this.size.x;
       var height = this.size.y;
-      var x = self.transform.position.x - camera.view.x;
-      var y = self.transform.position.y - camera.view.y;
+      var x = self.transform.position.x - camera.camera.view.x;
+      var y = self.transform.position.y - camera.camera.view.y;
 
       layer.ctx.save();
 

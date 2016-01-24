@@ -375,7 +375,7 @@ var AnimationRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       layer.ctx.save();
 
@@ -392,8 +392,8 @@ var AnimationRenderer = (function() {
         this.size.x = width * self.transform.scale.x;
         this.size.y = height * self.transform.scale.y;
 
-        var x = (self.transform.position.x - camera.view.x)// | 0 <- round for optymalization
-        var y = (self.transform.position.y - camera.view.y)// | 0 <- round for optymalization
+        var x = (self.transform.position.x - camera.camera.view.x)// | 0 <- round for optymalization
+        var y = (self.transform.position.y - camera.camera.view.y)// | 0 <- round for optymalization
 
         layer.ctx.translate(x, y);
 
@@ -508,12 +508,12 @@ var EngineRenderer = (function() {
 
       render: function render(self, camera) {
 
-        var layer = camera.layer;
+        var layer = camera.camera.layer;
 
         layer.ctx.save();
 
-        var x = self.transform.position.x - camera.view.x;
-        var y = self.transform.position.y - camera.view.y;
+        var x = self.transform.position.x - camera.camera.view.x;
+        var y = self.transform.position.y - camera.camera.view.y;
         layer.font('30px Arial');
 
         this.size.x = layer.ctx.measureText(self.name || 'Actor').width * 2;
@@ -569,6 +569,59 @@ var EngineRenderer = (function() {
     };
 
     return EngineRenderer;
+
+}());
+
+var CameraRenderer = (function() {
+
+    var CameraRenderer = function CameraRenderer(args) {
+      this.layer = 0;
+      this.size = new Vec2(128, 128);
+
+      this.img = new Image(128, 128);
+      this.img.src = 'cam_icon.png';
+
+      this.type = "engine";
+      this._editorName = 'EngineRenderer'
+    };
+
+    CameraRenderer.prototype = {
+
+      render: function render(self, camera) {
+
+        var layer = camera.camera.layer;
+
+        layer.ctx.save();
+
+        var x = self.transform.position.x - camera.camera.view.x;
+        var y = self.transform.position.y - camera.camera.view.y;
+        layer.font('30px Arial');
+
+        var width = self.camera.size.x;
+        var height = self.camera.size.y;
+
+        layer.ctx.translate(x, y);
+
+        // //scale
+        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+
+        // rotation in radians
+        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+
+        //draw img
+        layer.ctx.drawImage(this.img, -this.img.width/2, -this.img.height/2, this.img.width, this.img.height)
+
+        if(self.selected) {
+          layer.strokeStyle(primaryColor)
+            .lineWidth(2)
+            .strokeRect(-width/2, -height/2, width, height);
+        }
+
+        layer.ctx.restore();
+      }
+    };
+
+    return CameraRenderer;
 
 }());
 
@@ -741,11 +794,11 @@ var Input = (function(){
 
 var Layer = (function() {
 
-    var Layer = function Layer(width, height) {
+    var Layer = function Layer(camera) {
 
       this.canvas = document.createElement('canvas');
-      this.canvas.width = width || AMBLE.width;
-      this.canvas.height = height || AMBLE.height;
+      this.canvas.width = camera.size.x;
+      this.canvas.height = camera.size.y;
       this.canvas.style.position = 'absolute';
       this.ctx = this.canvas.getContext('2d');
 
@@ -773,7 +826,7 @@ var Layer = (function() {
 
         this.ctx.save();
         this.ctx.setTransform(1,0,0,1,0,0);
-        if (color) {
+        if (color && color != 'transparent') {
             this.ctx.fillStyle = color;
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         } else {
@@ -961,22 +1014,26 @@ var Loader = (function() {
 var MainCamera = (function() {
 
     var MainCamera = function MainCamera(args) {
-      this.position = args.position || new Vec2();
       this.context = document.getElementById(args.context) || document.body;
 
-      this.size = new Vec2($(this.context).width(), $(this.context).height());
+      this.size = args.size || new Vec2(1280, 720);
 
+      this.bgColor = args.bgColor || '#37474f';
 
-      this.view = new Vec2(this.position.x - this.size.x, this.position.y - this.size.y);
-      this.scale = 1;
-      this.layer = new Layer(this.size.x, this.size.y);
-      this.layer.appendTo(this.context);
+      this.view = new Vec2();
+      this.scale = args.scale || 1;
+
+      if(args.layer) {
+        this.size.x = $(this.context).width();
+        this.size.y = $(this.context).height();
+      this.layer = new Layer(this).appendTo(this.context);
+      }
     };
 
     MainCamera.prototype = {
 
-      update: function update() {
-        this.view = new Vec2(this.position.x - this.size.x/2, this.position.y - this.size.y/2);
+      update: function update(self) {
+        this.view = new Vec2(self.transform.position.x - this.size.x/2, self.transform.position.y - this.size.y/2);
         return this;
       }
 
@@ -1001,12 +1058,12 @@ var RectRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       var width = this.size.x;
       var height = this.size.y;
-      var x = self.transform.position.x - camera.view.x;
-      var y = self.transform.position.y - camera.view.y;
+      var x = self.transform.position.x - camera.camera.view.x;
+      var y = self.transform.position.y - camera.camera.view.y;
 
       layer.ctx.save();
 
@@ -1065,7 +1122,7 @@ var SpriteRenderer = (function() {
 
     render: function render(self, camera) {
 
-      var layer = camera.layer;
+      var layer = camera.camera.layer;
 
       layer.ctx.save();
 
@@ -1077,8 +1134,8 @@ var SpriteRenderer = (function() {
 
         var width = this.size.x = this._sprite.width;
         var height = this.size.y = this._sprite.height;
-        var x = self.transform.position.x - camera.view.x;
-        var y = self.transform.position.y - camera.view.y;
+        var x = self.transform.position.x - camera.camera.view.x;
+        var y = self.transform.position.y - camera.camera.view.y;
 
         layer.ctx.translate(x, y);
 
@@ -1125,8 +1182,8 @@ var Transform = (function() {
 
     var Transform = function Transform(args) {
       this.position = args.position || new Vec2();
+      this.scale = args.scale || new Vec2(1, 1);
       this.rotation = args.rotation || 0;
-      this.scale = new Vec2(1, 1);
 
     };
 
@@ -1149,6 +1206,7 @@ var Scene = (function() {
       var data = [];
       for(var i = 1; i < this.children.length; i++) {
         this.children[i].prefab.name = this.children[i].name;
+        console.log(this.children[i].name)
         data.push(this.children[i].prefab);
       }
 
@@ -1174,7 +1232,7 @@ var Scene = (function() {
 
       actor.prefab = obj;
 
-      console.log(actor);
+      // console.log(actor);
       return this._add(actor);
     },
 
@@ -1388,48 +1446,38 @@ var Application  = (function() {
     this.debug = new Debug();
     this.imgList = [];
 
-    this.resize = typeof args.resize === 'boolean' ? args.resize : false;
-
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
+    //move to camera
     this.fullscreen = args['fullscreen'] || false;
-    this.width = args['width'] || 640;
-    this.height = args['height'] || 480;
 
     this.scene = new Scene();
+
     if(args.mainCamera) {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    if(this.mainCamera) {
-      this.width = this.mainCamera.camera.size.x || 800;
-      this.height = this.mainCamera.camera.size.y || 600;
-    }
-
     //wrap this things up
-    if(this.resize) {
-      window.addEventListener('resize', function() {
+    window.addEventListener('resize', function() {
 
-        var width = $(that.mainCamera.camera.context).width();
-        var height = $(that.mainCamera.camera.context).height();
+      var width = $(that.mainCamera.camera.context).width();
+      var height = $(that.mainCamera.camera.context).height();
 
-        that.width = that.mainCamera.camera.layer.canvas.width = width;
-        that.height = that.mainCamera.camera.layer.canvas.height = height;
-        that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
-
+      that.mainCamera.camera.layer.canvas.width = width;
+      that.mainCamera.camera.layer.canvas.height = height;
+      that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
 
 
-      });
-    }
-
+    });
 
     //init all public game loop functions
-    var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
+    var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
     }
 
     this.paused = false;
+
     this.pause = function pause() {
         this.paused = true;
         console.log('pause')
@@ -1442,19 +1490,14 @@ var Application  = (function() {
     };
 
     this.update = function update(){
-      this.mainCamera.camera.update()
+      this.mainCamera.camera.update(this.mainCamera)
       this.scene.update();
     };
 
-    this.defaultBgColor = args.defaultBgColor || 'transparent';
-
     this.render = function render(){
       var camera = this.mainCamera.camera;
-      if(this.defaultBgColor == 'transparent') {
-        camera.layer.clear();
-      } else {
-        camera.layer.clear(this.defaultBgColor);
-      }
+
+      camera.layer.clear(this.mainCamera.camera.bgColor);
 
       var linesColor = '#eceff1'
       var layer = camera.layer;
@@ -1464,36 +1507,27 @@ var Application  = (function() {
 
       var lineSpacing = 200;
 
-      var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
-      var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
-      var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
-      var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
+      var verticalLinesCount = ((camera.size.x/camera.scale)/lineSpacing) * 2;
+      var horizontalLinesCount = ((camera.size.y/camera.scale)/lineSpacing) * 2;
+      var startX = Math.floor(this.mainCamera.transform.position.x - (camera.size.x)/camera.scale) - (this.mainCamera.transform.position.x - (camera.size.x)/camera.scale) % lineSpacing;
+      var startY = Math.floor(this.mainCamera.transform.position.y - (camera.size.y)/camera.scale) - (this.mainCamera.transform.position.y - (camera.size.y)/camera.scale) % lineSpacing;
+
 
       //vertical lines
       for(var i = -2; i < verticalLinesCount; i++) {
-          layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
-          layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
+        layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, this.mainCamera.transform.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
+        layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, this.mainCamera.transform.position.y + camera.size.y/camera.scale - camera.view.y);
       }
 
       //horizonala
       for(var i = -2; i < horizontalLinesCount; i++) {
-          layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
-          layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
+        layer.ctx.moveTo(this.mainCamera.transform.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
+        layer.ctx.lineTo(this.mainCamera.transform.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
       }
 
       layer.ctx.stroke();
 
-      this.scene.render(camera);
-
-      layer.ctx.save();
-      //draw camera viewport (sroke rect)
-      layer.strokeStyle(primaryColor);
-      layer.lineWidth(1.5)
-      var x = -1280/2 - camera.view.x;
-      var y = -720/2 - camera.view.y;
-      layer.strokeRect(x, y, 1280,  720)
-
-      layer.ctx.restore();
+      this.scene.render(this.mainCamera);
 
     };
 
@@ -1521,65 +1555,75 @@ var Application  = (function() {
 
     var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
-    this.loadingInterval = setInterval(function(){
-      if(that.mainCamera) {
-        var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-        var layer = that.mainCamera.camera.layer;
-        layer.ctx.save();
-        var loading = [
-            "   loading.  ",
-            "   loading.. ",
-            "   loading...",
-        ]
+    this.prePreload();
+    this.loader.loadAll(function() {
 
-        layer.clear('black')
-            .fillStyle(color)
-            .strokeStyle('white')
-            .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
-            .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
 
-        layer.ctx.shadowColor = "white";
-        layer.ctx.shadowBlur = 20;
+      that.loadingInterval = setInterval(function() {
 
-        layer.fillStyle('white');
-        layer.ctx.textAlign = 'center';
-        layer.ctx.font = "25px Arial";
-        var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
-        layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
+        if(that.mainCamera) {
+          // console.log('loading interval')
+          var width = that.mainCamera.camera.size.x;
+          var height = that.mainCamera.camera.size.y;
 
-        layer.ctx.font = "20px Arial";
-        text = loading[currentLoadingText];
-        layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
+          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
-        loadingTimer += 1/60;
-        if(loadingTimer > 1) {
-          loadingTimer = 0;
-          currentLoadingText++;
-          if(currentLoadingText == loading.length) currentLoadingText = 0;
+          var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
+          var layer = that.mainCamera.camera.layer;
+          layer.ctx.save();
+          var loading = [
+              "   loading.  ",
+              "   loading.. ",
+              "   loading...",
+          ];
+
+          layer.clear('black')
+              .fillStyle(color)
+              .strokeStyle('white')
+              .fillRect(width/8, height/2 - height/16, x, height/8)
+              .strokeRect(width/8, height/2 - height/16, (width - width/4), height/8);
+
+          layer.ctx.shadowColor = "white";
+          layer.ctx.shadowBlur = 20;
+
+          layer.fillStyle('white');
+          layer.ctx.textAlign = 'center';
+          layer.ctx.font = "25px Arial";
+          var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
+          layer.ctx.fillText(text, width/2, height/2 + 7)
+
+          layer.ctx.font = "20px Arial";
+          text = loading[currentLoadingText];
+          layer.ctx.fillText(text, width/2, 2*height/3 + 10)
+
+          loadingTimer += 1/60;
+          if(loadingTimer > 1) {
+            loadingTimer = 0;
+            currentLoadingText++;
+            if(currentLoadingText == loading.length) currentLoadingText = 0;
+          }
+          layer.ctx.restore();
         }
-        layer.ctx.restore();
-      }
-    }, 1000/60);
+      }, 1000/60);
 
+      that.preload();
+      that.loader.loadAll(function() {
 
-    this.preload();
+        var delay = 0;
 
-    this.loader.loadAll(function(){
+        setTimeout(function(){
+          clearInterval(that.loadingInterval);
+          Input._setListeners();
 
-      var delay = 0;
+          that.scene.start();
+          that.loaded();
 
-      setTimeout(function(){
-        clearInterval(that.loadingInterval);
-        Input._setListeners();
+          that.start();
+          Time._lastTime = Date.now()
+          gameLoop();
 
-        that.scene.start();
-        that.loaded();
-
-        that.start();
-        Time._lastTime = Date.now()
-        gameLoop();
-
-      }, delay);
+        }, delay);
+      });
     });
 
     function gameLoop(){

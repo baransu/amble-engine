@@ -36,7 +36,7 @@ Class({
             }
             var x = (this.lastMousePos.x - Input.mousePosition.x)/self.camera.scale;
             var y = (this.lastMousePos.y - Input.mousePosition.y)/self.camera.scale;
-            self.camera.position.add(new Vec2(x, y));
+            self.transform.position.add(new Vec2(x, y));
 
             this.lastMousePos.copy(Input.mousePosition);
         } else {

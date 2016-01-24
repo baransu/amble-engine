@@ -19,6 +19,8 @@ $RECYCLE.BIN/
 ## Node
 #############
 
+.bin
+
 # Logs
 logs
 *.log

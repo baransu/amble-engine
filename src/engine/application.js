@@ -7,56 +7,45 @@ var Application  = (function() {
     this.debug = new Debug();
     this.imgList = [];
 
-    this.resize = typeof args.resize === 'boolean' ? args.resize : false;
-
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 
+    //move to camera
     this.fullscreen = args['fullscreen'] || false;
-    this.width = args['width'] || 640;
-    this.height = args['height'] || 480;
 
     this.scene = new Scene();
+
     if(args.mainCamera) {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    if(this.mainCamera) {
-      this.width = this.mainCamera.camera.size.x || 800;
-      this.height = this.mainCamera.camera.size.y || 600;
-    }
-
     //wrap this things up
-    if(this.resize) {
-      window.addEventListener('resize', function() {
+    window.addEventListener('resize', function() {
 
-        // @ifdef EDITOR
-        var width = $(that.mainCamera.camera.context).width();
-        var height = $(that.mainCamera.camera.context).height();
+      // @ifdef EDITOR
+      var width = $(that.mainCamera.camera.context).width();
+      var height = $(that.mainCamera.camera.context).height();
 
-        that.width = that.mainCamera.camera.layer.canvas.width = width;
-        that.height = that.mainCamera.camera.layer.canvas.height = height;
-        that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
-        // @endif
+      that.mainCamera.camera.layer.canvas.width = width;
+      that.mainCamera.camera.layer.canvas.height = height;
+      that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
+      // @endif
 
-        // @ifdef GAME
+      // @ifdef GAME
+      if(that.mainCamera) {
         that.mainCamera.camera.layer.resize();
-        // @endif
+      }
+      // @endif
 
-        // @ifdef SRC
-        that.mainCamera.camera.layer.resize();
-        // @endif
-
-      });
-    }
-
+    });
 
     //init all public game loop functions
-    var gameLoopFunctionsList = ['preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
+    var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
     }
 
     this.paused = false;
+
     // @ifdef EDITOR
     this.pause = function pause() {
         this.paused = true;
@@ -71,19 +60,14 @@ var Application  = (function() {
     // @endif
 
     this.update = function update(){
-      this.mainCamera.camera.update()
+      this.mainCamera.camera.update(this.mainCamera)
       this.scene.update();
     };
 
-    this.defaultBgColor = args.defaultBgColor || 'transparent';
-
     this.render = function render(){
       var camera = this.mainCamera.camera;
-      if(this.defaultBgColor == 'transparent') {
-        camera.layer.clear();
-      } else {
-        camera.layer.clear(this.defaultBgColor);
-      }
+
+      camera.layer.clear(this.mainCamera.camera.bgColor);
 
       // @ifdef EDITOR
       var linesColor = '#eceff1'
@@ -94,39 +78,28 @@ var Application  = (function() {
 
       var lineSpacing = 200;
 
-      var verticalLinesCount = ((this.width/camera.scale)/lineSpacing) * 2;
-      var horizontalLinesCount = ((this.height/camera.scale)/lineSpacing) * 2;
-      var startX = Math.floor(camera.position.x - (camera.size.x)/camera.scale) - (camera.position.x - (camera.size.x)/camera.scale) % lineSpacing;
-      var startY = Math.floor(camera.position.y - (camera.size.y)/camera.scale) - (camera.position.y - (camera.size.y)/camera.scale) % lineSpacing;
+      var verticalLinesCount = ((camera.size.x/camera.scale)/lineSpacing) * 2;
+      var horizontalLinesCount = ((camera.size.y/camera.scale)/lineSpacing) * 2;
+      var startX = Math.floor(this.mainCamera.transform.position.x - (camera.size.x)/camera.scale) - (this.mainCamera.transform.position.x - (camera.size.x)/camera.scale) % lineSpacing;
+      var startY = Math.floor(this.mainCamera.transform.position.y - (camera.size.y)/camera.scale) - (this.mainCamera.transform.position.y - (camera.size.y)/camera.scale) % lineSpacing;
+
 
       //vertical lines
       for(var i = -2; i < verticalLinesCount; i++) {
-          layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, camera.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
-          layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, camera.position.y + camera.size.y/camera.scale - camera.view.y);
+        layer.ctx.moveTo(startX + lineSpacing * i - camera.view.x, this.mainCamera.transform.position.y - camera.size.y/camera.scale - camera.view.y - lineSpacing);
+        layer.ctx.lineTo(startX + lineSpacing * i - camera.view.x, this.mainCamera.transform.position.y + camera.size.y/camera.scale - camera.view.y);
       }
 
       //horizonala
       for(var i = -2; i < horizontalLinesCount; i++) {
-          layer.ctx.moveTo(camera.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
-          layer.ctx.lineTo(camera.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
+        layer.ctx.moveTo(this.mainCamera.transform.position.x - camera.size.x/camera.scale - camera.view.x - lineSpacing * 2, startY + lineSpacing * i - camera.view.y);
+        layer.ctx.lineTo(this.mainCamera.transform.position.x + camera.size.x/camera.scale - camera.view.x, startY + lineSpacing * i - camera.view.y);
       }
 
       layer.ctx.stroke();
       // @endif
 
-      this.scene.render(camera);
-
-      // @ifdef EDITOR
-      layer.ctx.save();
-      //draw camera viewport (sroke rect)
-      layer.strokeStyle(primaryColor);
-      layer.lineWidth(1.5)
-      var x = -1280/2 - camera.view.x;
-      var y = -720/2 - camera.view.y;
-      layer.strokeRect(x, y, 1280,  720)
-
-      layer.ctx.restore();
-      // @endif
+      this.scene.render(this.mainCamera);
 
     };
 
@@ -154,68 +127,91 @@ var Application  = (function() {
 
     var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
-    this.loadingInterval = setInterval(function(){
-      if(that.mainCamera) {
-        var x = (that.width - that.width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
-        var layer = that.mainCamera.camera.layer;
-        layer.ctx.save();
-        var loading = [
-            "   loading.  ",
-            "   loading.. ",
-            "   loading...",
-        ]
+    this.prePreload();
+    this.loader.loadAll(function() {
 
-        layer.clear('black')
-            .fillStyle(color)
-            .strokeStyle('white')
-            .fillRect(that.width/8, that.height/2 - that.height/16, x, that.height/8)
-            .strokeRect(that.width/8, that.height/2 - that.height/16, (that.width - that.width/4), that.height/8);
-
-        layer.ctx.shadowColor = "white";
-        layer.ctx.shadowBlur = 20;
-
-        layer.fillStyle('white');
-        layer.ctx.textAlign = 'center';
-        layer.ctx.font = "25px Arial";
-        var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
-        layer.ctx.fillText(text, that.width/2, that.height/2 + 7)
-
-        layer.ctx.font = "20px Arial";
-        text = loading[currentLoadingText];
-        layer.ctx.fillText(text, that.width/2, 2*that.height/3 + 10)
-
-        loadingTimer += 1/60;
-        if(loadingTimer > 1) {
-          loadingTimer = 0;
-          currentLoadingText++;
-          if(currentLoadingText == loading.length) currentLoadingText = 0;
-        }
-        layer.ctx.restore();
-      }
-    }, 1000/60);
-
-
-    this.preload();
-
-    this.loader.loadAll(function(){
-
-      var delay = 0;
       // @ifdef SRC
-      delay = 1000;
+      var scene = JSON.parse(that.loader.getAsset('scene.json'));
+      console.log('scene load')
+      for(var i = 0; i < scene.length; i++) {
+        if(scene[i].tag == 'mainCamera') {
+          that.mainCamera = that.scene.instantiate(scene[i]);
+          break;
+        }
+      }
+
+      that.loader = new Loader();
+
       // @endif
 
-      setTimeout(function(){
-        clearInterval(that.loadingInterval);
-        Input._setListeners();
+      that.loadingInterval = setInterval(function() {
 
-        that.scene.start();
-        that.loaded();
+        if(that.mainCamera) {
+          // console.log('loading interval')
+          var width = that.mainCamera.camera.size.x;
+          var height = that.mainCamera.camera.size.y;
 
-        that.start();
-        Time._lastTime = Date.now()
-        gameLoop();
+          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
-      }, delay);
+          var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
+          var layer = that.mainCamera.camera.layer;
+          layer.ctx.save();
+          var loading = [
+              "   loading.  ",
+              "   loading.. ",
+              "   loading...",
+          ];
+
+          layer.clear('black')
+              .fillStyle(color)
+              .strokeStyle('white')
+              .fillRect(width/8, height/2 - height/16, x, height/8)
+              .strokeRect(width/8, height/2 - height/16, (width - width/4), height/8);
+
+          layer.ctx.shadowColor = "white";
+          layer.ctx.shadowBlur = 20;
+
+          layer.fillStyle('white');
+          layer.ctx.textAlign = 'center';
+          layer.ctx.font = "25px Arial";
+          var text = parseInt(((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length) * 100) + "%"
+          layer.ctx.fillText(text, width/2, height/2 + 7)
+
+          layer.ctx.font = "20px Arial";
+          text = loading[currentLoadingText];
+          layer.ctx.fillText(text, width/2, 2*height/3 + 10)
+
+          loadingTimer += 1/60;
+          if(loadingTimer > 1) {
+            loadingTimer = 0;
+            currentLoadingText++;
+            if(currentLoadingText == loading.length) currentLoadingText = 0;
+          }
+          layer.ctx.restore();
+        }
+      }, 1000/60);
+
+      that.preload();
+      that.loader.loadAll(function() {
+
+        var delay = 0;
+        // @ifdef SRC
+        delay = 1000;
+        // @endif
+
+        setTimeout(function(){
+          clearInterval(that.loadingInterval);
+          Input._setListeners();
+
+          that.scene.start();
+          that.loaded();
+
+          that.start();
+          Time._lastTime = Date.now()
+          gameLoop();
+
+        }, delay);
+      });
     });
 
     function gameLoop(){

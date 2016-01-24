@@ -19,6 +19,11 @@ builderApp.controller('builderController', ['$scope', function($scope) {
     builder.gameTitle = '';
     builder.buildDirectory = '';
     builder.errorInfo = ''
+    builder.gameID = '';
+    builder.targetPlatform = 'web';
+    builder.projectVersion = '0.1.0';
+    builder.projectAuthor = '';
+    builder.projectDescription = '';
 
     builder.refresh = function() {
         $scope.$apply();
@@ -30,10 +35,17 @@ builderApp.controller('builderController', ['$scope', function($scope) {
 
     builder.build = function() {
 
-        if(builder.gameTitle && builder.buildDirectory != '') {
-
+        if(builder.gameTitle && builder.buildDirectory != '' && builder.gameID != '' && builder.projectVersion != '' && builder.projectAuthor != '' && builder.projectDescription != '') {
+          console.log(builder.targetPlatform)
             ipcRenderer.send('builder-build-request', {
+
                 name: builder.gameTitle,
+                gameID: builder.gameID.toLowerCase().trim(),
+                targetPlatform: builder.targetPlatform,
+                version: builder.projectVersion,
+                description: builder.projectDescription,
+                author: builder.projectAuthor
+
                 //others preferences
 
             });
@@ -52,6 +64,28 @@ builderApp.controller('builderController', ['$scope', function($scope) {
                 message: 'You must select build destination!'
             };
 
+        } else if(builder.gameID == '') {
+
+          builder.errorInfo = {
+              type: 'error',
+              message: 'You must enter game ID!'
+          };
+
+        } else if(builder.projectVersion == '') {
+          builder.errorInfo = {
+              type: 'error',
+              message: 'You must specify game version!'
+          };
+        } else if(builder.projectAuthor == '') {
+          builder.errorInfo = {
+              type: 'error',
+              message: 'Your game needs credits!'
+          };
+        } else if(builder.projectDescription == '') {
+          builder.errorInfo = {
+              type: 'error',
+              message: 'Your game needs description!'
+          };
         }
     };
 
