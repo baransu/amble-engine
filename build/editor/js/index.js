@@ -133,37 +133,53 @@ ipcRenderer.on('game-preview-error', function(event, data) {
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
 
-    projectDirectory = data.path;
-    projectData = data.project;
+  document.addEventListener('dragover',function(event){
+    event.preventDefault();
+    return false;
+  },false);
 
-    console.log(projectData)
+  document.addEventListener('drop',function(event){
+    event.preventDefault();
+    return false;
+  },false);
 
-    projectData.imgs = [];
-    projectData.scripts = [];
+  var holder = document.getElementById('project-view');
+  holder.ondrop = function (e) {
+    e.preventDefault();
+    var file = e.dataTransfer.files[0];
+    console.log('File you dragged here is', file.path);
+    return false;
+  };
 
-    // document.getElementById('list').innerHTML = "";
+  projectDirectory = data.path;
+  projectData = data.project;
 
-    projectView.init();
+  console.log(projectData)
 
-    for(var i in projectData.scripts) {
-        require(projectData.scripts[i].path);
-    }
+  projectData.imgs = [];
+  projectData.scripts = [];
 
-    //clear canvases
-    document.getElementById('scene-view').innerHTML = "";
+  projectView.init();
 
-    //pass sprites to polymer
-    // document.querySelector('renderer-component').sprites = projectData.imgs;
+  for(var i in projectData.scripts) {
+      require(projectData.scripts[i].path);
+  }
 
-    //game
-    app = null;
-    app = new Application(application);
+  //clear canvases
+  document.getElementById('scene-view').innerHTML = "";
 
-    EDITOR.update();
-    EDITOR.refresh();
+  //pass sprites to polymer
+  // document.querySelector('renderer-component').sprites = projectData.imgs;
 
-    ipcRenderer.send('editor-project-loaded');
-    AMBLE.imgList = projectData.imgs
+  //game
+  app = null;
+  app = new Application(application);
+
+  EDITOR.update();
+  EDITOR.refresh();
+
+  ipcRenderer.send('editor-project-loaded');
+  AMBLE.imgList = projectData.imgs
 
 });
 

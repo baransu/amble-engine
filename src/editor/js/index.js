@@ -133,37 +133,53 @@ ipcRenderer.on('game-preview-error', function(event, data) {
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
 
-    projectDirectory = data.path;
-    projectData = data.project;
+  // document.addEventListener('dragover',function(event){
+  //   event.preventDefault();
+  //   return false;
+  // },false);
+  //
+  // document.addEventListener('drop',function(event){
+  //   event.preventDefault();
+  //   return false;
+  // },false);
+  //
+  // var holder = document.getElementById('project-view');
+  // holder.ondrop = function (e) {
+  //   e.preventDefault();
+  //   var file = e.dataTransfer.files[0];
+  //   console.log('File you dragged here is', file.path);
+  //   return false;
+  // };
 
-    console.log(projectData)
+  projectDirectory = data.path;
+  projectData = data.project;
 
-    projectData.imgs = [];
-    projectData.scripts = [];
+  console.log(projectData)
 
-    // document.getElementById('list').innerHTML = "";
+  projectData.imgs = [];
+  projectData.scripts = [];
 
-    projectView.init();
+  projectView.init();
 
-    for(var i in projectData.scripts) {
-        require(projectData.scripts[i].path);
-    }
+  for(var i in projectData.scripts) {
+      require(projectData.scripts[i].path);
+  }
 
-    //clear canvases
-    document.getElementById('scene-view').innerHTML = "";
+  //clear canvases
+  document.getElementById('scene-view').innerHTML = "";
 
-    //pass sprites to polymer
-    // document.querySelector('renderer-component').sprites = projectData.imgs;
+  //pass sprites to polymer
+  // document.querySelector('renderer-component').sprites = projectData.imgs;
 
-    //game
-    app = null;
-    app = new Application(application);
+  //game
+  app = null;
+  app = new Application(application);
 
-    EDITOR.update();
-    EDITOR.refresh();
+  EDITOR.update();
+  EDITOR.refresh();
 
-    ipcRenderer.send('editor-project-loaded');
-    AMBLE.imgList = projectData.imgs
+  ipcRenderer.send('editor-project-loaded');
+  AMBLE.imgList = projectData.imgs
 
 });
 

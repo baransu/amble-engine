@@ -20,6 +20,7 @@ $RECYCLE.BIN/
 #############
 
 .bin
+.prefs
 
 # Logs
 logs

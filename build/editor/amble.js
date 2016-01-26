@@ -1655,8 +1655,6 @@ var Class = (function() {
 
   var Class = function Class(body) {
 
-    // console.log(body);
-
     if(!body) {
         // Amble.app.debug.error('Wrong class code!')
         throw new Error('Wrong class code!');
