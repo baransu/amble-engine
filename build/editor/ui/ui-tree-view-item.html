@@ -1,0 +1,93 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="ui-tree-view-item">
+
+	<style>
+
+  a {
+    text-decoration: none;
+    color: white;
+  }
+
+  li > ul {
+    margin-left: 5px;
+  }
+
+  ul {
+    list-style: none;
+    display: inline-block;
+    padding-left: 15px;
+    margin: 0;
+  }
+
+  .icon {
+    cursor: pointer;
+  }
+
+	</style>
+
+	<template>
+
+    <li>
+
+      <!-- header with name and icon -->
+      <div>
+        <span on-click="toggle">
+          <!-- <i class="fa fa-caret-right" hidden$="{{hasChild()}}"></i> -->
+          <i class="fa fa-folder icon"></i>
+        </span>
+        {{item.text}}
+      </div>
+
+      <!-- collapse with children -->
+      <iron-collapse id="collapse">
+        <ul>
+          <template is="dom-repeat" items="{{ item.children }}" as="child" filter="isFolder">
+            <ui-tree-view-item item="{{child}}"></ui-tree-view-item>
+          </template>
+        </ul>
+      </iron-collapse>
+
+    </li>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'ui-tree-view-item',
+
+		properties: {
+
+      item: {
+        type: Object,
+        value: null
+      },
+
+    },
+
+    hasChild: function() {
+      for(var i = 0; i < this.item.children.length; i++) {
+        if(this.item.children[i].type == 'folder') return false;
+      }
+      return true;
+    },
+
+    isFolder: function(item) {
+      return item.type == 'folder';
+    },
+
+
+    toggle: function() {
+      if(!this.hasChild()) {
+        this.$.collapse.toggle();
+      }
+    }
+
+	});
+
+</script>

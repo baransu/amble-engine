@@ -1,0 +1,85 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../../bower_components/paper-menu/paper-submenu.html">
+<link rel="import" href="../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<link rel="import" href="../ui/ui-tree-view-item.html">
+
+<dom-module id="assets-manager-panel">
+
+	<style>
+
+  :host { }
+
+  .left {
+    height: 93%;
+    width: 25%;
+    float: left;
+    border-right: 1px solid white;
+  }
+
+  .right {
+    /*background-color: green;*/
+    height: 93%;
+    width: 75%;
+    float: right;
+  }
+
+  .scroll {
+    overflow-y: scroll;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+	</style>
+
+	<template>
+
+    <div class="left card-block scroll">
+      <ul>
+        <template is="dom-repeat" items="{{ _folder }}" as="child" filter="isFolder">
+          <ui-tree-view-item item="{{child}}"></ui-tree-view-item>
+        </template>
+      </ul>
+    </div>
+
+    <div class="right card-block scroll">
+      (folder content folder and files)
+    </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'assets-manager-panel',
+
+		properties: {
+      _folder: {
+        type: Array,
+        value: []
+      }
+    },
+
+    ready: function() { },
+
+    isFolder: function(item) {
+      return item.type == 'folder';
+    },
+
+    update: function(folderStructure) {
+      console.log(folderStructure);
+      this._folder = folderStructure;
+      this.notifyPath('_folder', this._folder);
+      console.log(this._folder)
+    }
+
+	});
+
+</script>

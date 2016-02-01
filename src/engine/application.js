@@ -20,20 +20,20 @@ window.Application  = (function() {
 
     window.addEventListener('resize', function() {
 
-      // @ifdef EDITOR
-      var width = $(that.mainCamera.camera.context).width();
-      var height = $(that.mainCamera.camera.context).height();
+      if(AMBLE.mainCamera) {
+        // @ifdef EDITOR
+        var width = $(AMBLE.mainCamera.camera.context).width();
+        var height = $(AMBLE.mainCamera.camera.context).height();
 
-      that.mainCamera.camera.layer.canvas.width = width;
-      that.mainCamera.camera.layer.canvas.height = height;
-      that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
-      // @endif
+        AMBLE.mainCamera.camera.layer.canvas.width = width;
+        AMBLE.mainCamera.camera.layer.canvas.height = height;
+        AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
+        // @endif
 
-      // @ifdef GAME
-      if(that.mainCamera) {
-        that.mainCamera.camera.layer.resize();
+        // @ifdef GAME
+        AMBLE.mainCamera.camera.layer.resize();
+        // @endif
       }
-      // @endif
 
     });
 

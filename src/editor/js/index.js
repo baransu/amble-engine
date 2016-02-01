@@ -141,13 +141,13 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   console.log('main process loaded respond')
   AssetDB = low(data.path + '/assetsDB.json', { storage })
 
-  var holder = document.getElementById('project-view');
-  holder.ondrop = function (e) {
-    e.preventDefault();
-    var file = e.dataTransfer.files[0];
-    if(file) console.log('File you dragged here is', file.path);
-    return false;
-  };
+  // var holder = document.getElementById('assets-manager');
+  // holder.ondrop = function (e) {
+  //   e.preventDefault();
+  //   var file = e.dataTransfer.files[0];
+  //   if(file) console.log('File you dragged here is', file.path);
+  //   return false;
+  // };
 
   projectDirectory = data.path;
   console.log(projectData);
@@ -263,11 +263,13 @@ var projectView = {
 
       projectData.scripts = [];
       projectData.imgs = [];
-      projectView.projectStructure = projectView.processDir(projectDirectory + '/assets');
+      projectView.projectStructure = projectView.processDir(projectDirectory);
 
       console.log(AssetDB('images').value());
 
-      that.jstree();
+      // that.jstree();
+
+      document.querySelector('assets-manager-panel').update(projectView.projectStructure);
 
       for(var i in projectData.scripts) {
         require.reload(projectData.scripts[i].path);
@@ -282,8 +284,8 @@ var projectView = {
   },
 
   jstree: function() {
-    $('#project-view').jstree("destroy").empty();
-    $('#project-view').jstree({
+    $('#assets-manager').jstree("destroy").empty();
+    $('#assets-manager').jstree({
       'core' : {
         "check_callback" : true,
         'responsive': true,
@@ -309,15 +311,17 @@ var projectView = {
     projectData.imgs = [];
     projectData.scripts = [];
 
-    this.projectStructure = this.processDir(projectDirectory + '/assets');
+    this.projectStructure = this.processDir(projectDirectory);
 
     console.log(this.projectStructure);
     console.log(projectData);
 
+    document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+
     console.log(AssetDB('images').value());
     console.log(AssetDB('scripts').value());
 
-    this.jstree();
+    // this.jstree();
     this.watch();
 
   }
@@ -339,86 +343,100 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.update = function() {
 
-        this.logs = AMBLE.debug.logs;
-        this.hierarchy = {};
-        this.inspector = {};
-        this.inspector.transformShow = true;
-        this.previousActor = null;
-        this.sceneID = null;
-        this.actor = null;
+      this.logs = AMBLE.debug.logs;
+      this.hierarchy = {};
+      this.inspector = {};
+      this.inspector.transformShow = true;
+      this.previousActor = null;
+      this.sceneID = null;
+      this.actor = null;
 
-        //default components to add
-        this.componentsToAdd = [
-            {
-                name: 'SpriteRenderer',
-                type: 'renderer',
-                body: { name: 'SpriteRenderer', args: {
-                    sprite: ''
-                }}
-            },
-            {
-                name: 'RectRenderer',
-                type: 'renderer',
-                body: { name: 'RectRenderer', args: {
-                    color: '#1B5E20',
-                    size: { name: "Vec2", args: {x: 100, y:100}},
-                    layer: 0
-                }}
-            },
-            {
-                name: 'AnimationRenderer',
-                type: 'renderer',
-                body: { name: 'AnimationRenderer', args: {
-                    sprite: '',
-                    frames: 1,
-                    updatesPerFrame: 1,
-                    layer: 0
-                }}
-            }
-        ];
+      this.lastBottomPanelTab = document.getElementById('bottomPanelDefault');
+      this.bottomPanel = 'assets';
 
-        //default actors type to add
-        this.actorsToAdd = [
-          {
-            name: 'actor',
-            tag: ['actor'],
-            options: {},
-            selected: false,
-            transform: { name: "Transform", args: {
-                position: { name: "Vec2", args: {}},
-                scale: { name: "Vec2", args: {x: 1, y:1}},
-                rotation: 0
-            }},
-            renderer: { name: 'EngineRenderer', args: {}},
-            components: []
-          },
-          {
-            name: 'camera',
-            tag: 'mainCamera',
-            options: {},
-            transform: { name: "Transform", args: {
-                position: { name: "Vec2", args: {}},
-                scale: { name: "Vec2", args: {x: 1, y:1}},
-                rotation: 0
-            }},
-            renderer: { name: 'CameraRenderer', args: {}},
-            camera: { name: "MainCamera", args: {
-                scale: 1,
-                size: { name: 'Vec2', args: {x: 1280, y: 720}},
-                bgColor: '#37474f',
-            }},
-            components: []
-          },
-        ];
-
-        var cam = AMBLE.scene.getActorByName('SceneCamera');
-        if(cam) {
-          editor.cameraScript = cam.getComponent('Camera');
-          editor.cameraScript.editor = this;
+      //default components to add
+      this.componentsToAdd = [
+        {
+          name: 'SpriteRenderer',
+          type: 'renderer',
+          body: { name: 'SpriteRenderer', args: {
+            sprite: ''
+          }}
+        },
+        {
+          name: 'RectRenderer',
+          type: 'renderer',
+          body: { name: 'RectRenderer', args: {
+            color: '#1B5E20',
+            size: { name: "Vec2", args: {x: 100, y:100}},
+            layer: 0
+          }}
+        },
+        {
+          name: 'AnimationRenderer',
+          type: 'renderer',
+          body: { name: 'AnimationRenderer', args: {
+            sprite: '',
+            frames: 1,
+            updatesPerFrame: 1,
+            layer: 0
+          }}
         }
+      ];
 
-        editor.updateActors();
-        editor.updateClass();
+      //default actors type to add
+      this.actorsToAdd = [
+        {
+          name: 'actor',
+          tag: ['actor'],
+          options: {},
+          selected: false,
+          transform: { name: "Transform", args: {
+            position: { name: "Vec2", args: {}},
+            scale: { name: "Vec2", args: {x: 1, y:1}},
+            rotation: 0
+          }},
+          renderer: { name: 'EngineRenderer', args: {}},
+          components: []
+        },
+        {
+          name: 'camera',
+          tag: 'mainCamera',
+          options: {},
+          transform: { name: "Transform", args: {
+            position: { name: "Vec2", args: {}},
+            scale: { name: "Vec2", args: {x: 1, y:1}},
+            rotation: 0
+          }},
+          renderer: { name: 'CameraRenderer', args: {}},
+          camera: { name: "MainCamera", args: {
+            scale: 1,
+            size: { name: 'Vec2', args: {x: 1280, y: 720}},
+            bgColor: '#37474f',
+          }},
+          components: []
+        },
+      ];
+
+      var cam = AMBLE.scene.getActorByName('SceneCamera');
+      if(cam) {
+        editor.cameraScript = cam.getComponent('Camera');
+        editor.cameraScript.editor = this;
+      }
+
+      editor.updateActors();
+      editor.updateClass();
+    };
+
+    editor.bottomPanelsSelect = function(name, $e) {
+
+      if(this.lastBottomPanelTab) {
+        this.lastBottomPanelTab.className = 'nav-link';
+      }
+      console.log(this.lastBottomPanelTab);
+      this.bottomPanel = name;
+      $e.target.className += ' active';
+      this.lastBottomPanelTab = $e.target;
     };
 
     editor.updateClass = function() {
@@ -490,8 +508,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             case 70: // f
 
                 if(e.shiftKey && !e.ctrlKey && editor.actor.transform ) {
-                    AMBLE.mainCamera.camera.position.x = editor.actor.transform.position.x;
-                    AMBLE.mainCamera.camera.position.y = editor.actor.transform.position.y;
+                    AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
+                    AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
                 }
                 //
                 // if(e.shiftKey && e.ctrlKey) {
@@ -578,8 +596,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       editor.sceneID = _actor.sceneID;
 
       editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
-
-      console.log('actor select')
 
       var normal = 'list-group-item';
       var highlighted = "list-group-item active";

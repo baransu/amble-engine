@@ -1124,7 +1124,6 @@ window.SpriteRenderer = (function() {
       layer.ctx.save();
 
       if(this._sprite) {
-        console.log(this._sprite.src, this.sprite);
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
           if(!this._sprite) return;
@@ -1137,11 +1136,9 @@ window.SpriteRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        // TODO: add if
-        if(self.transform.scale.x != 1 && self.transform.scale.y != 1)
+        if(self.transform.scale.x != 1 || self.transform.scale.y != 1)
           layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
-        // TODO: add if
         if(self.transform.rotation != 0)
           layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
@@ -1167,7 +1164,7 @@ window.SpriteRenderer = (function() {
         }
 
       } else {
-        // TODO: change to correct instance
+
         this._sprite = AMBLE.loader.getAsset(this.sprite);
       }
 
@@ -1461,13 +1458,15 @@ window.Application  = (function() {
 
     window.addEventListener('resize', function() {
 
-      var width = $(that.mainCamera.camera.context).width();
-      var height = $(that.mainCamera.camera.context).height();
+      if(AMBLE.mainCamera) {
+        var width = $(AMBLE.mainCamera.camera.context).width();
+        var height = $(AMBLE.mainCamera.camera.context).height();
 
-      that.mainCamera.camera.layer.canvas.width = width;
-      that.mainCamera.camera.layer.canvas.height = height;
-      that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
+        AMBLE.mainCamera.camera.layer.canvas.width = width;
+        AMBLE.mainCamera.camera.layer.canvas.height = height;
+        AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
 
+      }
 
     });
 

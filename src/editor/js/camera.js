@@ -73,7 +73,7 @@ Class({
     }
 
     self.camera.size = new Vec2(width, height);
-    self.camera.update();
+    self.camera.update(self);
   },
 
   onmousedown: function(self, e) {
@@ -97,7 +97,7 @@ Class({
             var a = document.getElementById('id_' + obj.sceneID);
             if(a) {
               a.click();
-              location.href = "#id_" + obj.sceneID;
+              // location.href = "#id_" + obj.sceneID;
             }
 
             return;

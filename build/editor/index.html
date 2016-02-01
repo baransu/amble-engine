@@ -20,29 +20,16 @@
 
       <div class="container-fluid">
 
-          <div id="tools" class="card">
+          <!-- <div id="tools" class="card">
               <div class="card-block">
               </div>
-          </div>
+          </div> -->
 
-          <div id="project-view" class="scroll card"></div>
+          <scene-panel id="scene-view" class="card"></scene-panel>
 
-          <div id="scene-view" class="card"></div>
+          <bottom-panel id="debug-console" class="card"></bottom-panel>
 
-          <div id="debug-console" class="scroll card">
-              <div class="container-fluid" ng-repeat="log in editor.logs">
-                  <div class="row">
-                      <div class="col-md-12 text-danger console-message" ng-if="log.type == 'error'">
-                          {{log.message}}
-                      </div>
-                      <div class="col-md-12 console-message" ng-if="log.type == 'log'">
-                          {{log.message}}
-                      </div>
-                  </div>
-              </div>
-          </div>
-
-          <div id="hierarchy" class="card">
+          <hierarchy-panel id="hierarchy" class="card">
 
               <div class="card-block">
                   <div class="row">
@@ -69,9 +56,9 @@
                   </div>
 
               </div>
-          </div>
+          </hierarchy-panel>
 
-          <div id="inspector-view" class="card">
+          <inspector-panel id="inspector-view" class="card">
 
               <div class="card-block">
                   <div class="row">
@@ -104,7 +91,7 @@
                   <!--  list of components -->
               </div>
 
-          </div>
+          </inspector-panel>
 
       </div>
 
@@ -131,5 +118,17 @@
       <link rel="import" href="elements/transform-component.html">
       <link rel="import" href="elements/renderer-component.html">
       <link rel="import" href="elements/camera-component.html">
+
+      <!-- panels -->
+      <link rel="import" href="panels/assets-manager-panel.html">
+
+      <link rel="import" href="panels/bottom-panel.html">
+
+      <link rel="import" href="panels/console-panel.html">
+      <link rel="import" href="panels/game-panel.html">
+      <link rel="import" href="panels/hierarchy-panel.html">
+      <link rel="import" href="panels/inspector-panel.html">
+      <link rel="import" href="panels/scene-panel.html">
+
   </body>
 </html>

@@ -51,7 +51,7 @@ html, body {
 
 #scene-view {
   .default;
-  left: calc(~'@{projectWidth} + @{viewMargin}');
+  left: calc(~'@{viewMargin}');
   top: calc(~'@{toolsHeight} + @{viewMargin}');
   width: calc(~'@{sceneWidth} - @{viewMargin}');
   height: calc(~'@{sceneHeight} - @{viewMargin}');
@@ -63,7 +63,7 @@ html, body {
 
 #debug-console {
   .default;
-  left: calc(~'@{projectWidth} + @{viewMargin}');
+  left: calc(~'@{viewMargin}');
   top: calc(~'@{toolsHeight} + @{sceneHeight} + @{viewMargin}');
   width: calc(~'@{debugWidth} - @{viewMargin}');
   height: calc(~'@{debugHeight} - 2*@{viewMargin}');
@@ -86,9 +86,9 @@ html, body {
 }
 
 .scroll {
-  overflow: scroll;
+  overflow-y: scroll;
   height: 90%;
-  width: 100%;
+  // width: 100%;
   &.hierarchy {
     height: 100% - 2*@searchHeight;
   }
