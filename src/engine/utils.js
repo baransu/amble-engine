@@ -1,12 +1,8 @@
-var Utils = (function(){
+const uuid = require('uuid')
+
+window.Utils = (function(){
 
   var Utils = {
-
-    generateID: function generateID() {
-      return Math.floor((1 + Math.random()) * (new Date().getTime()))
-        .toString(16)
-        .substring(1);
-    },
 
     makeFunction: function makeFunction(obj) {
       if(obj instanceof Object) {

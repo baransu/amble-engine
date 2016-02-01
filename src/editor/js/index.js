@@ -3,8 +3,14 @@ const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
 
+const low = require('lowdb')
+const storage = require('lowdb/file-sync')
+
+var AssetDB = null;
+
 var fs = require('fs');
 var watch = require('node-watch');
+
 global.jQuery = $ = require('jquery');
 
 var imgExtensionList = [
@@ -24,282 +30,297 @@ var primaryColor = '#e91e63';
 
 var menuFunctions = {
 
-    save: function() {
-        var data = {};
+  save: function() {
+    var data = {};
 
-        data.time = Date.now();
-        data.scene = AMBLE.scene.createSceneFile();
-        data.camera = {
-            x: AMBLE.mainCamera.transform.position.x,
-            y: AMBLE.mainCamera.transform.position.y
-        };
+    data.time = Date.now();
+    data.scene = AMBLE.scene.createSceneFile();
+    data.camera = {
+      x: AMBLE.mainCamera.transform.position.x,
+      y: AMBLE.mainCamera.transform.position.y
+    };
 
-        ipcRenderer.send('editor-save-respond', JSON.stringify(data));
-    },
+    ipcRenderer.send('editor-save-respond', JSON.stringify(data));
+  },
 
-    build: function() {
+  build: function() {
 
-        var data = {
-            sceneFile: AMBLE.scene.createSceneFile(),
-            imagesList: projectData.imgs,
-            scriptsList: projectData.scripts
-        };
+    var data = {
+      sceneFile: AMBLE.scene.createSceneFile(),
+      imagesList: projectData.imgs,
+      scriptsList: projectData.scripts
+    };
 
-        ipcRenderer.send('editor-build-respond', data);
-    },
+    ipcRenderer.send('editor-build-respond', data);
+  },
 
-    play: function() {
-        var data = {
-            sceneFile: AMBLE.scene.createSceneFile(),
-            imagesList: projectData.imgs,
-            scriptsList: projectData.scripts
-        };
+  play: function() {
+      var data = {
+        sceneFile: AMBLE.scene.createSceneFile(),
+        imagesList: projectData.imgs,
+        scriptsList: projectData.scripts
+      };
 
-        AMBLE.pause();
-        ipcRenderer.send('editor-game-preview-respond', data);
-    },
+      AMBLE.pause();
+      ipcRenderer.send('editor-game-preview-respond', data);
+  },
 
-    stop: function() {
-        console.log('stop preview - editor')
-        ipcRenderer.send('editor-game-preview-stop-request');
-    }
+  stop: function() {
+    console.log('stop preview - editor')
+    ipcRenderer.send('editor-game-preview-stop-request');
+  }
 
 }
 
 var menu = Menu.buildFromTemplate([
-    {
-        label: 'File',
-        submenu: [
-            {
-                label: 'Save',
-                accelerator: 'Ctrl+S',
-                click: menuFunctions.save
-            },
-            {
-                type: 'separator'
-            },
-            {
-                label: 'Build',
-                accelerator: 'Ctrl+B',
-                click: menuFunctions.build
-            },
-        ]
-    },
-    {
-        label: 'Game',
-        submenu: [
-            {
-                label: 'Play (preview)',
-                accelerator: 'Ctrl+P',
-                click: menuFunctions.play
-            },
-            {
-                label: 'Stop (preview)',
-                accelerator: 'Shift+Ctrl+P',
-                click: menuFunctions.stop
-            }
-        ]
-    }
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Save',
+        accelerator: 'Ctrl+S',
+        click: menuFunctions.save
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Build',
+        accelerator: 'Ctrl+B',
+        click: menuFunctions.build
+      },
+    ]
+  },
+  {
+    label: 'Game',
+    submenu: [
+      {
+        label: 'Play (preview)',
+        accelerator: 'Ctrl+P',
+        click: menuFunctions.play
+      },
+      {
+        label: 'Stop (preview)',
+        accelerator: 'Shift+Ctrl+P',
+        click: menuFunctions.stop
+      }
+    ]
+  }
 ]);
 
 Menu.setApplicationMenu(menu);
 
 window.onload = function() {
-    ipcRenderer.send('editor-app-loaded');
+  ipcRenderer.send('editor-app-loaded');
 }
 
 ipcRenderer.on('editor-game-preview-request', function() {
-    menuFunctions.play();
+  menuFunctions.play();
 });
 
 ipcRenderer.on('editor-build-request', function() {
-    menuFunctions.build();
+  menuFunctions.build();
 });
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
 
 ipcRenderer.on('editor-unpause', function(event, data) {
-    AMBLE.unpause();
+  AMBLE.unpause();
 });
 
 ipcRenderer.on('game-preview-log', function(event, data) {
-    AMBLE.debug.log(data);
+  AMBLE.debug.log(data);
 });
 
 
 ipcRenderer.on('game-preview-error', function(event, data) {
-    AMBLE.debug.error(data);
+  AMBLE.debug.error(data);
 });
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
+  console.log('main process loaded respond')
+  AssetDB = low(data.path + '/assetsDB.json', { storage })
 
-  // document.addEventListener('dragover',function(event){
-  //   event.preventDefault();
-  //   return false;
-  // },false);
-  //
-  // document.addEventListener('drop',function(event){
-  //   event.preventDefault();
-  //   return false;
-  // },false);
-  //
-  // var holder = document.getElementById('project-view');
-  // holder.ondrop = function (e) {
-  //   e.preventDefault();
-  //   var file = e.dataTransfer.files[0];
-  //   console.log('File you dragged here is', file.path);
-  //   return false;
-  // };
+  var holder = document.getElementById('project-view');
+  holder.ondrop = function (e) {
+    e.preventDefault();
+    var file = e.dataTransfer.files[0];
+    if(file) console.log('File you dragged here is', file.path);
+    return false;
+  };
 
   projectDirectory = data.path;
+  console.log(projectData);
   projectData = data.project;
 
   console.log(projectData)
 
-  projectData.imgs = [];
-  projectData.scripts = [];
-
   projectView.init();
 
   for(var i in projectData.scripts) {
-      require(projectData.scripts[i].path);
+    require(projectData.scripts[i].path);
   }
 
-  //clear canvases
+  //clear canvas
   document.getElementById('scene-view').innerHTML = "";
 
-  //pass sprites to polymer
-  // document.querySelector('renderer-component').sprites = projectData.imgs;
-
-  //game
-  app = null;
-  app = new Application(application);
+  var app = new Application(application);
 
   EDITOR.update();
   EDITOR.refresh();
 
-  ipcRenderer.send('editor-project-loaded');
   AMBLE.imgList = projectData.imgs
+  ipcRenderer.send('editor-project-loaded');
 
 });
 
 //move to angular
 var projectView = {
 
-    projectStructure: [],
+  projectStructure: [],
 
-    processDir: function(path) {
+  processDir: function(path) {
 
-        var files = [];
+    var files = [];
 
-        var abc = fs.readdirSync(path)
+    var abc = fs.readdirSync(path)
 
-        for(var i = 0; i < abc.length; i++) {
-            var f = abc[i].split('.');
-            var extension = f[f.length - 1];
+    for(var i = 0; i < abc.length; i++) {
 
-            if(extension == 'aproject') continue;
+      var f = abc[i].split('.');
+      var extension = f[f.length - 1];
 
-            var file = {
-                id: "id_" + Utils.generateID(),
-                type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
+      if(extension == 'aproject') continue;
+
+      var file = {
+        id: "id_" + uuid.v1(),
+        type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
+        path: path + '/' + abc[i],
+        text: abc[i],
+        children: [],
+        li_attr: {},  // attributes for the generated LI node
+        a_attr: {} // attributes for the generated A node
+      }
+
+      if(file.type == 'folder') {
+        file.children = this.processDir(path + '/' + abc[i]);
+      } else {
+        for(var x in imgExtensionList) {
+
+          if(extension == imgExtensionList[x]) {
+
+            projectData.imgs.push({
+              path: path + '/' + abc[i],
+              name: abc[i]
+            });
+
+            var _i = AssetDB('images').find({path: path + '/' + abc[i], name: abc[i]});
+            if(!_i) {
+              AssetDB('images').push({
+                id: uuid.v1(),
                 path: path + '/' + abc[i],
-                text: abc[i],
-                children: [],
-                li_attr: {},  // attributes for the generated LI node
-                a_attr: {} // attributes for the generated A node
+                name: abc[i]
+              });
             }
 
-            if(file.type == 'folder') {
-                file.children = this.processDir(path + '/' + abc[i]);
-            } else {
-                for(var x in imgExtensionList) {
+            break;
 
-                    if(extension == imgExtensionList[x]) {
+          } else if(extension == 'js') {
 
-                        projectData.imgs.push({
-                            path: path + '/' + abc[i],
-                            name: abc[i]
-                        })
-                        break;
+            projectData.scripts.push({
+              path: path + '/' + abc[i],
+              name: abc[i]
+            });
 
-                    } else if(extension == 'js') {
-
-                        projectData.scripts.push({
-                            path: path + '/' + abc[i],
-                            name: abc[i]
-                        });
-                        break;
-
-                    }
-
-                }
+            // validation?
+            var _i = AssetDB('scripts').find({path: path + '/' + abc[i], name: abc[i]});
+            if(!_i) {
+              AssetDB('scripts').push({
+                id: uuid.v1(),
+                path: path + '/' + abc[i],
+                name: abc[i]
+              });
             }
 
-            files.push(file)
+            break;
+
+          }
         }
+      }
 
-        return files;
-
-    },
-
-    watch: function(){
-
-        var that = this;
-
-        watch(projectDirectory + '/assets', function(filename){
-
-            projectData.scripts = [];
-            projectData.imgs = [];
-
-            projectView.projectStructure = projectView.processDir(projectDirectory);
-
-            that.jstree();
-
-            for(var i in projectData.scripts) {
-                require.reload(projectData.scripts[i].path);
-            }
-
-            EDITOR.updateClass();
-
-            AMBLE.imgList = projectData.imgs
-            // document.querySelector('renderer-component').sprites = projectData.imgs;
-        });
-
-    },
-                // icon: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'fa fa-folder': 'fa fa-file-text-o',
-    jstree: function() {
-        $('#project-view').jstree({
-            'core' : {
-                "check_callback" : true,
-                'responsive': true,
-                'data' : projectView.projectStructure,
-            },
-            'themes' : {
-                'dots' : false // no connecting dots between dots
-            },
-            'plugins' : [ 'wholerow', 'state', 'dnd', 'sort', 'types'],
-            'types' : {
-                'folder' : {
-                    'icon' : 'fa fa-folder'
-                },
-                'file' : {
-                    'icon' : 'fa fa-file-text-o'
-                }
-            },
-        });
-    },
-
-    init: function(){
-
-        this.projectStructure = this.processDir(projectDirectory);
-
-        console.log(this.projectStructure);
-
-        this.jstree();
-        this.watch();
-
+      files.push(file)
     }
+
+    return files;
+
+  },
+
+  watch: function(){
+
+    var that = this;
+
+    watch(projectDirectory + '/assets', function(filename){
+
+      projectData.scripts = [];
+      projectData.imgs = [];
+      projectView.projectStructure = projectView.processDir(projectDirectory + '/assets');
+
+      console.log(AssetDB('images').value());
+
+      that.jstree();
+
+      for(var i in projectData.scripts) {
+        require.reload(projectData.scripts[i].path);
+      }
+
+      EDITOR.updateClass();
+
+      AMBLE.imgList = projectData.imgs
+
+    });
+
+  },
+
+  jstree: function() {
+    $('#project-view').jstree("destroy").empty();
+    $('#project-view').jstree({
+      'core' : {
+        "check_callback" : true,
+        'responsive': true,
+        'data' : projectView.projectStructure,
+      },
+      'themes' : {
+        'dots' : false // no connecting dots
+      },
+      'plugins' : [ 'wholerow', 'state', 'sort', 'types'],
+      'types' : {
+        'folder' : {
+          'icon' : 'fa fa-folder'
+        },
+        'file' : {
+          'icon' : 'fa fa-file-text-o'
+        }
+      },
+    });
+  },
+
+  init: function(){
+
+    projectData.imgs = [];
+    projectData.scripts = [];
+
+    this.projectStructure = this.processDir(projectDirectory + '/assets');
+
+    console.log(this.projectStructure);
+    console.log(projectData);
+
+    console.log(AssetDB('images').value());
+    console.log(AssetDB('scripts').value());
+
+    this.jstree();
+    this.watch();
+
+  }
 }
 
 var ambleEditor = angular.module('ambleEditor', []);
@@ -309,11 +330,11 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     editor.actors = [];
 
     editor.refresh = function() {
-        $scope.$apply();
+      $scope.$apply();
     };
 
     editor.updateActors = function() {
-        editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
+      editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
     };
 
     editor.update = function() {
@@ -392,8 +413,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         var cam = AMBLE.scene.getActorByName('SceneCamera');
         if(cam) {
-            editor.cameraScript = cam.getComponent('Camera');
-            editor.cameraScript.editor = this;
+          editor.cameraScript = cam.getComponent('Camera');
+          editor.cameraScript.editor = this;
         }
 
         editor.updateActors();
@@ -413,10 +434,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
               a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
             }
           }
-
-          console.log(a.components[j].properties)
-
-          //force polymer to update;
 
           var toDel = [];
           for(var x in a.components[j].properties) {
@@ -554,32 +571,34 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     editor.actorSelected = function(_actor, $e) {
 
-        if(editor.actor) {
-            editor.actor.selected = false;
-        }
+      if(editor.actor) {
+        editor.actor.selected = false;
+      }
 
-        editor.sceneID = _actor.sceneID;
+      editor.sceneID = _actor.sceneID;
 
-        editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
+      editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
 
-        var normal = 'list-group-item';
-        var highlighted = "list-group-item active";
+      console.log('actor select')
 
-        if(editor.previousActor) {
-            editor.previousActor.className = normal;
-        }
+      var normal = 'list-group-item';
+      var highlighted = "list-group-item active";
 
-        if($e) {
-            $e.preventDefault();
-            $e.target.className = highlighted;
-            editor.previousActor = $e.target;
-        }
+      if(editor.previousActor) {
+        editor.previousActor.className = normal;
+      }
 
-        if(editor.actor.selected) {
-            editor.actor.selected = false;
-        } else {
-            editor.actor.selected = true;
-        }
+      if($e) {
+        $e.preventDefault();
+        $e.target.className = highlighted;
+        editor.previousActor = $e.target;
+      }
+
+      if(editor.actor.selected) {
+        editor.actor.selected = false;
+      } else {
+        editor.actor.selected = true;
+      }
     };
 }]);
 
@@ -611,35 +630,36 @@ var application = {
 
     preload: function(){
 
-        //load actors to scene
-        for(var i in projectData.actors) {
+      // load actors to scene
+      if(projectData.actors) {
+        for(var i = 0; i < projectData.actors.length; i++) {
           console.log(projectData.actors[i]);
           this.scene.instantiate(projectData.actors[i]);
-          EDITOR.updateActors();
         }
+        EDITOR.updateActors();
+      }
 
-        // load imgs
-        if(projectData.imgs) {
-            for(var i in projectData.imgs) {
-                this.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
-            }
+      // load imgs
+      if(projectData.imgs) {
+        for(var i in projectData.imgs) {
+          this.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
         }
+      }
 
     },
 
     //process scripts int engine and load objects
     loaded: function(){
-
-        if(projectData.camera) {
-            this.mainCamera.transform.position.x = projectData.camera.x;
-            this.mainCamera.transform.position.y = projectData.camera.y;
-        }
+      if(projectData.camera) {
+        this.mainCamera.transform.position.x = projectData.camera.x;
+        this.mainCamera.transform.position.y = projectData.camera.y;
+      }
 
     },
 
     //actual start function
     start: function(){
-      console.log(this.mainCamera)
+      // console.log(this.mainCamera)
     },
 
     preupdate: function(){
@@ -658,6 +678,19 @@ var application = {
 var app = new Application({});
 
 /**
+ * Prevent for drag'n'drop default action
+ */
+document.addEventListener('dragover',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+document.addEventListener('drop',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+/**
  * Removes a module from the cache.
  */
 require.uncache = function (moduleName) {
@@ -672,31 +705,31 @@ require.uncache = function (moduleName) {
  * Runs over the cache to search for all the cached files.
  */
 require.searchCache = function (moduleName, callback) {
-    // Resolve the module identified by the specified name
-    var mod = require.resolve(moduleName);
+  // Resolve the module identified by the specified name
+  var mod = require.resolve(moduleName);
 
-    // Check if the module has been resolved and found within
-    // the cache
-    if (mod && ((mod = require.cache[mod]) !== undefined)) {
-        // Recursively go over the results
-        (function run(mod) {
-            // Go over each of the module's children and
-            // run over it
-            mod.children.forEach(function (child) {
-                run(child);
-            });
+  // Check if the module has been resolved and found within
+  // the cache
+  if (mod && ((mod = require.cache[mod]) !== undefined)) {
+    // Recursively go over the results
+    (function run(mod) {
+      // Go over each of the module's children and
+      // run over it
+      mod.children.forEach(function (child) {
+          run(child);
+      });
 
-            // Call the specified callback providing the
-            // found module
-            callback(mod);
-        })(mod);
-    }
+      // Call the specified callback providing the
+      // found module
+      callback(mod);
+    })(mod);
+  }
 };
 
 /*
  * Load a module, clearing it from the cache if necessary.
  */
 require.reload = function(moduleName) {
-    require.uncache(moduleName);
-    return require(moduleName);
+  require.uncache(moduleName);
+  return require(moduleName);
 };

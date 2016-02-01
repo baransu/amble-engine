@@ -1,4 +1,4 @@
-var Application  = (function() {
+window.Application  = (function() {
 
   var Application = function Application(args) {
 
@@ -18,7 +18,6 @@ var Application  = (function() {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    //wrap this things up
     window.addEventListener('resize', function() {
 
       // @ifdef EDITOR
@@ -38,7 +37,6 @@ var Application  = (function() {
 
     });
 
-    //init all public game loop functions
     var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
@@ -48,14 +46,14 @@ var Application  = (function() {
 
     // @ifdef EDITOR
     this.pause = function pause() {
-        this.paused = true;
-        console.log('pause')
+      this.paused = true;
+      console.log('pause')
     };
 
     this.unpause = function unpause() {
-        console.log('unpause')
-        this.paused = false;
-        gameLoop();
+      console.log('unpause')
+      this.paused = false;
+      gameLoop();
     };
     // @endif
 
@@ -103,6 +101,7 @@ var Application  = (function() {
 
     };
 
+    this.preloader = new Loader();
     this.loader = new Loader();
 
     var loadingTimer = 0;
@@ -125,14 +124,11 @@ var Application  = (function() {
         "#e91e63"
     ];
 
-    var color = colors[Math.floor(Math.random() * colors.length - 1)];
-
     this.prePreload();
-    this.loader.loadAll(function() {
+    this.preloader.loadAll(function() {
 
       // @ifdef SRC
-      var scene = JSON.parse(that.loader.getAsset('scene.json'));
-      console.log('scene load')
+      var scene = JSON.parse(that.preloader.getAsset('scene.json'));
       for(var i = 0; i < scene.length; i++) {
         if(scene[i].tag == 'mainCamera') {
           that.mainCamera = that.scene.instantiate(scene[i]);
@@ -140,18 +136,14 @@ var Application  = (function() {
         }
       }
 
-      that.loader = new Loader();
-
       // @endif
+      var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
       that.loadingInterval = setInterval(function() {
 
         if(that.mainCamera) {
-          // console.log('loading interval')
           var width = that.mainCamera.camera.size.x;
           var height = that.mainCamera.camera.size.y;
-
-          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
           var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
           var layer = that.mainCamera.camera.layer;
@@ -161,6 +153,7 @@ var Application  = (function() {
               "   loading.. ",
               "   loading...",
           ];
+
 
           layer.clear('black')
               .fillStyle(color)

@@ -1,4 +1,4 @@
-var Time = (function() {
+window.Time = (function() {
 
     var Time = {
       deltaTime: 0,

@@ -1,4 +1,4 @@
-var Input = (function(){
+window.Input = (function(){
 
   var Input = {
 
@@ -105,16 +105,17 @@ var Input = (function(){
       document.addEventListener('keyup', Input._eventFunctions.keyup, false);
       element.addEventListener('mousedown', Input._eventFunctions.mousedown, false);
       element.addEventListener('mouseup', Input._eventFunctions.mouseup, false);
-      element.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
+      document.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
       element.addEventListener("wheel", Input._eventFunctions.wheel, false);
       element.addEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
       //touch start
       element.addEventListener("touchstart", Input._eventFunctions.touchstart, false);
       //touch end
-      element.addEventListener("touchstart", Input._eventFunctions.touchend, false);
+      element.addEventListener("touchend", Input._eventFunctions.touchend, false);
       //touch move
-      element.addEventListener("touchstart", Input._eventFunctions.touchmove, false);
+      element.addEventListener("touchmove", Input._eventFunctions.touchmove, false);
+
     }
   }
 
@@ -128,16 +129,16 @@ var Input = (function(){
         document.removeEventListener('keyup', Input._eventFunctions.keyup, false);
         element.removeEventListener('mousedown', Input._eventFunctions.mousedown, false);
         element.removeEventListener('mouseup', Input._eventFunctions.mouseup, false);
-        element.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
+        document.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
         element.removeEventListener("wheel", Input._eventFunctions.wheel, false);
         element.removeEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.removeEventListener("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.removeEventListener("touchstart", Input._eventFunctions.touchend, false);
+        element.removeEventListener("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.removeEventListener("touchstart", Input._eventFunctions.touchmove, false);
+        element.removeEventListener("touchmove", Input._eventFunctions.touchmove, false);
 
 
       } else if (document.detachEvent) {
@@ -146,16 +147,16 @@ var Input = (function(){
         document.detachEvent('keyup', Input._eventFunctions.keyup, false);
         element.detachEvent('mousedown', Input._eventFunctions.mousedown, false);
         element.detachEvent('mouseup', Input._eventFunctions.mouseup, false);
-        element.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
+        document.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
         element.detachEvent("wheel", Input._eventFunctions.wheel, false);
         element.detachEvent("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.detachEvent("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.detachEvent("touchstart", Input._eventFunctions.touchend, false);
+        element.detachEvent("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.detachEvent("touchstart", Input._eventFunctions.touchmove, false);
+        element.detachEvent("touchmove", Input._eventFunctions.touchmove, false);
 
       }
     }

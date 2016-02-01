@@ -1,4 +1,4 @@
-var Layer = (function() {
+window.Layer = (function() {
 
     var Layer = function Layer(camera) {
 

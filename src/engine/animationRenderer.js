@@ -1,4 +1,4 @@
-var AnimationRenderer = (function() {
+window.AnimationRenderer = (function() {
 
   var AnimationRenderer = function AnimationRenderer(args) {
     this.sprite = args.sprite;
@@ -10,7 +10,7 @@ var AnimationRenderer = (function() {
 
     this._currentFrame = 0;
     this._updates = 0;
-    this._sprite = new Image();
+    this._sprite = null;
     this._frameTimer = 0;
     this.size = new Vec2();
 
@@ -28,7 +28,7 @@ var AnimationRenderer = (function() {
 
       layer.ctx.save();
 
-      if(this._sprite) {
+      if(this._sprite !== null ) {
 
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
             this._sprite = AMBLE.loader.getAsset(this.sprite);

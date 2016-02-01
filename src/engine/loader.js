@@ -1,4 +1,4 @@
-var Loader = (function() {
+window.Loader = (function() {
 
     var Loader = function Loader() {
       this.queue = [];

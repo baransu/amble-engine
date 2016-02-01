@@ -86,7 +86,7 @@
   							{{p.name}} (array)</br>
   							<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
 
-  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  								<div class="row" hidden$="{{hideProperty('Number', v)}}">
   									<div class="col-md-12">
   										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
   									</div>
@@ -233,6 +233,18 @@
 		toArray: function(obj, type) {
       // console.log(obj)
 			if(Array.isArray(obj)) {
+        if(obj.length > 0) {
+          for(var i = 0; i < obj.length; i++) {
+            if(typeof obj[i] == 'string' || typeof obj[i] == 'number' || typeof obj[i] == 'boolean') {
+              var value = obj[i];
+              obj[i] = {
+                type: value.constructor.name,
+                value: value
+              }
+            }
+          }
+        }
+        console.log(obj)
 				return obj;
 			} else if(obj != undefined && obj != null && type == 'Object'){
           var oo = Object.keys(obj).map(function(key) {

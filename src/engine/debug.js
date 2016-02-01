@@ -1,4 +1,4 @@
-var Debug = (function() {
+window.Debug = (function() {
 
   var Debug = function Debug() {
     // @ifdef EDITOR

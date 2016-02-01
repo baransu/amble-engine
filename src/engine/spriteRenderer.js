@@ -1,10 +1,10 @@
-var SpriteRenderer = (function() {
+window.SpriteRenderer = (function() {
 
   var SpriteRenderer = function SpriteRenderer(args) {
 
     this.sprite = args.sprite; // || TODO: add placeholder graphics
     this.layer = args.layer || 0;
-    this._sprite = new Image();
+    this._sprite = null
     this.size = new Vec2();
 
     // @ifdef EDITOR
@@ -22,6 +22,7 @@ var SpriteRenderer = (function() {
       layer.ctx.save();
 
       if(this._sprite) {
+        console.log(this._sprite.src, this.sprite);
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
           if(!this._sprite) return;
@@ -35,12 +36,15 @@ var SpriteRenderer = (function() {
         layer.ctx.translate(x, y);
 
         // TODO: add if
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        if(self.transform.scale.x != 1 && self.transform.scale.y != 1)
+          layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
         // TODO: add if
-        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+        if(self.transform.rotation != 0)
+          layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         if(this._sprite.src) {
+
           layer.ctx.drawImage(this._sprite, -width/2, -height/2);
 
           // @ifdef EDITOR

@@ -1,5 +1,5 @@
 // @ifdef EDITOR
-var EngineRenderer = (function() {
+window.EngineRenderer = (function() {
 
     var EngineRenderer = function EngineRenderer(args) {
       this.layer = 0;

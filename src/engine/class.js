@@ -1,5 +1,5 @@
-var CLASSES = [];
-var Class = (function() {
+window.CLASSES = [];
+window.Class = (function() {
 
   var Class = function Class(body) {
 
@@ -83,8 +83,6 @@ var Class = (function() {
     }
 
     CLASSES.push(_class);
-
-    console.log(CLASSES)
 
   };
 

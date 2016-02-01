@@ -1,4 +1,4 @@
-var Actor = (function() {
+window.Actor = (function() {
 
   var Actor = function Actor(args) {
     this.components = [];

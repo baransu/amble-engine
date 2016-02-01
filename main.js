@@ -5,11 +5,6 @@ const ipcMain = electron.ipcMain;
 const globalShortcut = electron.globalShortcut;
 const dialog = electron.dialog;
 
-if (typeof localStorage === "undefined" || localStorage === null) {
-  var LocalStorage = require('node-localstorage').LocalStorage;
-  var localStorage = new LocalStorage('./.prefs');
-}
-
 const DEVELOPMENT = true;
 
 var fs = require('fs');
@@ -34,38 +29,46 @@ var projectBuildData = null;
 var shortcuts = {};
 
 app.on('ready', function() {
-    //launcher
-    launcherWindow = new BrowserWindow({
-        icon: __dirname + '/icon.png',
-        title: 'Amble Engine Launcher',
-        width: 640,
-        height: 480,
-        resizable: false
-    });
 
-    launcherWindow.loadURL('file://' + __dirname + '/build/launcher/index.html');
-    currentState = 'launcher';
+  var userDataPath = app.getPath('userData');
+  console.log(userDataPath);
+  if (typeof global.localStorage === "undefined" || global.localStorage === null) {
+    var LocalStorage = require('node-localstorage').LocalStorage;
+    global.localStorage = new LocalStorage(userDataPath + '/prefs');
+  }
 
-    launcherWindow.setMenu(null);
-    if(DEVELOPMENT) launcherWindow.toggleDevTools();
-    launcherWindow.center();
+  //launcher
+  launcherWindow = new BrowserWindow({
+    icon: __dirname + '/icon.png',
+    title: 'Amble Engine Launcher',
+    width: 640,
+    height: 480,
+    resizable: false
+  });
 
-    launcherWindow.on('closed', function() {
-        launcherWindow = null;
-    });
+  launcherWindow.loadURL('file://' + __dirname + '/build/launcher/index.html');
+  currentState = 'launcher';
+
+  launcherWindow.setMenu(null);
+  if(DEVELOPMENT) launcherWindow.toggleDevTools();
+  launcherWindow.center();
+
+  launcherWindow.on('closed', function() {
+    launcherWindow = null;
+  });
 
 });
 
 app.on('browser-window-blur', function(event, bWindow){
-    globalShortcut.unregisterAll();
+  globalShortcut.unregisterAll();
 });
 
 app.on('will-quit', function(event, bWindow){
-    globalShortcut.unregisterAll();
+  globalShortcut.unregisterAll();
 
-    editorWindow = null;
-    launcherWindow = null;
-    builderWindow = null;
+  editorWindow = null;
+  launcherWindow = null;
+  builderWindow = null;
 
 });
 
@@ -242,23 +245,23 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
 //editor
 ipcMain.on('editor-app-loaded', function(event, data) {
-    var d = JSON.parse(fs.readFileSync(currentDir + '/' + currentName + '.aproject', 'utf8'));
-    var data = {
-      path: currentDir,
-      project: {
-        actors: d.scene,
-        camera: d.camera
-      },
-    };
+  var d = JSON.parse(fs.readFileSync(currentDir + '/' + currentName + '.aproject', 'utf8'));
+  var data = {
+    path: currentDir,
+    project: {
+      actors: d.scene,
+      camera: d.camera
+    },
+  };
 
-    editorWindow.webContents.send('editor-load-respond', data);
-    editorWindow.setTitle(currentName + ' - ' + currentDir + ' - Amble Editor')
+  editorWindow.webContents.send('editor-load-respond', data);
+  editorWindow.setTitle(currentName + ' - ' + currentDir + ' - Amble Editor')
 
 });
 
 ipcMain.on('editor-project-loaded', function(event, data) {
-    if(launcherWindow) launcherWindow.close();
-    editorWindow.show();
+  if(launcherWindow) launcherWindow.close();
+  editorWindow.show();
 });
 
 ipcMain.on('editor-save-respond', function(event, data) {
@@ -372,73 +375,72 @@ ipcMain.on('builder-dir-request', function(event, data) {
 
 ipcMain.on('builder-build-request', function(event, data) {
 
-    console.log(projectBuildData);
+  console.log(projectBuildData);
 
-    //process build
-    var sceneFile = projectBuildData.sceneFile;
-    var imagesList = projectBuildData.imagesList;
-    var scriptsList = projectBuildData.scriptsList;
-    var targetDir = buildDir + '/' + data.name;
-    var gameTitle = data.name;
+  //process build
+  var sceneFile = projectBuildData.sceneFile;
+  var imagesList = projectBuildData.imagesList;
+  var scriptsList = projectBuildData.scriptsList;
+  var targetDir = buildDir + '/' + data.name;
+  var gameTitle = data.name;
 
-    builderGulp.projectDirectory = currentDir + '/' + currentName;
-    builderGulp.imagesList = [];
-    builderGulp.scriptsList = [];
-    builderGulp.outputDir = targetDir;
+  builderGulp.projectDirectory = currentDir + '/' + currentName;
+  builderGulp.imagesList = [];
+  builderGulp.scriptsList = [];
+  builderGulp.outputDir = targetDir;
 
-    builderGulp.projectName = gameTitle;
-    builderGulp.projectID = data.gameID;
+  builderGulp.projectName = gameTitle;
+  builderGulp.projectID = data.gameID;
 
-    builderGulp.projectVersion = data.version;
+  builderGulp.projectVersion = data.version;
 
-    builderGulp.projectDescription = data.description;
-    builderGulp.projectAuthor = data.author;
+  builderGulp.projectDescription = data.description;
+  builderGulp.projectAuthor = data.author;
 
-    for(var i = 0; i < imagesList.length; i++) {
-      builderGulp.imagesList.push(imagesList[i].path);
+  for(var i = 0; i < imagesList.length; i++) {
+    builderGulp.imagesList.push(imagesList[i].path);
+  }
+
+  for(var i = 0; i < scriptsList.length; i++) {
+    builderGulp.scriptsList.push(scriptsList[i].path);
+  }
+
+  if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
+    response.type = 'error';
+    response.message = 'Game build failed - wrong directory';
+    builderWindow.send('builder-build-respond', response);
+  }
+
+  builderGulp.start('build-move-' + data.targetPlatform, function() {
+
+    if(data.targetPlatform == 'android') {
+      fs.writeFileSync(targetDir + '/_temp/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+      fs.writeFileSync(targetDir + '/_temp/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+    } else {
+      fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
+      fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
     }
 
-    for(var i = 0; i < scriptsList.length; i++) {
-      builderGulp.scriptsList.push(scriptsList[i].path);
-    }
-
-    if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
-      response.type = 'error';
-      response.message = 'Game build failed - wrong directory';
-      builderWindow.send('builder-build-respond', response);
-    }
-
-    builderGulp.start('build-move-' + data.targetPlatform, function() {
-
-      if(data.targetPlatform == 'android') {
-        fs.writeFileSync(targetDir + '/_temp/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-        fs.writeFileSync(targetDir + '/_temp/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
-      } else {
-        fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-        fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+    builderGulp.start('build-game-' + data.targetPlatform, function(err) {
+      rmdir(__dirname + '/.cordova', function() {});
+      var respond = {};
+      if(err) {
+        console.log(err)
+        respond.type = 'error';
+        respond.message = 'Game build failed - build';
+        builderWindow.send('builder-build-respond', respond);
+        throw err;
       }
 
-      builderGulp.start('build-game-' + data.targetPlatform, function(err) {
-        rmdir(__dirname + '/.cordova', function() {});
-        var respond = {};
-        if(err) {
-          console.log(err)
-          respond.type = 'error';
-          respond.message = 'Game build failed - build';
-          builderWindow.send('builder-build-respond', respond);
-          throw err;
-        }
+      console.log('build-game callback')
 
-        console.log('build-game callback')
+      respond.type = 'success';
+      respond.message = 'Game build succesful - game build to: ' + targetDir;
 
-        respond.type = 'success';
-        respond.message = 'Game build succesful - game build to: ' + targetDir;
+      builderWindow.send('builder-build-respond', respond)
 
-        builderWindow.send('builder-build-respond', respond)
-
-      });
     });
-
+  });
 });
 
 app.on('browser-window-focus', function(event, bWindow) {
@@ -482,3 +484,10 @@ var menuFunctions = {
     editorWindow.webContents.send('editor-unpause');
   }
 }
+
+//remote?
+//database managment
+//insert into
+//remove
+//update?
+//get

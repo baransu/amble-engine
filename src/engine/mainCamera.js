@@ -1,4 +1,4 @@
-var MainCamera = (function() {
+window.MainCamera = (function() {
 
     var MainCamera = function MainCamera(args) {
       this.context = document.getElementById(args.context) || document.body;

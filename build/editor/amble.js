@@ -1,4 +1,4 @@
-var Vec2 = (function(){
+window.Vec2 = (function(){
 
   var Vec2 = function Vec2(x, y) {
     if(typeof x == 'object') {
@@ -56,7 +56,7 @@ var Vec2 = (function(){
 
 }());
 
-var Vec3 = (function() {
+window.Vec3 = (function() {
 
   var Vec3 = function Vec3(x, y, z) {
     if(typeof x == 'object') {
@@ -121,7 +121,7 @@ var Vec3 = (function() {
 
 }());
 
-var Mathf = (function() {
+window.Mathf = (function() {
 
     var Mathf = {
 
@@ -133,15 +133,11 @@ var Mathf = (function() {
 
 }());
 
-var Utils = (function(){
+const uuid = require('uuid')
+
+window.Utils = (function(){
 
   var Utils = {
-
-    generateID: function generateID() {
-      return Math.floor((1 + Math.random()) * (new Date().getTime()))
-        .toString(16)
-        .substring(1);
-    },
 
     makeFunction: function makeFunction(obj) {
       if(obj instanceof Object) {
@@ -321,7 +317,7 @@ var Utils = (function(){
 
 }());
 
-var Time = (function() {
+window.Time = (function() {
 
     var Time = {
       deltaTime: 0,
@@ -332,7 +328,7 @@ var Time = (function() {
 
 }());
 
-var Actor = (function() {
+window.Actor = (function() {
 
   var Actor = function Actor(args) {
     this.components = [];
@@ -351,7 +347,7 @@ var Actor = (function() {
 
 }());
 
-var AnimationRenderer = (function() {
+window.AnimationRenderer = (function() {
 
   var AnimationRenderer = function AnimationRenderer(args) {
     this.sprite = args.sprite;
@@ -363,7 +359,7 @@ var AnimationRenderer = (function() {
 
     this._currentFrame = 0;
     this._updates = 0;
-    this._sprite = new Image();
+    this._sprite = null;
     this._frameTimer = 0;
     this.size = new Vec2();
 
@@ -379,7 +375,7 @@ var AnimationRenderer = (function() {
 
       layer.ctx.save();
 
-      if(this._sprite) {
+      if(this._sprite !== null ) {
 
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
             this._sprite = AMBLE.loader.getAsset(this.sprite);
@@ -455,7 +451,7 @@ var AnimationRenderer = (function() {
 
 }());
 
-var Debug = (function() {
+window.Debug = (function() {
 
   var Debug = function Debug() {
     this.logs = [];
@@ -495,7 +491,7 @@ var Debug = (function() {
 
 }());
 
-var EngineRenderer = (function() {
+window.EngineRenderer = (function() {
 
     var EngineRenderer = function EngineRenderer(args) {
       this.layer = 0;
@@ -572,13 +568,13 @@ var EngineRenderer = (function() {
 
 }());
 
-var CameraRenderer = (function() {
+window.CameraRenderer = (function() {
 
     var CameraRenderer = function CameraRenderer(args) {
-      this.layer = 0;
-      this.size = new Vec2(128, 128);
+      this.layer = -9999;
+      this.size = new Vec2(64, 64);
 
-      this.img = new Image(128, 128);
+      this.img = new Image(64, 64);
       this.img.src = 'cam_icon.png';
 
       this.type = "engine";
@@ -625,7 +621,7 @@ var CameraRenderer = (function() {
 
 }());
 
-var Input = (function(){
+window.Input = (function(){
 
   var Input = {
 
@@ -732,16 +728,17 @@ var Input = (function(){
       document.addEventListener('keyup', Input._eventFunctions.keyup, false);
       element.addEventListener('mousedown', Input._eventFunctions.mousedown, false);
       element.addEventListener('mouseup', Input._eventFunctions.mouseup, false);
-      element.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
+      document.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
       element.addEventListener("wheel", Input._eventFunctions.wheel, false);
       element.addEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
       //touch start
       element.addEventListener("touchstart", Input._eventFunctions.touchstart, false);
       //touch end
-      element.addEventListener("touchstart", Input._eventFunctions.touchend, false);
+      element.addEventListener("touchend", Input._eventFunctions.touchend, false);
       //touch move
-      element.addEventListener("touchstart", Input._eventFunctions.touchmove, false);
+      element.addEventListener("touchmove", Input._eventFunctions.touchmove, false);
+
     }
   }
 
@@ -755,16 +752,16 @@ var Input = (function(){
         document.removeEventListener('keyup', Input._eventFunctions.keyup, false);
         element.removeEventListener('mousedown', Input._eventFunctions.mousedown, false);
         element.removeEventListener('mouseup', Input._eventFunctions.mouseup, false);
-        element.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
+        document.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
         element.removeEventListener("wheel", Input._eventFunctions.wheel, false);
         element.removeEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.removeEventListener("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.removeEventListener("touchstart", Input._eventFunctions.touchend, false);
+        element.removeEventListener("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.removeEventListener("touchstart", Input._eventFunctions.touchmove, false);
+        element.removeEventListener("touchmove", Input._eventFunctions.touchmove, false);
 
 
       } else if (document.detachEvent) {
@@ -773,16 +770,16 @@ var Input = (function(){
         document.detachEvent('keyup', Input._eventFunctions.keyup, false);
         element.detachEvent('mousedown', Input._eventFunctions.mousedown, false);
         element.detachEvent('mouseup', Input._eventFunctions.mouseup, false);
-        element.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
+        document.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
         element.detachEvent("wheel", Input._eventFunctions.wheel, false);
         element.detachEvent("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.detachEvent("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.detachEvent("touchstart", Input._eventFunctions.touchend, false);
+        element.detachEvent("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.detachEvent("touchstart", Input._eventFunctions.touchmove, false);
+        element.detachEvent("touchmove", Input._eventFunctions.touchmove, false);
 
       }
     }
@@ -792,7 +789,7 @@ var Input = (function(){
 
 }());
 
-var Layer = (function() {
+window.Layer = (function() {
 
     var Layer = function Layer(camera) {
 
@@ -895,7 +892,7 @@ var Layer = (function() {
 
 }());
 
-var Loader = (function() {
+window.Loader = (function() {
 
     var Loader = function Loader() {
       this.queue = [];
@@ -1011,7 +1008,7 @@ var Loader = (function() {
 
 }());
 
-var MainCamera = (function() {
+window.MainCamera = (function() {
 
     var MainCamera = function MainCamera(args) {
       this.context = document.getElementById(args.context) || document.body;
@@ -1043,7 +1040,7 @@ var MainCamera = (function() {
 
 }());
 
-var RectRenderer = (function() {
+window.RectRenderer = (function() {
 
   var RectRenderer = function RectRenderer(args) {
     this.color = args.color || '#e91e63';
@@ -1105,13 +1102,13 @@ var RectRenderer = (function() {
 
 }());
 
-var SpriteRenderer = (function() {
+window.SpriteRenderer = (function() {
 
   var SpriteRenderer = function SpriteRenderer(args) {
 
     this.sprite = args.sprite; // || TODO: add placeholder graphics
     this.layer = args.layer || 0;
-    this._sprite = new Image();
+    this._sprite = null
     this.size = new Vec2();
 
     this.type = "sprite";
@@ -1127,6 +1124,7 @@ var SpriteRenderer = (function() {
       layer.ctx.save();
 
       if(this._sprite) {
+        console.log(this._sprite.src, this.sprite);
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
           if(!this._sprite) return;
@@ -1140,12 +1138,15 @@ var SpriteRenderer = (function() {
         layer.ctx.translate(x, y);
 
         // TODO: add if
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        if(self.transform.scale.x != 1 && self.transform.scale.y != 1)
+          layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
         // TODO: add if
-        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+        if(self.transform.rotation != 0)
+          layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         if(this._sprite.src) {
+
           layer.ctx.drawImage(this._sprite, -width/2, -height/2);
 
           if(self.selected) {
@@ -1178,7 +1179,7 @@ var SpriteRenderer = (function() {
 
 }());
 
-var Transform = (function() {
+window.Transform = (function() {
 
     var Transform = function Transform(args) {
       this.position = args.position || new Vec2();
@@ -1191,7 +1192,7 @@ var Transform = (function() {
 
 }());
 
-var Scene = (function() {
+window.Scene = (function() {
 
   var Scene = function Scene() {
     this.children = [];
@@ -1224,6 +1225,7 @@ var Scene = (function() {
     },
 
     instantiate: function instantiate(obj) {
+
       var actor = new Actor();
       var clone = Utils.clone(obj);
       for(var i in clone) {
@@ -1238,7 +1240,7 @@ var Scene = (function() {
 
     _add: function _add(object) {
 
-      var sceneID = Utils.generateID();
+      var sceneID = uuid.v1();
       object.sceneID = sceneID;
 
       if(object.components !== undefined) {
@@ -1437,7 +1439,7 @@ var Scene = (function() {
 
 }());
 
-var Application  = (function() {
+window.Application  = (function() {
 
   var Application = function Application(args) {
 
@@ -1457,7 +1459,6 @@ var Application  = (function() {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    //wrap this things up
     window.addEventListener('resize', function() {
 
       var width = $(that.mainCamera.camera.context).width();
@@ -1470,7 +1471,6 @@ var Application  = (function() {
 
     });
 
-    //init all public game loop functions
     var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
@@ -1479,14 +1479,14 @@ var Application  = (function() {
     this.paused = false;
 
     this.pause = function pause() {
-        this.paused = true;
-        console.log('pause')
+      this.paused = true;
+      console.log('pause')
     };
 
     this.unpause = function unpause() {
-        console.log('unpause')
-        this.paused = false;
-        gameLoop();
+      console.log('unpause')
+      this.paused = false;
+      gameLoop();
     };
 
     this.update = function update(){
@@ -1531,6 +1531,7 @@ var Application  = (function() {
 
     };
 
+    this.preloader = new Loader();
     this.loader = new Loader();
 
     var loadingTimer = 0;
@@ -1553,20 +1554,16 @@ var Application  = (function() {
         "#e91e63"
     ];
 
-    var color = colors[Math.floor(Math.random() * colors.length - 1)];
-
     this.prePreload();
-    this.loader.loadAll(function() {
+    this.preloader.loadAll(function() {
 
+      var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
       that.loadingInterval = setInterval(function() {
 
         if(that.mainCamera) {
-          // console.log('loading interval')
           var width = that.mainCamera.camera.size.x;
           var height = that.mainCamera.camera.size.y;
-
-          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
           var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
           var layer = that.mainCamera.camera.layer;
@@ -1576,6 +1573,7 @@ var Application  = (function() {
               "   loading.. ",
               "   loading...",
           ];
+
 
           layer.clear('black')
               .fillStyle(color)
@@ -1650,8 +1648,8 @@ var Application  = (function() {
 
 }());
 
-var CLASSES = [];
-var Class = (function() {
+window.CLASSES = [];
+window.Class = (function() {
 
   var Class = function Class(body) {
 
@@ -1735,8 +1733,6 @@ var Class = (function() {
     }
 
     CLASSES.push(_class);
-
-    console.log(CLASSES)
 
   };
 

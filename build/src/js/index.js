@@ -8,7 +8,7 @@ window.onload = function() {
 
         prePreload: function() {
             //load scene (json)
-            this.loader.load('json', './assets/json/scene.json', 'scene.json');
+            this.preloader.load('json', './assets/json/scene.json', 'scene.json');
         },
 
         preload: function(){

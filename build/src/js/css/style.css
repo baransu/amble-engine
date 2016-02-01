@@ -1,0 +1,16 @@
+body,
+html {
+  padding: 0;
+  margin: auto;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000;
+  overflow: hidden;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+canvas {
+  margin: auto;
+  display: inline;
+}
