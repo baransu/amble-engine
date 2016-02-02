@@ -484,10 +484,3 @@ var menuFunctions = {
     editorWindow.webContents.send('editor-unpause');
   }
 }
-
-//remote?
-//database managment
-//insert into
-//remove
-//update?
-//get
