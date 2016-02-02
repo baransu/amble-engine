@@ -597,16 +597,13 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
       editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
 
-      var normal = 'list-group-item';
-      var highlighted = "list-group-item active";
-
       if(editor.previousActor) {
-        editor.previousActor.className = normal;
+        editor.previousActor.classList.remove('active');
       }
 
       if($e) {
         $e.preventDefault();
-        $e.target.className = highlighted;
+        $e.target.classList.add('active');
         editor.previousActor = $e.target;
       }
 

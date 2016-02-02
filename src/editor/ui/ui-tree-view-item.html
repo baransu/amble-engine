@@ -6,9 +6,22 @@
 
 	<style>
 
+  :host {
+    cursor: pointer;
+    display: inline;
+  }
+
+  .head:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
   a {
     text-decoration: none;
     color: white;
+  }
+
+  li {
+    text-overflow: ellipsis;
   }
 
   li > ul {
@@ -17,13 +30,11 @@
 
   ul {
     list-style: none;
-    display: inline-block;
     padding-left: 15px;
     margin: 0;
   }
 
   .icon {
-    cursor: pointer;
   }
 
 	</style>
@@ -33,8 +44,8 @@
     <li>
 
       <!-- header with name and icon -->
-      <div>
-        <span on-click="toggle">
+      <div class="head" on-click="toggle">
+        <span >
           <!-- <i class="fa fa-caret-right" hidden$="{{hasChild()}}"></i> -->
           <i class="fa fa-folder icon"></i>
         </span>
@@ -45,7 +56,7 @@
       <iron-collapse id="collapse">
         <ul>
           <template is="dom-repeat" items="{{ item.children }}" as="child" filter="isFolder">
-            <ui-tree-view-item item="{{child}}"></ui-tree-view-item>
+            <ui-tree-view-item id="{{child.id}}" item="{{child}}"></ui-tree-view-item>
           </template>
         </ul>
       </iron-collapse>
@@ -70,6 +81,17 @@
 
     },
 
+    ready: function() {
+      if(this.item.text == 'assets') {
+        this.$.collapse.toggle();
+      }
+    },
+
+    // onClick: function(e) {
+    //   e.stopPropagation();
+    //
+    // },
+
     hasChild: function() {
       for(var i = 0; i < this.item.children.length; i++) {
         if(this.item.children[i].type == 'folder') return false;
@@ -81,11 +103,12 @@
       return item.type == 'folder';
     },
 
-
-    toggle: function() {
+    toggle: function(e) {
       if(!this.hasChild()) {
         this.$.collapse.toggle();
       }
+
+      this.async(() => this.fire('folder-click'), 1);
     }
 
 	});
