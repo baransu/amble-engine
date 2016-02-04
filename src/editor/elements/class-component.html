@@ -207,29 +207,30 @@
 
 		resetClass: function(e) {
 
-			var id = this.actor.sceneID;
-			this.actor = AMBLE.scene.getActorByID(id);
-			var c = Amble.CLASSES.find(cl => cl.name == this.component.name);
-			if(c) {
 
-				for(var i = 0; i < c.properties.length; i++) {
-					this.actor.prefab.components[this.index].properties[i] = JSON.parse(JSON.stringify(c.properties[i]));
-					// this.notifyPath('component.properties' + [x], this.component.properties[x]);
-				}
-				//
-				// delete this.actor.prefab.components[this.index].$$hashKey;
-				// this.component = this.actor.prefab.components[this.index];
-
-				// console.log(this.actor.prefab.components[this.index])
-				var a = document.querySelectorAll('class-element');
-				for(var i = 0; i < a.length; i++) {
-					a[i].refreshActor();
-				}
-			}
+			// var id = this.actor.sceneID;
+			// this.actor = AMBLE.scene.getActorByID(id);
+			// var c = Amble.CLASSES.find(cl => cl.name == this.component.name);
+			// if(c) {
+      //
+			// 	for(var i = 0; i < c.properties.length; i++) {
+			// 		this.actor.prefab.components[this.index].properties[i] = JSON.parse(JSON.stringify(c.properties[i]));
+			// 		// this.notifyPath('component.properties' + [x], this.component.properties[x]);
+			// 	}
+			// 	//
+			// 	// delete this.actor.prefab.components[this.index].$$hashKey;
+			// 	// this.component = this.actor.prefab.components[this.index];
+      //
+			// 	// console.log(this.actor.prefab.components[this.index])
+			// 	var a = document.querySelectorAll('class-element');
+			// 	for(var i = 0; i < a.length; i++) {
+			// 		a[i].refreshActor();
+			// 	}
+			// }
 		},
 
 		toArray: function(obj, type) {
-      // console.log(obj)
+
 			if(Array.isArray(obj)) {
         if(obj.length > 0) {
           for(var i = 0; i < obj.length; i++) {
@@ -242,7 +243,7 @@
             }
           }
         }
-        console.log(obj)
+
 				return obj;
 			} else if(obj != undefined && obj != null && type == 'Object'){
           var oo = Object.keys(obj).map(function(key) {
@@ -268,10 +269,9 @@
 		},
 
 		updateComponentsDeep: function(e) {
-      console.log(this.actor = AMBLE.scene.getActorByID(this.actor.sceneID));
-			// console.log(e.target.parent, e.target.name);
+
 			var property = this.component.properties.find(c => c.name == e.target.parent);
-			// console.log(property);
+
 			if(e.target.nodeName.toLowerCase() == 'amble-checkbox') {
 				var val = e.target.checked;
 			} else if(e.target.type == 'number') {

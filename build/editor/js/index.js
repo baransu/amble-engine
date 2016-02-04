@@ -6,6 +6,8 @@ const ipcRenderer = electron.ipcRenderer;
 const low = require('lowdb')
 const storage = require('lowdb/file-sync')
 
+const _ = require('lodash');
+
 var AssetDB = null;
 
 var fs = require('fs');
@@ -331,28 +333,22 @@ var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
     var editor = EDITOR = this;
-    editor.actors = [];
 
-    editor.refresh = function() {
+    this.refresh = function() {
       $scope.$apply();
     };
 
-    editor.updateActors = function() {
-      editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
+    this.updateActors = function() {
+      this.actors = AMBLE.scene.children;
     };
 
     editor.update = function() {
 
       this.logs = AMBLE.debug.logs;
-      this.hierarchy = {};
-      this.inspector = {};
-      this.inspector.transformShow = true;
-      this.previousActor = null;
-      this.sceneID = null;
-      this.actor = null;
 
-      this.lastBottomPanelTab = document.getElementById('bottomPanelDefault');
-      this.bottomPanel = 'assets';
+      this.previousActor = null;
+      this.actors = [];
+      this.actor = null;
 
       //default components to add
       this.componentsToAdd = [
@@ -388,11 +384,11 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       this.actorsToAdd = [
         {
           name: 'actor',
-          tag: ['actor'],
-          options: {},
+          tag: 'actor',
+          hideInHierarchy: false,
           selected: false,
           transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {}},
+            position: { name: "Vec2", args: {x: 0, y: 0}},
             scale: { name: "Vec2", args: {x: 1, y:1}},
             rotation: 0
           }},
@@ -402,41 +398,31 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
         {
           name: 'camera',
           tag: 'mainCamera',
-          options: {},
+          hideInHierarchy: false,
+          selected: false,
           transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {}},
+            position: { name: "Vec2", args: {x: 0, y: 0}},
             scale: { name: "Vec2", args: {x: 1, y:1}},
             rotation: 0
           }},
-          renderer: { name: 'CameraRenderer', args: {}},
           camera: { name: "MainCamera", args: {
             scale: 1,
             size: { name: 'Vec2', args: {x: 1280, y: 720}},
             bgColor: '#37474f',
           }},
+          renderer: { name: 'CameraRenderer', args: {}},
           components: []
         },
       ];
 
       var cam = AMBLE.scene.getActorByName('SceneCamera');
       if(cam) {
-        editor.cameraScript = cam.getComponent('Camera');
-        editor.cameraScript.editor = this;
+        this.cameraScript = cam.getComponent('Camera');
+        this.cameraScript.editor = this;
       }
 
-      editor.updateActors();
-      editor.updateClass();
-    };
-
-    editor.bottomPanelsSelect = function(name, $e) {
-
-      if(this.lastBottomPanelTab) {
-        this.lastBottomPanelTab.className = 'nav-link';
-      }
-      console.log(this.lastBottomPanelTab);
-      this.bottomPanel = name;
-      $e.target.className += ' active';
-      this.lastBottomPanelTab = $e.target;
+      this.updateActors();
+      this.updateClass();
     };
 
     editor.updateClass = function() {
@@ -498,7 +484,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
                     AMBLE.scene.remove(editor.actor)
 
-                    editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
                     editor.actor = null;
 
                     editor.refresh();
@@ -550,81 +535,81 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     };
 
     editor.addComponent = function(component, $e) {
-        console.log(component);
+      console.log(component);
 
-        if(editor.actor) {
-            //add to prefab
-            if(component.type == 'renderer') {
-                editor.actor.prefab.renderer = component.body;
-            } else if(component.type == 'class'){
-                var c = JSON.parse(JSON.stringify(component.body))
-                editor.actor.prefab.components.push(c);
-                // console.log(editor.actor.prefab);
-            }
+      if(editor.actor) {
+        //add to prefab
+        if(component.type == 'renderer') {
+          editor.actor.prefab.renderer = component.body;
+        } else if(component.type == 'class'){
+          var c = JSON.parse(JSON.stringify(component.body))
+          editor.actor.prefab.components.push(c);
 
-            var sceneID = editor.actor.sceneID;
-            var prefab = editor.actor.prefab;
-
-            AMBLE.scene.remove(this.actor);
-            editor.actor = AMBLE.scene.instantiate(prefab);
-
-            editor.actor.selected = true;
-            editor.actor.sceneID = sceneID;
         }
+
+        var sceneID = editor.actor.sceneID;
+        var prefab = editor.actor.prefab;
+
+        AMBLE.scene.remove(this.actor);
+        editor.actor = AMBLE.scene.instantiate(prefab);
+
+        editor.actor.selected = true;
+        editor.actor.sceneID = sceneID;
+      }
 
     };
 
     editor.addActor = function(actor) {
 
-      var _actor = JSON.parse(JSON.stringify(this.actorsToAdd.find(a => a.name == actor.name)));
+      var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
       if(_actor) {
         delete _actor.$$hashKey;
-        _actor.name += editor.actors.length;
+        _actor.name += this.actors.length;
         console.log(_actor)
         AMBLE.scene.instantiate(_actor);
       }
 
-      editor.actors = AMBLE.scene.children.filter(c => c.options.hideInHierarchy != true);
     };
 
-    editor.actorSelected = function(_actor, $e) {
-
-      if(editor.actor) {
-        editor.actor.selected = false;
+    editor.getActor = function() {
+      if(this.actor) {
+        delete this.actor.$$hashKey;
       }
+      return this.actor;
+    };
 
-      editor.sceneID = _actor.sceneID;
+    editor.actorSelected = function($e) {
 
-      editor.actor = AMBLE.scene.getActorByID(_actor.sceneID);
+      var sceneID = $e.target.id.replace('id_', '');
 
-      if(editor.previousActor) {
-        editor.previousActor.classList.remove('active');
+      if(this.actor) this.actor.selected = false;
+
+      this.actor = AMBLE.scene.getActorByID(sceneID)
+
+      if(this.previousActor) {
+        this.previousActor.classList.remove('active');
       }
 
       if($e) {
         $e.preventDefault();
         $e.target.classList.add('active');
-        editor.previousActor = $e.target;
+        this.previousActor = $e.target;
       }
 
-      if(editor.actor.selected) {
-        editor.actor.selected = false;
-      } else {
-        editor.actor.selected = true;
-      }
+      this.actor.selected = !this.actor.selected;
+
     };
 }]);
 
 //scane view
 var application = {
 
+
     // resize: true,
     mainCamera: {
       name: 'SceneCamera',
       tag: ['sceneCamera'],
-      options: {
-        hideInHierarchy: true
-      },
+      hideInHierarchy: true,
       transform: { name: "Transform", args: {
         position: { name: "Vec2", args: {}},
         scale: { name: "Vec2", args: {x: 1, y:1}},

@@ -56,8 +56,8 @@ window.Input = (function(){
     },
 
     mousemove: function mousemove(e) {
-      var offsetLeft = AMBLE.mainCamera.camera.context.offsetLeft;
-      var offsetTop = AMBLE.mainCamera.camera.context.offsetTop;
+      var offsetLeft = AMBLE.mainCamera.camera.getContext().offsetLeft;
+      var offsetTop = AMBLE.mainCamera.camera.getContext().offsetTop;
 
       Input.offset.x = offsetLeft;
       Input.offset.y = offsetTop;
@@ -100,7 +100,7 @@ window.Input = (function(){
   Input._setListeners = function _setListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       document.addEventListener('keydown', Input._eventFunctions.keydown, false);
       document.addEventListener('keyup', Input._eventFunctions.keyup, false);
       element.addEventListener('mousedown', Input._eventFunctions.mousedown, false);
@@ -122,7 +122,7 @@ window.Input = (function(){
   Input._removeListeners = function _removeListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       if (document.removeEventListener) {
 
         document.removeEventListener('keydown', Input._eventFunctions.keydown, false);

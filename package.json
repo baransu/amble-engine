@@ -36,6 +36,7 @@
     "gulp-rimraf": "^0.2.0",
     "gulp-sequence": "^0.4.4",
     "jquery": "^2.2.0",
+    "lodash": "^4.2.1",
     "lowdb": "^0.12.2",
     "mkdirp": "^0.5.1",
     "node-localstorage": "^1.1.2",

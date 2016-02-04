@@ -22,8 +22,8 @@ window.Application  = (function() {
 
       if(AMBLE.mainCamera) {
         // @ifdef EDITOR
-        var width = $(AMBLE.mainCamera.camera.context).width();
-        var height = $(AMBLE.mainCamera.camera.context).height();
+        var width = $(AMBLE.mainCamera.camera.getContext()).width();
+        var height = $(AMBLE.mainCamera.camera.getContext()).height();
 
         AMBLE.mainCamera.camera.layer.canvas.width = width;
         AMBLE.mainCamera.camera.layer.canvas.height = height;

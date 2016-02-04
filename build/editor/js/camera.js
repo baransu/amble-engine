@@ -50,8 +50,8 @@ Class({
 
   onresize: function(self) {
 
-    var width = $(self.camera.context).width();
-    var height = $(self.camera.context).height();
+    var width = $(self.camera.getContext()).width();
+    var height = $(self.camera.getContext()).height();
 
     if(self.camera.scale != 1) {
       var w = self.camera.size.x;

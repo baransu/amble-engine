@@ -87,8 +87,8 @@ body {
 .scroll.hierarchy {
   height: 90%;
 }
-.hierarchy-list-item {
-  width: 100%;
+.list-item {
+  overflow: hidden;
 }
 .vcenter {
   display: inline-block;

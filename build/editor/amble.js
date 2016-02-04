@@ -679,8 +679,8 @@ window.Input = (function(){
     },
 
     mousemove: function mousemove(e) {
-      var offsetLeft = AMBLE.mainCamera.camera.context.offsetLeft;
-      var offsetTop = AMBLE.mainCamera.camera.context.offsetTop;
+      var offsetLeft = AMBLE.mainCamera.camera.getContext().offsetLeft;
+      var offsetTop = AMBLE.mainCamera.camera.getContext().offsetTop;
 
       Input.offset.x = offsetLeft;
       Input.offset.y = offsetTop;
@@ -723,7 +723,7 @@ window.Input = (function(){
   Input._setListeners = function _setListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       document.addEventListener('keydown', Input._eventFunctions.keydown, false);
       document.addEventListener('keyup', Input._eventFunctions.keyup, false);
       element.addEventListener('mousedown', Input._eventFunctions.mousedown, false);
@@ -745,7 +745,7 @@ window.Input = (function(){
   Input._removeListeners = function _removeListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       if (document.removeEventListener) {
 
         document.removeEventListener('keydown', Input._eventFunctions.keydown, false);
@@ -1011,7 +1011,8 @@ window.Loader = (function() {
 window.MainCamera = (function() {
 
     var MainCamera = function MainCamera(args) {
-      this.context = document.getElementById(args.context) || document.body;
+
+      this.context = args.context;
 
       this.size = args.size || new Vec2(1280, 720);
 
@@ -1020,10 +1021,19 @@ window.MainCamera = (function() {
       this.view = new Vec2();
       this.scale = args.scale || 1;
 
+
+      this.getContext = function getContext() {
+        if(this.context) {
+          return document.getElementById(this.context) || document.body;
+        } else {
+          return document.body;
+        }
+      };
+
       if(args.layer) {
-        this.size.x = $(this.context).width();
-        this.size.y = $(this.context).height();
-      this.layer = new Layer(this).appendTo(this.context);
+        this.size.x = $(this.getContext()).width();
+        this.size.y = $(this.getContext()).height();
+      this.layer = new Layer(this).appendTo(this.getContext());
       }
     };
 
@@ -1032,7 +1042,7 @@ window.MainCamera = (function() {
       update: function update(self) {
         this.view = new Vec2(self.transform.position.x - this.size.x/2, self.transform.position.y - this.size.y/2);
         return this;
-      }
+      },
 
     };
 
@@ -1459,8 +1469,8 @@ window.Application  = (function() {
     window.addEventListener('resize', function() {
 
       if(AMBLE.mainCamera) {
-        var width = $(AMBLE.mainCamera.camera.context).width();
-        var height = $(AMBLE.mainCamera.camera.context).height();
+        var width = $(AMBLE.mainCamera.camera.getContext()).width();
+        var height = $(AMBLE.mainCamera.camera.getContext()).height();
 
         AMBLE.mainCamera.camera.layer.canvas.width = width;
         AMBLE.mainCamera.camera.layer.canvas.height = height;
