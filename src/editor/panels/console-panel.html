@@ -1,13 +1,44 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../ui/ui-console-log.html">
+<link rel="import" href="../ui/ui-console-error.html">
+
 <dom-module id="console-panel">
 
 	<style>
 
+  .info {
+    width: 100%;
+    height: 15%;
+    text-align: right;
+  }
+
+  .scroll {
+    width: 100%;
+    height: 85%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+
 	</style>
 
 	<template>
-    <content></content>
+    <div class="info">
+      <h5 class="p-t-2">
+        Logs:<span class="label label-pill label-default"> {{counter.logs}}</span>
+        | Errors: <span class="label label-pill label-danger"> {{counter.errors}}</span>
+      </h5>
+    </div>
+    <div id="console" class="scroll">
+      <template is="dom-repeat" items="{{ logs }}" as="log">
+        <template is="dom-if" if="{{type('log', log)}}">
+          <ui-console-log item="{{log}}"></ui-console-log>
+        </template>
+        <template is="dom-if" if="{{type('error', log)}}">
+          <ui-console-error item="{{log}}"></ui-console-error>
+        </template>
+      </template>
+    </div>
 	</template>
 
 </dom-module>
@@ -17,7 +48,44 @@
 	Polymer({
 		is: 'console-panel',
 
-		properties: { },
+		properties: {
+
+      logs: {
+        type: Array,
+        value: []
+      },
+
+      counter: {
+        type: Object,
+        value: {
+          logs: 0,
+          errors: 0
+        }
+      }
+
+    },
+
+    ready: function() { },
+
+    type: function(type, property) {
+      return property.type == type;
+    },
+
+    update: function(log) {
+
+      if(log.type == 'error') {
+        this.counter.errors++;
+        this.notifyPath('counter.errors', this.counter.errors);
+      } else if(log.type == 'log') {
+        this.counter.logs++;
+        this.notifyPath('counter.logs', this.counter.logs);
+      }
+
+      this.push('logs', log);
+
+      // this.$.console.scrollTop = this.$.console.scrollHeight;
+    }
+
 
 	});
 

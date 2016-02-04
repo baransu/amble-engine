@@ -97,8 +97,8 @@ body {
 }
 .console-message {
   padding: 5px;
-  font-size: 12px;
-  border-bottom: 1px solid #e6e6e6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
 }
 ::-webkit-scrollbar-track {
   border-radius: 10px;

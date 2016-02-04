@@ -438,10 +438,7 @@ window.AnimationRenderer = (function() {
 
 window.Debug = (function() {
 
-  var Debug = function Debug() {
-  };
-
-  Debug.prototype = {
+  var Debug = {
 
     log: function log(log) {
 
@@ -1260,7 +1257,6 @@ window.Application  = (function() {
 
     var that = AMBLE = this;
 
-    this.debug = new Debug();
     this.imgList = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;

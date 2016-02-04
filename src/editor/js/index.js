@@ -131,12 +131,12 @@ ipcRenderer.on('editor-unpause', function(event, data) {
 });
 
 ipcRenderer.on('game-preview-log', function(event, data) {
-  AMBLE.debug.log(data);
+  Debug.log(data);
 });
 
 
 ipcRenderer.on('game-preview-error', function(event, data) {
-  AMBLE.debug.error(data);
+  Debug.error(data);
 });
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
@@ -343,8 +343,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     };
 
     editor.update = function() {
-
-      this.logs = AMBLE.debug.logs;
 
       this.previousActor = null;
       this.actors = [];

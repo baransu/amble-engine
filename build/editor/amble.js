@@ -453,20 +453,14 @@ window.AnimationRenderer = (function() {
 
 window.Debug = (function() {
 
-  var Debug = function Debug() {
-    this.logs = [];
-  };
-
-  Debug.prototype = {
+  var Debug = {
 
     log: function log(log) {
 
-      this.logs.push({
+      document.querySelector('console-panel').update({
         type: 'log',
         message: log
       });
-
-      EDITOR.refresh();
 
 
 
@@ -474,12 +468,10 @@ window.Debug = (function() {
 
     error: function error(error) {
 
-      this.logs.push({
+      document.querySelector('console-panel').update({
         type: 'error',
         message: error
       });
-
-      EDITOR.refresh();
 
 
 
@@ -1452,7 +1444,6 @@ window.Application  = (function() {
 
     var that = AMBLE = this;
 
-    this.debug = new Debug();
     this.imgList = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
@@ -1489,11 +1480,11 @@ window.Application  = (function() {
 
     this.pause = function pause() {
       this.paused = true;
-      console.log('pause')
+      Debug.log('pause')
     };
 
     this.unpause = function unpause() {
-      console.log('unpause')
+      Debug.log('unpause')
       this.paused = false;
       gameLoop();
     };

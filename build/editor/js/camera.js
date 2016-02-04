@@ -77,6 +77,7 @@ Class({
   },
 
   onmousedown: function(self, e) {
+
     switch(e.which) {
     case 1:
       for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {

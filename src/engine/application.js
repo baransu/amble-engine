@@ -4,7 +4,6 @@ window.Application  = (function() {
 
     var that = AMBLE = this;
 
-    this.debug = new Debug();
     this.imgList = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
@@ -47,11 +46,11 @@ window.Application  = (function() {
     // @ifdef EDITOR
     this.pause = function pause() {
       this.paused = true;
-      console.log('pause')
+      Debug.log('pause')
     };
 
     this.unpause = function unpause() {
-      console.log('unpause')
+      Debug.log('unpause')
       this.paused = false;
       gameLoop();
     };
