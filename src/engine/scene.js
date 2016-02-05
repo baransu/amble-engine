@@ -1,4 +1,4 @@
-var Scene = (function() {
+window.Scene = (function() {
 
   var Scene = function Scene() {
     this.children = [];
@@ -35,6 +35,7 @@ var Scene = (function() {
     },
 
     instantiate: function instantiate(obj) {
+
       var actor = new Actor();
       var clone = Utils.clone(obj);
       for(var i in clone) {
@@ -49,7 +50,7 @@ var Scene = (function() {
 
     _add: function _add(object) {
 
-      var sceneID = Utils.generateID();
+      var sceneID = uuid.v1();
       object.sceneID = sceneID;
 
       if(object.components !== undefined) {

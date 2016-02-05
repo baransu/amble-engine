@@ -1,4 +1,4 @@
-var Vec3 = (function() {
+window.Vec3 = (function() {
 
   var Vec3 = function Vec3(x, y, z) {
     if(typeof x == 'object') {

@@ -4,6 +4,10 @@ var concat = require('gulp-concat');
 var less = require('gulp-less');
 var rimraf = require('gulp-rimraf');
 var jsValidate = require('gulp-jsvalidate');
+var browserify = require('browserify');
+var gulpSequence = require('gulp-sequence');
+var source = require('vinyl-source-stream');
+
 // var minifyCss = require('gulp-minify-css');
 
 //list all engine files and build to amble.js for editor/game preview/core
@@ -53,6 +57,13 @@ gulp.task('amble-src-build', function() {
     .pipe(preprocess({ context: { NODE_ENV: 'production', SRC: true, GAME: true}}))
     .pipe(concat('amble.js'))
     .pipe(jsValidate())
+    .pipe(gulp.dest('./build/src/'))
+});
+
+gulp.task('amble-src-browserify', function() {
+  return browserify('./build/src/amble.js')
+    .bundle()
+    .pipe(source('amble.js'))
     .pipe(gulp.dest('./build/src/'))
 });
 
@@ -195,6 +206,16 @@ gulp.task('editor-elements', function() {
     .pipe(gulp.dest('./build/editor/elements/'))
 });
 
+gulp.task('editor-panels', function() {
+  return gulp.src('./src/editor/panels/*.html')
+    .pipe(gulp.dest('./build/editor/panels/'))
+});
+
+gulp.task('editor-ui', function() {
+  return gulp.src('./src/editor/ui/*.html')
+    .pipe(gulp.dest('./build/editor/ui/'))
+});
+
 // UTILS
 
 var utilsJSFiles = [
@@ -223,9 +244,11 @@ gulp.task('clean', function() {
     .pipe(rimraf());
 })
 
-gulp.task('build-engine', [ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ]);
+gulp.task('build-engine', function(cb) {
+  gulpSequence([ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ], 'amble-src-browserify', cb);
+});
 gulp.task('build-launcher', [ 'launcher-less', 'launcher-js', 'launcher-html' ]);
-gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-move', 'editor-elements' ]);
+gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-move', 'editor-elements', 'editor-panels', 'editor-ui' ]);
 gulp.task('build-preview', [ 'preview-less', 'preview-js', 'preview-html' ]);
 gulp.task('build-builder', [ 'builder-less', 'builder-js', 'builder-html' ]);
 gulp.task('build-src', [ 'src-less', 'src-js', 'src-html', 'src-move' ]);

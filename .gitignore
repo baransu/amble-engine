@@ -20,6 +20,7 @@ $RECYCLE.BIN/
 #############
 
 .bin
+.prefs
 
 # Logs
 logs
@@ -45,6 +46,9 @@ coverage
 
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
+
+# Build directory
+build
 
 # Dependency directory
 # https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git

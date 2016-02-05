@@ -1,10 +1,9 @@
-var Application  = (function() {
+window.Application  = (function() {
 
   var Application = function Application(args) {
 
     var that = AMBLE = this;
 
-    this.debug = new Debug();
     this.imgList = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
@@ -18,27 +17,25 @@ var Application  = (function() {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    //wrap this things up
     window.addEventListener('resize', function() {
 
-      // @ifdef EDITOR
-      var width = $(that.mainCamera.camera.context).width();
-      var height = $(that.mainCamera.camera.context).height();
+      if(AMBLE.mainCamera) {
+        // @ifdef EDITOR
+        var width = $(AMBLE.mainCamera.camera.getContext()).width();
+        var height = $(AMBLE.mainCamera.camera.getContext()).height();
 
-      that.mainCamera.camera.layer.canvas.width = width;
-      that.mainCamera.camera.layer.canvas.height = height;
-      that.mainCamera.getComponent('Camera').onresize(that.mainCamera);
-      // @endif
+        AMBLE.mainCamera.camera.layer.canvas.width = width;
+        AMBLE.mainCamera.camera.layer.canvas.height = height;
+        AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
+        // @endif
 
-      // @ifdef GAME
-      if(that.mainCamera) {
-        that.mainCamera.camera.layer.resize();
+        // @ifdef GAME
+        AMBLE.mainCamera.camera.layer.resize();
+        // @endif
       }
-      // @endif
 
     });
 
-    //init all public game loop functions
     var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
@@ -48,14 +45,14 @@ var Application  = (function() {
 
     // @ifdef EDITOR
     this.pause = function pause() {
-        this.paused = true;
-        console.log('pause')
+      this.paused = true;
+      Debug.log('pause')
     };
 
     this.unpause = function unpause() {
-        console.log('unpause')
-        this.paused = false;
-        gameLoop();
+      Debug.log('unpause')
+      this.paused = false;
+      gameLoop();
     };
     // @endif
 
@@ -103,6 +100,7 @@ var Application  = (function() {
 
     };
 
+    this.preloader = new Loader();
     this.loader = new Loader();
 
     var loadingTimer = 0;
@@ -125,14 +123,11 @@ var Application  = (function() {
         "#e91e63"
     ];
 
-    var color = colors[Math.floor(Math.random() * colors.length - 1)];
-
     this.prePreload();
-    this.loader.loadAll(function() {
+    this.preloader.loadAll(function() {
 
       // @ifdef SRC
-      var scene = JSON.parse(that.loader.getAsset('scene.json'));
-      console.log('scene load')
+      var scene = JSON.parse(that.preloader.getAsset('scene.json'));
       for(var i = 0; i < scene.length; i++) {
         if(scene[i].tag == 'mainCamera') {
           that.mainCamera = that.scene.instantiate(scene[i]);
@@ -140,18 +135,14 @@ var Application  = (function() {
         }
       }
 
-      that.loader = new Loader();
-
       // @endif
+      var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
       that.loadingInterval = setInterval(function() {
 
         if(that.mainCamera) {
-          // console.log('loading interval')
           var width = that.mainCamera.camera.size.x;
           var height = that.mainCamera.camera.size.y;
-
-          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
           var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
           var layer = that.mainCamera.camera.layer;
@@ -161,6 +152,7 @@ var Application  = (function() {
               "   loading.. ",
               "   loading...",
           ];
+
 
           layer.clear('black')
               .fillStyle(color)

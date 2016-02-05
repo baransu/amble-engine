@@ -1,22 +1,14 @@
-var Debug = (function() {
+window.Debug = (function() {
 
-  var Debug = function Debug() {
-    // @ifdef EDITOR
-    this.logs = [];
-    // @endif
-  };
-
-  Debug.prototype = {
+  var Debug = {
 
     log: function log(log) {
 
       // @ifdef EDITOR
-      this.logs.push({
+      document.querySelector('console-panel').update({
         type: 'log',
         message: log
       });
-
-      EDITOR.refresh();
       // @endif
 
       // @ifdef PREVIEW
@@ -32,12 +24,10 @@ var Debug = (function() {
     error: function error(error) {
 
       // @ifdef EDITOR
-      this.logs.push({
+      document.querySelector('console-panel').update({
         type: 'error',
         message: error
       });
-
-      EDITOR.refresh();
       // @endif
 
       // @ifdef PREVIEW

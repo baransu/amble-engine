@@ -1,4 +1,5 @@
-var Vec2 = (function(){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+window.Vec2 = (function(){
 
   var Vec2 = function Vec2(x, y) {
     if(typeof x == 'object') {
@@ -56,7 +57,7 @@ var Vec2 = (function(){
 
 }());
 
-var Vec3 = (function() {
+window.Vec3 = (function() {
 
   var Vec3 = function Vec3(x, y, z) {
     if(typeof x == 'object') {
@@ -121,7 +122,7 @@ var Vec3 = (function() {
 
 }());
 
-var Mathf = (function() {
+window.Mathf = (function() {
 
     var Mathf = {
 
@@ -133,15 +134,11 @@ var Mathf = (function() {
 
 }());
 
-var Utils = (function(){
+const uuid = require('uuid')
+
+window.Utils = (function(){
 
   var Utils = {
-
-    generateID: function generateID() {
-      return Math.floor((1 + Math.random()) * (new Date().getTime()))
-        .toString(16)
-        .substring(1);
-    },
 
     makeFunction: function makeFunction(obj) {
       if(obj instanceof Object) {
@@ -322,7 +319,7 @@ var Utils = (function(){
 
 }());
 
-var Time = (function() {
+window.Time = (function() {
 
     var Time = {
       deltaTime: 0,
@@ -333,7 +330,7 @@ var Time = (function() {
 
 }());
 
-var Actor = (function() {
+window.Actor = (function() {
 
   var Actor = function Actor(args) {
     this.components = [];
@@ -352,7 +349,7 @@ var Actor = (function() {
 
 }());
 
-var AnimationRenderer = (function() {
+window.AnimationRenderer = (function() {
 
   var AnimationRenderer = function AnimationRenderer(args) {
     this.sprite = args.sprite;
@@ -364,7 +361,7 @@ var AnimationRenderer = (function() {
 
     this._currentFrame = 0;
     this._updates = 0;
-    this._sprite = new Image();
+    this._sprite = null;
     this._frameTimer = 0;
     this.size = new Vec2();
 
@@ -378,7 +375,7 @@ var AnimationRenderer = (function() {
 
       layer.ctx.save();
 
-      if(this._sprite) {
+      if(this._sprite !== null ) {
 
         if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
             this._sprite = AMBLE.loader.getAsset(this.sprite);
@@ -440,12 +437,9 @@ var AnimationRenderer = (function() {
 
 }());
 
-var Debug = (function() {
+window.Debug = (function() {
 
-  var Debug = function Debug() {
-  };
-
-  Debug.prototype = {
+  var Debug = {
 
     log: function log(log) {
 
@@ -471,7 +465,7 @@ var Debug = (function() {
 
 
 
-var Input = (function(){
+window.Input = (function(){
 
   var Input = {
 
@@ -529,8 +523,8 @@ var Input = (function(){
     },
 
     mousemove: function mousemove(e) {
-      var offsetLeft = AMBLE.mainCamera.camera.context.offsetLeft;
-      var offsetTop = AMBLE.mainCamera.camera.context.offsetTop;
+      var offsetLeft = AMBLE.mainCamera.camera.getContext().offsetLeft;
+      var offsetTop = AMBLE.mainCamera.camera.getContext().offsetTop;
 
       Input.offset.x = offsetLeft;
       Input.offset.y = offsetTop;
@@ -573,44 +567,45 @@ var Input = (function(){
   Input._setListeners = function _setListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       document.addEventListener('keydown', Input._eventFunctions.keydown, false);
       document.addEventListener('keyup', Input._eventFunctions.keyup, false);
       element.addEventListener('mousedown', Input._eventFunctions.mousedown, false);
       element.addEventListener('mouseup', Input._eventFunctions.mouseup, false);
-      element.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
+      document.addEventListener('mousemove', Input._eventFunctions.mousemove, false);
       element.addEventListener("wheel", Input._eventFunctions.wheel, false);
       element.addEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
       //touch start
       element.addEventListener("touchstart", Input._eventFunctions.touchstart, false);
       //touch end
-      element.addEventListener("touchstart", Input._eventFunctions.touchend, false);
+      element.addEventListener("touchend", Input._eventFunctions.touchend, false);
       //touch move
-      element.addEventListener("touchstart", Input._eventFunctions.touchmove, false);
+      element.addEventListener("touchmove", Input._eventFunctions.touchmove, false);
+
     }
   }
 
   Input._removeListeners = function _removeListeners() {
 
     if(AMBLE.mainCamera) {
-      var element = AMBLE.mainCamera.camera.context;
+      var element = AMBLE.mainCamera.camera.getContext();
       if (document.removeEventListener) {
 
         document.removeEventListener('keydown', Input._eventFunctions.keydown, false);
         document.removeEventListener('keyup', Input._eventFunctions.keyup, false);
         element.removeEventListener('mousedown', Input._eventFunctions.mousedown, false);
         element.removeEventListener('mouseup', Input._eventFunctions.mouseup, false);
-        element.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
+        document.removeEventListener('mousemove', Input._eventFunctions.mousemove, false);
         element.removeEventListener("wheel", Input._eventFunctions.wheel, false);
         element.removeEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.removeEventListener("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.removeEventListener("touchstart", Input._eventFunctions.touchend, false);
+        element.removeEventListener("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.removeEventListener("touchstart", Input._eventFunctions.touchmove, false);
+        element.removeEventListener("touchmove", Input._eventFunctions.touchmove, false);
 
 
       } else if (document.detachEvent) {
@@ -619,16 +614,16 @@ var Input = (function(){
         document.detachEvent('keyup', Input._eventFunctions.keyup, false);
         element.detachEvent('mousedown', Input._eventFunctions.mousedown, false);
         element.detachEvent('mouseup', Input._eventFunctions.mouseup, false);
-        element.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
+        document.detachEvent('mousemove', Input._eventFunctions.mousemove, false);
         element.detachEvent("wheel", Input._eventFunctions.wheel, false);
         element.detachEvent("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
         element.detachEvent("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.detachEvent("touchstart", Input._eventFunctions.touchend, false);
+        element.detachEvent("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.detachEvent("touchstart", Input._eventFunctions.touchmove, false);
+        element.detachEvent("touchmove", Input._eventFunctions.touchmove, false);
 
       }
     }
@@ -638,7 +633,7 @@ var Input = (function(){
 
 }());
 
-var Layer = (function() {
+window.Layer = (function() {
 
     var Layer = function Layer(camera) {
 
@@ -760,7 +755,7 @@ var Layer = (function() {
 
 }());
 
-var Loader = (function() {
+window.Loader = (function() {
 
     var Loader = function Loader() {
       this.queue = [];
@@ -876,10 +871,11 @@ var Loader = (function() {
 
 }());
 
-var MainCamera = (function() {
+window.MainCamera = (function() {
 
     var MainCamera = function MainCamera(args) {
-      this.context = document.getElementById(args.context) || document.body;
+
+      this.context = args.context;
 
       this.size = args.size || new Vec2(1280, 720);
 
@@ -888,7 +884,16 @@ var MainCamera = (function() {
       this.view = new Vec2();
       this.scale = args.scale || 1;
 
-      this.layer = new Layer(this).appendTo(this.context);
+
+      this.getContext = function getContext() {
+        if(this.context) {
+          return document.getElementById(this.context) || document.body;
+        } else {
+          return document.body;
+        }
+      };
+
+      this.layer = new Layer(this).appendTo(this.getContext());
     };
 
     MainCamera.prototype = {
@@ -896,7 +901,7 @@ var MainCamera = (function() {
       update: function update(self) {
         this.view = new Vec2(self.transform.position.x - this.size.x/2, self.transform.position.y - this.size.y/2);
         return this;
-      }
+      },
 
     };
 
@@ -904,7 +909,7 @@ var MainCamera = (function() {
 
 }());
 
-var RectRenderer = (function() {
+window.RectRenderer = (function() {
 
   var RectRenderer = function RectRenderer(args) {
     this.color = args.color || '#e91e63';
@@ -949,13 +954,13 @@ var RectRenderer = (function() {
 
 }());
 
-var SpriteRenderer = (function() {
+window.SpriteRenderer = (function() {
 
   var SpriteRenderer = function SpriteRenderer(args) {
 
     this.sprite = args.sprite; // || TODO: add placeholder graphics
     this.layer = args.layer || 0;
-    this._sprite = new Image();
+    this._sprite = null
     this.size = new Vec2();
 
   };
@@ -981,19 +986,20 @@ var SpriteRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        // TODO: add if
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        if(self.transform.scale.x != 1 || self.transform.scale.y != 1)
+          layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
-        // TODO: add if
-        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+        if(self.transform.rotation != 0)
+          layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         if(this._sprite.src) {
+
           layer.ctx.drawImage(this._sprite, -width/2, -height/2);
 
         }
 
       } else {
-        // TODO: change to correct instance
+
         this._sprite = AMBLE.loader.getAsset(this.sprite);
       }
 
@@ -1005,7 +1011,7 @@ var SpriteRenderer = (function() {
 
 }());
 
-var Transform = (function() {
+window.Transform = (function() {
 
     var Transform = function Transform(args) {
       this.position = args.position || new Vec2();
@@ -1018,7 +1024,7 @@ var Transform = (function() {
 
 }());
 
-var Scene = (function() {
+window.Scene = (function() {
 
   var Scene = function Scene() {
     this.children = [];
@@ -1037,6 +1043,7 @@ var Scene = (function() {
     },
 
     instantiate: function instantiate(obj) {
+
       var actor = new Actor();
       var clone = Utils.clone(obj);
       for(var i in clone) {
@@ -1051,7 +1058,7 @@ var Scene = (function() {
 
     _add: function _add(object) {
 
-      var sceneID = Utils.generateID();
+      var sceneID = uuid.v1();
       object.sceneID = sceneID;
 
       if(object.components !== undefined) {
@@ -1245,13 +1252,12 @@ var Scene = (function() {
 
 }());
 
-var Application  = (function() {
+window.Application  = (function() {
 
   var Application = function Application(args) {
 
     var that = AMBLE = this;
 
-    this.debug = new Debug();
     this.imgList = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
@@ -1265,17 +1271,15 @@ var Application  = (function() {
       this.mainCamera = this.scene.instantiate(args.mainCamera);
     }
 
-    //wrap this things up
     window.addEventListener('resize', function() {
 
+      if(AMBLE.mainCamera) {
 
-      if(that.mainCamera) {
-        that.mainCamera.camera.layer.resize();
+        AMBLE.mainCamera.camera.layer.resize();
       }
 
     });
 
-    //init all public game loop functions
     var gameLoopFunctionsList = ['prePreload', 'preload', 'loaded', 'start', 'preupdate', 'postupdate', 'prerender', 'postrender'];
     for(var i in gameLoopFunctionsList){
         this[gameLoopFunctionsList[i]] = typeof args[gameLoopFunctionsList[i]] === 'function' ? args[gameLoopFunctionsList[i]] : function(){};
@@ -1299,6 +1303,7 @@ var Application  = (function() {
 
     };
 
+    this.preloader = new Loader();
     this.loader = new Loader();
 
     var loadingTimer = 0;
@@ -1321,13 +1326,10 @@ var Application  = (function() {
         "#e91e63"
     ];
 
-    var color = colors[Math.floor(Math.random() * colors.length - 1)];
-
     this.prePreload();
-    this.loader.loadAll(function() {
+    this.preloader.loadAll(function() {
 
-      var scene = JSON.parse(that.loader.getAsset('scene.json'));
-      console.log('scene load')
+      var scene = JSON.parse(that.preloader.getAsset('scene.json'));
       for(var i = 0; i < scene.length; i++) {
         if(scene[i].tag == 'mainCamera') {
           that.mainCamera = that.scene.instantiate(scene[i]);
@@ -1335,17 +1337,13 @@ var Application  = (function() {
         }
       }
 
-      that.loader = new Loader();
-
+      var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
       that.loadingInterval = setInterval(function() {
 
         if(that.mainCamera) {
-          // console.log('loading interval')
           var width = that.mainCamera.camera.size.x;
           var height = that.mainCamera.camera.size.y;
-
-          console.log(that.loader.successCount, that.loader.errorCount, that.loader.queue.length);
 
           var x = (width - width/4) * ((that.loader.successCount + that.loader.errorCount)/that.loader.queue.length);
           var layer = that.mainCamera.camera.layer;
@@ -1355,6 +1353,7 @@ var Application  = (function() {
               "   loading.. ",
               "   loading...",
           ];
+
 
           layer.clear('black')
               .fillStyle(color)
@@ -1430,12 +1429,10 @@ var Application  = (function() {
 
 }());
 
-var CLASSES = [];
-var Class = (function() {
+window.CLASSES = [];
+window.Class = (function() {
 
   var Class = function Class(body) {
-
-    // console.log(body);
 
     if(!body) {
         // Amble.app.debug.error('Wrong class code!')
@@ -1518,10 +1515,230 @@ var Class = (function() {
 
     CLASSES.push(_class);
 
-    console.log(CLASSES)
-
   };
 
   return Class;
 
 }());
+
+},{"uuid":3}],2:[function(require,module,exports){
+(function (global){
+
+var rng;
+
+if (global.crypto && crypto.getRandomValues) {
+  // WHATWG crypto-based RNG - http://wiki.whatwg.org/wiki/Crypto
+  // Moderately fast, high quality
+  var _rnds8 = new Uint8Array(16);
+  rng = function whatwgRNG() {
+    crypto.getRandomValues(_rnds8);
+    return _rnds8;
+  };
+}
+
+if (!rng) {
+  // Math.random()-based (RNG)
+  //
+  // If all else fails, use Math.random().  It's fast, but is of unspecified
+  // quality.
+  var  _rnds = new Array(16);
+  rng = function() {
+    for (var i = 0, r; i < 16; i++) {
+      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      _rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+    }
+
+    return _rnds;
+  };
+}
+
+module.exports = rng;
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],3:[function(require,module,exports){
+//     uuid.js
+//
+//     Copyright (c) 2010-2012 Robert Kieffer
+//     MIT License - http://opensource.org/licenses/mit-license.php
+
+// Unique ID creation requires a high quality random # generator.  We feature
+// detect to determine the best RNG source, normalizing to a function that
+// returns 128-bits of randomness, since that's what's usually required
+var _rng = require('./rng');
+
+// Maps for number <-> hex string conversion
+var _byteToHex = [];
+var _hexToByte = {};
+for (var i = 0; i < 256; i++) {
+  _byteToHex[i] = (i + 0x100).toString(16).substr(1);
+  _hexToByte[_byteToHex[i]] = i;
+}
+
+// **`parse()` - Parse a UUID into it's component bytes**
+function parse(s, buf, offset) {
+  var i = (buf && offset) || 0, ii = 0;
+
+  buf = buf || [];
+  s.toLowerCase().replace(/[0-9a-f]{2}/g, function(oct) {
+    if (ii < 16) { // Don't overflow!
+      buf[i + ii++] = _hexToByte[oct];
+    }
+  });
+
+  // Zero out remaining bytes if string was short
+  while (ii < 16) {
+    buf[i + ii++] = 0;
+  }
+
+  return buf;
+}
+
+// **`unparse()` - Convert UUID byte array (ala parse()) into a string**
+function unparse(buf, offset) {
+  var i = offset || 0, bth = _byteToHex;
+  return  bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]];
+}
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+
+// random #'s we need to init node and clockseq
+var _seedBytes = _rng();
+
+// Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+var _nodeId = [
+  _seedBytes[0] | 0x01,
+  _seedBytes[1], _seedBytes[2], _seedBytes[3], _seedBytes[4], _seedBytes[5]
+];
+
+// Per 4.2.2, randomize (14 bit) clockseq
+var _clockseq = (_seedBytes[6] << 8 | _seedBytes[7]) & 0x3fff;
+
+// Previous uuid creation time
+var _lastMSecs = 0, _lastNSecs = 0;
+
+// See https://github.com/broofa/node-uuid for API details
+function v1(options, buf, offset) {
+  var i = buf && offset || 0;
+  var b = buf || [];
+
+  options = options || {};
+
+  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
+
+  // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime();
+
+  // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1;
+
+  // Time since last uuid creation (in msecs)
+  var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
+
+  // Per 4.2.1.2, Bump clockseq on clock regression
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  }
+
+  // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  }
+
+  // Per 4.2.1.2 Throw error if too many uuids are requested
+  if (nsecs >= 10000) {
+    throw new Error('uuid.v1(): Can\'t create more than 10M uuids/sec');
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq;
+
+  // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+  msecs += 12219292800000;
+
+  // `time_low`
+  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff;
+
+  // `time_mid`
+  var tmh = (msecs / 0x100000000 * 10000) & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff;
+
+  // `time_high_and_version`
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+  b[i++] = tmh >>> 16 & 0xff;
+
+  // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+  b[i++] = clockseq >>> 8 | 0x80;
+
+  // `clock_seq_low`
+  b[i++] = clockseq & 0xff;
+
+  // `node`
+  var node = options.node || _nodeId;
+  for (var n = 0; n < 6; n++) {
+    b[i + n] = node[n];
+  }
+
+  return buf ? buf : unparse(b);
+}
+
+// **`v4()` - Generate random UUID**
+
+// See https://github.com/broofa/node-uuid for API details
+function v4(options, buf, offset) {
+  // Deprecated - 'format' argument, as supported in v1.2
+  var i = buf && offset || 0;
+
+  if (typeof(options) == 'string') {
+    buf = options == 'binary' ? new Array(16) : null;
+    options = null;
+  }
+  options = options || {};
+
+  var rnds = options.random || (options.rng || _rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    for (var ii = 0; ii < 16; ii++) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+
+  return buf || unparse(rnds);
+}
+
+// Export public API
+var uuid = v4;
+uuid.v1 = v1;
+uuid.v4 = v4;
+uuid.parse = parse;
+uuid.unparse = unparse;
+
+module.exports = uuid;
+
+},{"./rng":2}]},{},[1]);

@@ -1,9 +1,7 @@
-var CLASSES = [];
-var Class = (function() {
+window.CLASSES = [];
+window.Class = (function() {
 
   var Class = function Class(body) {
-
-    // console.log(body);
 
     if(!body) {
         // Amble.app.debug.error('Wrong class code!')
@@ -85,8 +83,6 @@ var Class = (function() {
     }
 
     CLASSES.push(_class);
-
-    console.log(CLASSES)
 
   };
 

@@ -1,0 +1,141 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-menu/paper-menu.html">
+<link rel="import" href="../../../bower_components/paper-menu/paper-submenu.html">
+<link rel="import" href="../../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<link rel="import" href="../ui/ui-tree-view-item.html">
+<link rel="import" href="../ui/ui-asset-element.html">
+
+<dom-module id="assets-manager-panel">
+
+	<style>
+
+  :host { }
+
+  .left {
+    height: 100%;
+    width: 25%;
+    float: left;
+    border-right: 1px solid white;
+    display: inline-block;
+  }
+
+  .right {
+    /*background-color: red;*/
+    height: 100%;
+    width: 75%;
+    display: flex;
+    float: right;
+    padding: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+    /*justify-content: space-around;*/
+  }
+
+  .scroll {
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+	</style>
+
+	<template>
+
+    <div class="left card-block scroll">
+      <ul>
+        <template is="dom-repeat" items="{{ _folder }}" as="child" filter="isFolder">
+          <ui-tree-view-item id="{{child.id}}" item="{{child}}"></ui-tree-view-item>
+        </template>
+      </ul>
+    </div>
+
+    <div class="right card-block scroll">
+        <template is="dom-repeat" items="{{ _currentFolder.children }}" as="child">
+          <ui-asset-element item="{{child}}"></ui-asset-element>
+        </template>
+    </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'assets-manager-panel',
+
+		properties: {
+
+      _folder: {
+        type: Array,
+        value: []
+      },
+
+      _currentFolder: {
+        type: Object,
+        value: null,
+      }
+
+    },
+
+    ready: function() {
+      document.body.addEventListener('folder-click', this.folderClick.bind(this), false);
+      document.body.addEventListener('asset-click', this.assetClick.bind(this), false);
+    },
+
+    deepFind: function(items, id) {
+
+      for(var i = 0; i < items.length; i++) {
+        if(items[i].id == id) return items[i];
+        else {
+          var result = this.deepFind(items[i].children, id);
+          if(result) return result;
+        }
+      }
+      return null;
+    },
+
+    folderClick: function(e) {
+      var id = e.target.item.id;
+
+      this.notifyPath('_currentFolder', this._currentFolder);
+
+      var target = this.deepFind(this._folder, id);
+      if(target) {
+        this._currentFolder = target;
+        this.notifyPath('_currentFolder', this._currentFolder);
+      }
+    },
+
+    assetClick: function(e) {
+      this.folderClick(e);
+      var id = e.target.item.id;
+
+      document.getElementById(id).toggle();
+
+    },
+
+    isFolder: function(item) {
+      return item.type == 'folder';
+    },
+
+    update: function(folderStructure) {
+
+      this._folder = folderStructure;
+      this.notifyPath('_folder', this._folder);
+
+      if(!this._currentFolder && this._folder.length > 0) {
+        this._currentFolder = this._folder[0];
+      }
+      this.notifyPath('_currentFolder', this._currentFolder);
+    }
+
+	});
+
+</script>

@@ -1,0 +1,64 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../../bower_components/paper-tabs/paper-tabs.html">
+<link rel="import" href="../../../bower_components/iron-pages/iron-pages.html">
+
+<link rel="import" href="console-panel.html">
+<link rel="import" href="assets-manager-panel.html">
+
+<dom-module id="bottom-panel">
+
+	<style>
+
+  :host {
+    --paper-tab-ink: #e91e63;
+    --paper-tabs-selection-bar-color: #e91e63;
+    width: 100%;
+    height: 100%;
+  }
+
+  paper-tabs {
+    height: 15%;
+  }
+
+  iron-pages {
+    height: 85%;
+  }
+
+	</style>
+
+	<template>
+
+    <paper-tabs selected="{{selected}}">
+      <paper-tab>Asset Manager</paper-tab>
+      <paper-tab>Console</paper-tab>
+    </paper-tabs>
+
+    <iron-pages selected="{{selected}}">
+      <assets-manager-panel id="assets-manager"></assets-manager-panel>
+
+      <console-panel></console-panel>
+
+    </iron-pages>
+
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'bottom-panel',
+
+		properties: {
+
+      selected: {
+        type: Number,
+        value: 0
+      },
+
+    },
+
+	});
+
+</script>

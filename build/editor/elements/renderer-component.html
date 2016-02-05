@@ -1,6 +1,7 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../../bower_components/iron-input/iron-input.html">
 <link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="amble-checkbox.html">
 
 <dom-module id="renderer-component">
 
@@ -105,8 +106,9 @@
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>play</label>
-  								<input id="play" class="checkbox" type="checkbox" on-change="valuesChange">
+                  <amble-checkbox id="play" checked="{{actor.renderer.play}}" on-click="valuesChange">play</amble-checkbox>
+  								<!-- <label>play</label>
+  								<input id="play" class="checkbox" type="checkbox" on-change="valuesChange"> -->
   							</div>
   						</div>
 
@@ -242,6 +244,8 @@
 
 						//play
 						this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
+            this.notifyPath('actor.prefab.renderer.args.play', this.actor.prefab.renderer.play);
+            console.log(this.actor.prefab.renderer.args.play, this.actor.renderer.play, this.$.play.checked);
 
 					break;
 					case 'rect':
@@ -321,8 +325,10 @@
 
 			if(this.actor instanceof Actor) {
 				this.actor.renderer.sprite = e.target.value;
-				this.valuesChange();
-			}
+
+				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
+        this.notifyPath('actor.renderer.sprite', this.actor.renderer.sprite);
+      }
 		},
 
     toggle: function() {

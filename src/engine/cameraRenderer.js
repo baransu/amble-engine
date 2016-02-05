@@ -1,11 +1,11 @@
 // @ifdef EDITOR
-var CameraRenderer = (function() {
+window.CameraRenderer = (function() {
 
     var CameraRenderer = function CameraRenderer(args) {
-      this.layer = 0;
-      this.size = new Vec2(128, 128);
+      this.layer = -9999;
+      this.size = new Vec2(64, 64);
 
-      this.img = new Image(128, 128);
+      this.img = new Image(64, 64);
       this.img.src = 'cam_icon.png';
 
       this.type = "engine";

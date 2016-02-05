@@ -1,4 +1,4 @@
-var Transform = (function() {
+window.Transform = (function() {
 
     var Transform = function Transform(args) {
       this.position = args.position || new Vec2();

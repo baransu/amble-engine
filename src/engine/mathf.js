@@ -1,4 +1,4 @@
-var Mathf = (function() {
+window.Mathf = (function() {
 
     var Mathf = {
 

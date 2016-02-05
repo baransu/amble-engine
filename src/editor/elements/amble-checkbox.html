@@ -15,10 +15,6 @@
 
 		cursor: pointer;
 	}
-/*
-	:host[pressed] #box {
-		opacity: 0.7;
-	}*/
 
 	#icon {
 		width: 100%;
@@ -73,31 +69,31 @@
 		is: 'amble-checkbox',
 
 		properties: {
-            checked: {
-                type: Boolean,
-                value: false,
-                notify: true,
-                reflectToAttribute: true
-            },
+      checked: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        reflectToAttribute: true
+      },
 
 			disabled: {
 				type: Boolean,
 				value: false,
 				notify: true,
-                reflectToAttribute: true
+        reflectToAttribute: true
 			}
 		},
 
-        listeners: {
-            'click': '_onClick'
-        },
+    listeners: {
+      'click': '_onClick'
+    },
 
-        _onClick: function(e) {
-            e.stopPropagation();
+    _onClick: function(e) {
+      e.stopPropagation();
 
-            this.checked = !this.checked;
-			this.async(() => this.fire('update'), 1);
-        },
+      this.checked = !this.checked;
+      this.async(() => this.fire('update'), 1);
+    },
 
 
 	});

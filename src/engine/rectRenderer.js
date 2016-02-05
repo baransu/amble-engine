@@ -1,4 +1,4 @@
-var RectRenderer = (function() {
+window.RectRenderer = (function() {
 
   var RectRenderer = function RectRenderer(args) {
     this.color = args.color || '#e91e63';

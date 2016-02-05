@@ -7,8 +7,8 @@
 // }
 
 canvas {
-    display: block;
-    cursor: default;
+  display: block;
+  cursor: default;
 }
 
 html, body {
@@ -22,93 +22,92 @@ html, body {
 }
 
 .no-clickable {
-    pointer-events:none;
+  pointer-events:none;
 }
 
 .default {
-    -webkit-user-select: none;
-    user-select: none;
-    position: absolute;
+  -webkit-user-select: none;
+  user-select: none;
+  position: absolute;
 }
 
 #project-view {
-    .default;
+  .default;
 
-    left: calc(~'0% + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{viewMargin}');
-    width: calc(~'@{projectWidth} - @{viewMargin}');
-    height: calc(~'@{projectHeight} - 2*@{viewMargin}');
-
+  left: calc(~'0% + @{viewMargin}');
+  top: calc(~'@{toolsHeight} + @{viewMargin}');
+  width: calc(~'@{projectWidth} - @{viewMargin}');
+  height: calc(~'@{projectHeight} - 2*@{viewMargin}');
 }
 
 #tools {
-    .default;
-    position: absolute;
-    left: calc(~'0% + @{viewMargin}');
-    top: calc(~'0% + @{viewMargin}');
-    width: calc(~'@{toolsWidth} - 2*@{viewMargin}');
-    height: calc(~'@{toolsHeight} - @{viewMargin}');
+  .default;
+  position: absolute;
+  left: calc(~'0% + @{viewMargin}');
+  top: calc(~'0% + @{viewMargin}');
+  width: calc(~'@{toolsWidth} - 2*@{viewMargin}');
+  height: calc(~'@{toolsHeight} - @{viewMargin}');
 }
 
 #scene-view {
-    .default;
-    left: calc(~'@{projectWidth} + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{viewMargin}');
-    width: calc(~'@{sceneWidth} - @{viewMargin}');
-    height: calc(~'@{sceneHeight} - @{viewMargin}');
+  .default;
+  left: calc(~'@{viewMargin}');
+  top: calc(~'@{toolsHeight} + @{viewMargin}');
+  width: calc(~'@{sceneWidth} - @{viewMargin}');
+  height: calc(~'@{sceneHeight} - @{viewMargin}');
 
-    /*for canvas*/
-    margin: 0;
-    padding: 0;
+  /*for canvas*/
+  margin: 0;
+  padding: 0;
 }
 
 #debug-console {
-    .default;
-    left: calc(~'@{projectWidth} + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{sceneHeight} + @{viewMargin}');
-    width: calc(~'@{debugWidth} - @{viewMargin}');
-    height: calc(~'@{debugHeight} - 2*@{viewMargin}');
+  .default;
+  left: calc(~'@{viewMargin}');
+  top: calc(~'@{toolsHeight} + @{sceneHeight} + @{viewMargin}');
+  width: calc(~'@{debugWidth} - @{viewMargin}');
+  height: calc(~'@{debugHeight} - 2*@{viewMargin}');
 }
 
 #hierarchy {
-    .default;
-    right: calc(~'@{inspectorWidth} + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{viewMargin}');
-    width: calc(~'@{hierarchyWidth} - 2*@{viewMargin}');
-    height: calc(~'@{hierarchyHeight} - 2*@{viewMargin}');
+  .default;
+  right: calc(~'@{inspectorWidth} + @{viewMargin}');
+  top: calc(~'@{toolsHeight} + @{viewMargin}');
+  width: calc(~'@{hierarchyWidth} - 2*@{viewMargin}');
+  height: calc(~'@{hierarchyHeight} - 2*@{viewMargin}');
 }
 
 #inspector-view {
-    .default;
-    right: calc(~'0% + @{viewMargin}');
-    top: calc(~'@{toolsHeight} + @{viewMargin}');
-    width: calc(~'@{inspectorWidth} - @{viewMargin}');
-    height: calc(~'@{inspectorHeight} - 2*@{viewMargin}');
+  .default;
+  right: calc(~'0% + @{viewMargin}');
+  top: calc(~'@{toolsHeight} + @{viewMargin}');
+  width: calc(~'@{inspectorWidth} - @{viewMargin}');
+  height: calc(~'@{inspectorHeight} - 2*@{viewMargin}');
 }
 
 .scroll {
-    overflow: scroll;
-    height: 90%;
-    width: 100%;
-    &.hierarchy {
-        height: 100% - 2*@searchHeight;
-    }
+  overflow-y: scroll;
+  height: 90%;
+  // width: 100%;
+  &.hierarchy {
+    height: 100% - 2*@searchHeight;
+  }
 }
 
-.hierarchy-list-item {
-    width: 100%;
+.list-item {
+  overflow: hidden;
 }
 
 .vcenter {
-    display: inline-block;
-    vertical-align: middle;
-    float: none;
+  display: inline-block;
+  vertical-align: middle;
+  float: none;
 }
 
 .console-message {
-    padding: 5px;
-    font-size: 12px;
-    border-bottom: 1px solid darken(@mainColor, 10%);
+  padding: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  width: 100%;
 }
 
 ::-webkit-scrollbar-track {
@@ -118,9 +117,8 @@ html, body {
 
 ::-webkit-scrollbar {
 	width: 5px;
-    height: 5px;
-
-    background-color: transparent;
+  height: 5px;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
