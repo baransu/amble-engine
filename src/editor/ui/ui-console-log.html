@@ -1,0 +1,42 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="ui-console-log">
+
+	<style>
+
+    .log {
+      color: white;
+    }
+
+
+	</style>
+
+	<template>
+
+    <div class="console-message log">
+      {{item.message}}
+    </div>
+
+	</template>
+
+</dom-module>
+
+<script>
+
+	Polymer({
+		is: 'ui-console-log',
+
+		properties: {
+
+      item: {
+        type: Object,
+        value: null
+      },
+
+    },
+
+    ready: function() { },
+
+	});
+
+</script>
