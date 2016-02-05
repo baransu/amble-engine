@@ -161,7 +161,16 @@ window.Utils = (function(){
             var func = obj.type;
           }
 
-          if(obj.value && (Array.isArray(obj.value) || typeof obj.value == 'object')) {
+          if(obj.type == 'Array') {
+            var array = [];
+            for(var i = 0; i < obj.value.length; i++) {
+              array[i] = this.deStringify(obj.value[i]);
+            }
+            console.log(array);
+            return array;
+
+          } else if(obj.value && (Array.isArray(obj.value) || typeof obj.value == 'object')) {
+            console.log('obj', obj.value);
             for(var i in obj.value) {
               obj.value[i] = this.deStringify(obj.value[i]);
             }
