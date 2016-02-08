@@ -401,19 +401,6 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       //default actors type to add
       this.actorsToAdd = [
         {
-          name: 'actor',
-          tag: 'actor',
-          hideInHierarchy: false,
-          selected: false,
-          transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {x: 0, y: 0}},
-            scale: { name: "Vec2", args: {x: 1, y:1}},
-            rotation: 0
-          }},
-          renderer: { name: 'EngineRenderer', args: {}},
-          components: []
-        },
-        {
           name: 'MainCamera',
           tag: 'mainCamera',
           hideInHierarchy: false,
@@ -429,6 +416,19 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             bgColor: '#37474f',
           }},
           renderer: { name: 'CameraRenderer', args: {}},
+          components: []
+        },
+        {
+          name: 'Actor',
+          tag: 'actor',
+          hideInHierarchy: false,
+          selected: false,
+          transform: { name: "Transform", args: {
+            position: { name: "Vec2", args: {x: 0, y: 0}},
+            scale: { name: "Vec2", args: {x: 1, y:1}},
+            rotation: 0
+          }},
+          renderer: { name: 'EngineRenderer', args: {}},
           components: []
         },
       ];
@@ -580,7 +580,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     editor.addActor = function(actor) {
 
       var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
-      if(!AMBLE.scene.getActorByTag('mainCamera') && _actor) {
+      if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
+      if(_actor) {
 
         delete _actor.$$hashKey;
 
@@ -653,7 +654,7 @@ var application = {
       // load actors to scene
       if(projectData.actors) {
         for(var i = 0; i < projectData.actors.length; i++) {
-          console.log(projectData.actors[i]);
+          // console.log(projectData.actors[i]);
           this.scene.instantiate(projectData.actors[i]);
         }
         EDITOR.updateActors();

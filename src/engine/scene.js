@@ -16,7 +16,7 @@ window.Scene = (function() {
       var data = [];
       for(var i = 1; i < this.children.length; i++) {
         this.children[i].prefab.name = this.children[i].name;
-        console.log(this.children[i].name)
+        // console.log(this.children[i].name)
         data.push(this.children[i].prefab);
       }
 

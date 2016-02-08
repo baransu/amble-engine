@@ -89,11 +89,30 @@
     <paper-dialog id="renameDialog" entry-animation="scale-up-animation">
       <h2>Enter new {{item.type}} name:</h2>
       <div>
-        <paper-input id="nameInput" label="{{item.name}}" on-change="renameConfirm"></paper-input>
+        <paper-input id="renameInput" label="{{item.name}}" on-change="renameConfirm"></paper-input>
       </div>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button dialog-confirm on-click="renameConfirm">Accept</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="newDialog" entry-animation="scale-up-animation">
+      <h2>Enter {{newType}} name:</h2>
+      <div>
+        <paper-input id="newInput" label="{{name}}" on-change="confirmCreate"></paper-input>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm on-click="confirmCreate">Accept</paper-button>
+      </div>
+    </paper-dialog>
+
+    <paper-dialog id="deleteDialog" entry-animation="scale-up-animation">
+      <h2>Do you really want to delete {{item.name}}?</h2>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm on-click="confirmDelete">Delete</paper-button>
       </div>
     </paper-dialog>
 
@@ -104,6 +123,8 @@
 <script>
 
   var fs = require('fs');
+  var mkdirp = require('mkdirp');
+  var rimraf = require('rimraf');
 
 	Polymer({
 		is: 'ui-tree-view-item',
@@ -115,6 +136,16 @@
         value: null
       },
 
+      name: {
+        type: String,
+        value: ''
+      },
+
+      newType: {
+        type: String,
+        value: 'folder' // folder, script
+      }
+
     },
 
     listeners: {
@@ -125,22 +156,69 @@
       if(this.item.name == 'assets') {
         this.toggle();
       }
+
+      document.body.addEventListener('close-context', this.closeContext.bind(this), false);
+    },
+
+    closeContext: function(e){
+      if(e.detail.id != this.item.id) {
+        this.$.menu.close();
+      }
     },
 
     createFolder: function() {
-      this.$.renameDialog.toggle();
+      this.name = 'newFolder';
+      this.newType = 'folder'
+      this.$.newDialog.toggle();
       this.$.menu.close();
     },
 
     createScript: function() {
-      this.$.renameDialog.toggle();
+      this.name = 'newAmbleScript.js';
+      this.newType = 'script'
+      this.$.newDialog.toggle();
       this.$.menu.close();
+    },
+
+
+    deleteAsset: function(err) {
+      if(err) throw err;
+      this.$.deleteDialog.close();
+    },
+
+    confirmDelete: function() {
+      // delete
+      rimraf(this.item.path, this.deleteAsset.bind(this));
+    },
+
+    folderCreation: function(err) {
+      if(err) throw err;
+      this.$.newDialog.close();
+    },
+
+    confirmCreate: function(){
+
+      var name = this.$.newInput.value;
+
+      switch(this.newType) {
+        case 'folder':
+
+        mkdirp(this.item.path + '/' + name, this.folderCreation.bind(this));
+
+        break;
+        case 'script':
+
+        fs.writeFileSync(this.item.path + '/' + name, ' ', 'utf-8');
+        this.$.newDialog.close();
+        break;
+      }
+
     },
 
     delete: function() {
       if(this.item.name != 'assets') {
+        this.$.deleteDialog.open();
       }
-        console.log('delete')
       this.$.menu.close();
     },
 
@@ -153,16 +231,22 @@
     },
 
     renameConfirm: function() {
+
       this.$.renameDialog.close();
-      var name = this.$.nameInput.value;
-      var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
-      fs.renameSync(path + '/' + this.item.name, path + '/' + name);
-      document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+      var name = this.$.renameInput.value;
+      if(name == 'assets') {
+        console.log("you cannot name folder or asset - 'assets'")
+      } else {
+        var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+        fs.renameSync(path + '/' + this.item.name, path + '/' + name);
+        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+      }
     },
 
     _onContextMenu: function(e) {
       e.stopPropagation();
       this.$.menu.toggle();
+      this.async(() => this.fire('close-context', { id: this.item.id }), 1);
     },
 
     hasChild: function() {
