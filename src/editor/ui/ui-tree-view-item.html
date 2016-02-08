@@ -2,6 +2,15 @@
 
 <link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
 
+<link rel="import" href="../../../bower_components/iron-dropdown/iron-dropdown.html">
+
+<link rel="import" href="../../../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../../../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+
+
 <dom-module id="ui-tree-view-item">
 
 	<style>
@@ -34,26 +43,29 @@
     margin: 0;
   }
 
-  .icon {
+  paper-button {
+    margin-left: 10px;
   }
 
 	</style>
 
 	<template>
 
-    <li>
+    <li >
 
       <!-- header with name and icon -->
-      <div class="head" on-click="toggle">
+      <div class="head" class="dropdown-toggle" data-toggle="dropdown">
         <span >
-          <!-- <i class="fa fa-caret-right" hidden$="{{hasChild()}}"></i> -->
-          <i class="fa fa-folder icon"></i>
+          <i class="fa fa-caret-right" id="caret" on-click="toggle"></i>
         </span>
-        {{item.text}}
+        <span on-click="itemClick">
+          <i class="fa fa-folder"></i>
+          {{item.name}}
+        <span>
       </div>
 
       <!-- collapse with children -->
-      <iron-collapse id="collapse">
+      <iron-collapse id="collapse" noAnimation>
         <ul>
           <template is="dom-repeat" items="{{ item.children }}" as="child" filter="isFolder">
             <ui-tree-view-item id="{{child.id}}" item="{{child}}"></ui-tree-view-item>
@@ -61,13 +73,37 @@
         </ul>
       </iron-collapse>
 
+      <iron-dropdown id="menu" horizontal-align="right" vertical-align="top" withBackdrop>
+        <div class="menu-container dropdown-content">
+          <div class="list-group">
+            <a href="#" class="list-group-item" on-click="createFolder">Create folder</a>
+            <a href="#" class="list-group-item" on-click="createScript">Create script</a>
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
+            <a href="#" class="list-group-item" on-click="delete">Delete</a>
+          </div>
+        </div>
+      </iron-dropdown>
+
     </li>
+
+    <paper-dialog id="renameDialog" entry-animation="scale-up-animation">
+      <h2>Enter new {{item.type}} name:</h2>
+      <div>
+        <paper-input id="nameInput" label="{{item.name}}" on-change="renameConfirm"></paper-input>
+      </div>
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button dialog-confirm on-click="renameConfirm">Accept</paper-button>
+      </div>
+    </paper-dialog>
 
 	</template>
 
 </dom-module>
 
 <script>
+
+  var fs = require('fs');
 
 	Polymer({
 		is: 'ui-tree-view-item',
@@ -81,16 +117,53 @@
 
     },
 
+    listeners: {
+      'contextmenu': '_onContextMenu'
+    },
+
     ready: function() {
-      if(this.item.text == 'assets') {
-        this.$.collapse.toggle();
+      if(this.item.name == 'assets') {
+        this.toggle();
       }
     },
 
-    // onClick: function(e) {
-    //   e.stopPropagation();
-    //
-    // },
+    createFolder: function() {
+      this.$.renameDialog.toggle();
+      this.$.menu.close();
+    },
+
+    createScript: function() {
+      this.$.renameDialog.toggle();
+      this.$.menu.close();
+    },
+
+    delete: function() {
+      if(this.item.name != 'assets') {
+      }
+        console.log('delete')
+      this.$.menu.close();
+    },
+
+    // TODO: add auto focus
+    rename: function() {
+      if(this.item.name != 'assets') {
+        this.$.renameDialog.toggle();
+      }
+      this.$.menu.close();
+    },
+
+    renameConfirm: function() {
+      this.$.renameDialog.close();
+      var name = this.$.nameInput.value;
+      var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+      fs.renameSync(path + '/' + this.item.name, path + '/' + name);
+      document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+    },
+
+    _onContextMenu: function(e) {
+      e.stopPropagation();
+      this.$.menu.toggle();
+    },
 
     hasChild: function() {
       for(var i = 0; i < this.item.children.length; i++) {
@@ -103,12 +176,23 @@
       return item.type == 'folder';
     },
 
+    itemClick: function() {
+      // this.toggle();
+      this.async(() => this.fire('folder-click'), 1);
+    },
+
     toggle: function(e) {
       if(!this.hasChild()) {
         this.$.collapse.toggle();
-      }
 
-      this.async(() => this.fire('folder-click'), 1);
+        if(this.$.caret.classList.contains('fa-caret-right')) {
+          this.$.caret.classList.remove('fa-caret-right')
+          this.$.caret.classList.add('fa-caret-down')
+        } else {
+          this.$.caret.classList.add('fa-caret-right')
+          this.$.caret.classList.remove('fa-caret-down')
+        }
+      }
     }
 
 	});

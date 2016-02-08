@@ -7,6 +7,7 @@ const low = require('lowdb')
 const storage = require('lowdb/file-sync')
 
 const _ = require('lodash');
+// const _ = require('underscore');
 
 var AssetDB = null;
 
@@ -142,6 +143,7 @@ ipcRenderer.on('game-preview-error', function(event, data) {
 ipcRenderer.on('editor-load-respond', function(event, data) {
   console.log('main process loaded respond')
   AssetDB = low(data.path + '/assetsDB.json', { storage })
+  AssetDB._.mixin(require('underscore-db'));
 
   // var holder = document.getElementById('assets-manager');
   // holder.ondrop = function (e) {
@@ -198,10 +200,8 @@ var projectView = {
         id: "id_" + uuid.v1(),
         type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
         path: path + '/' + abc[i],
-        text: abc[i],
+        name: abc[i],
         children: [],
-        li_attr: {},  // attributes for the generated LI node
-        a_attr: {} // attributes for the generated A node
       }
 
       if(file.type == 'folder') {
@@ -216,14 +216,26 @@ var projectView = {
               name: abc[i]
             });
 
-            var _i = AssetDB('images').find({path: path + '/' + abc[i], name: abc[i]});
-            if(!_i) {
-              AssetDB('images').push({
-                id: uuid.v1(),
-                path: path + '/' + abc[i],
-                name: abc[i]
-              });
-            }
+            // var _i = AssetDB('images').find({path: path + '/' + abc[i], name: abc[i]});
+            // if(!_i) {
+            //   AssetDB('images').push({
+            //     id: uuid.v1(),
+            //     path: path + '/' + abc[i],
+            //     name: abc[i]
+            //   });
+            // } else {
+            //   var id = _i.id;
+            //   AssetDB('images').replaceById(AssetDB('images'), 1, {
+            //     id: id,
+            //     path: path + '/' + abc[i],
+            //     name: abc[i]
+            //   });
+            //
+            //   // AssetDB('images').save(AssetDB)
+            // }
+            //
+            // console.log(AssetDB('images').value())
+
 
             break;
 
@@ -234,15 +246,26 @@ var projectView = {
               name: abc[i]
             });
 
-            // validation?
-            var _i = AssetDB('scripts').find({path: path + '/' + abc[i], name: abc[i]});
-            if(!_i) {
-              AssetDB('scripts').push({
-                id: uuid.v1(),
-                path: path + '/' + abc[i],
-                name: abc[i]
-              });
-            }
+            // // validation?
+            // var _i = AssetDB('scripts').find({path: path + '/' + abc[i], name: abc[i]});
+            // if(!_i) {
+            //   AssetDB('scripts').push({
+            //     id: uuid.v1(),
+            //     path: path + '/' + abc[i],
+            //     name: abc[i]
+            //   });
+            // } else {
+            //   var id = _i.id;
+            //   AssetDB('scripts').replaceById(AssetDB('scripts'), 1, {
+            //     id: id,
+            //     path: path + '/' + abc[i],
+            //     name: abc[i]
+            //   });
+            //
+            //   // AssetDB('scripts').save(AssetDB)
+            // }
+            //
+            // console.log(AssetDB('scripts').value())
 
             break;
 
@@ -285,28 +308,28 @@ var projectView = {
 
   },
 
-  jstree: function() {
-    $('#assets-manager').jstree("destroy").empty();
-    $('#assets-manager').jstree({
-      'core' : {
-        "check_callback" : true,
-        'responsive': true,
-        'data' : projectView.projectStructure,
-      },
-      'themes' : {
-        'dots' : false // no connecting dots
-      },
-      'plugins' : [ 'wholerow', 'state', 'sort', 'types'],
-      'types' : {
-        'folder' : {
-          'icon' : 'fa fa-folder'
-        },
-        'file' : {
-          'icon' : 'fa fa-file-text-o'
-        }
-      },
-    });
-  },
+  // jstree: function() {
+  //   $('#assets-manager').jstree("destroy").empty();
+  //   $('#assets-manager').jstree({
+  //     'core' : {
+  //       "check_callback" : true,
+  //       'responsive': true,
+  //       'data' : projectView.projectStructure,
+  //     },
+  //     'themes' : {
+  //       'dots' : false // no connecting dots
+  //     },
+  //     'plugins' : [ 'wholerow', 'state', 'sort', 'types'],
+  //     'types' : {
+  //       'folder' : {
+  //         'icon' : 'fa fa-folder'
+  //       },
+  //       'file' : {
+  //         'icon' : 'fa fa-file-text-o'
+  //       }
+  //     },
+  //   });
+  // },
 
   init: function(){
 
@@ -319,9 +342,6 @@ var projectView = {
     console.log(projectData);
 
     document.querySelector('assets-manager-panel').update(projectView.projectStructure);
-
-    console.log(AssetDB('images').value());
-    console.log(AssetDB('scripts').value());
 
     // this.jstree();
     this.watch();
@@ -394,7 +414,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
           components: []
         },
         {
-          name: 'camera',
+          name: 'MainCamera',
           tag: 'mainCamera',
           hideInHierarchy: false,
           selected: false,
@@ -463,7 +483,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
                 editor.refresh();
 
-                if(document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
+                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
                     if(editor.actor && editor.actor.selected) {
                         editor.actor.selected = false;
                     }
@@ -490,7 +510,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
             break;
             case 70: // f
 
-                if(e.shiftKey && !e.ctrlKey && editor.actor.transform ) {
+                if(e.shiftKey && !e.ctrlKey && editor.acotr && editor.actor.transform ) {
                     AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
                     AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
                 }
@@ -560,10 +580,14 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     editor.addActor = function(actor) {
 
       var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
-      if(_actor) {
+      if(!AMBLE.scene.getActorByTag('mainCamera') && _actor) {
+
         delete _actor.$$hashKey;
-        _actor.name += this.actors.length;
-        console.log(_actor)
+
+        if(AMBLE.scene.getActorByName(_actor.name)) {
+          _actor.name += this.actors.length;
+        }
+
         AMBLE.scene.instantiate(_actor);
       }
 

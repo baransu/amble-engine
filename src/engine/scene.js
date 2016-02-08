@@ -34,6 +34,11 @@ window.Scene = (function() {
       return this.children.find(function(c) { return c.sceneID == id });
     },
 
+    // TODO: add search by tag array
+    getActorByTag: function getActorByTag(tag) {
+      return this.children.find(function(c) { return c.tag == tag });
+    },
+
     instantiate: function instantiate(obj) {
 
       var actor = new Actor();
