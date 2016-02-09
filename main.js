@@ -182,7 +182,7 @@ ipcMain.on('launcher-open-request', function(event, data) {
         var p = projects.find(pr => pr.name == currentName && pr.dir == currentDir)
 
         if(p) {
-          var index = f.projects.indexOf(p);
+          var index = projects.indexOf(p);
           projects.splice(index, 1);
         }
 

@@ -28,6 +28,7 @@ var engineJSFiles = [
   //editor only
   './src/engine/engineRenderer.js',
   './src/engine/cameraRenderer.js',
+  './src/engine/sceneArrows.js',
 
   './src/engine/input.js',
   './src/engine/layer.js',
