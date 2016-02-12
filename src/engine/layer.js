@@ -12,9 +12,22 @@ window.Layer = (function() {
       this.ctx.mozImageSmoothingEnabled = AMBLE.antyAliasing;
       this.ctx.msImageSmoothingEnabled = AMBLE.antyAliasing;
 
+      // @ifdef EDITOR
+      this.resize = function() {
+        // console.log(camera.getContext());
+        var contextElement = camera.getContext();
+        // console.log(contextElement.clientWidth, contextElement.clientHeight, contextElement.offsetLeft, contextElement.offsetTop)
+        this.canvas.width = contextElement.clientWidth;
+        this.canvas.height = contextElement.clientHeight;
+        this.canvas.style.left = contextElement.offsetLeft;
+        this.canvas.style.top = contextElement.offsetTop;
+      }
+      // @endif
+
       // @ifdef GAME
       //scale to fullscreen
       this.resize = function() {
+
         var scaleX = window.innerWidth / this.canvas.width;
         var scaleY = window.innerHeight / this.canvas.height;
 
@@ -30,9 +43,9 @@ window.Layer = (function() {
         this.canvas.style.transformOrigin = "0 0"; //scale from top left
         this.canvas.style.transform = "scale(" + scaleToFit + ")";
       }
+      // @endif
 
       this.resize();
-      // @endif
 
     };
 

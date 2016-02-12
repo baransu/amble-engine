@@ -1,0 +1,389 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="dynamic-layout">
+
+  <style>
+
+    #content {
+      background-color: #303841;
+      color: #EEEEEE;
+      display: flex;
+    }
+
+  </style>
+
+  <template>
+    <div id="content">
+      <content></content>
+    </div>
+  </template>
+
+  <script>
+
+    Polymer({
+
+        is: 'dynamic-layout',
+
+        /*
+        width: String default - 100%
+        height: String (default - 100%)
+        */
+
+        properties: {
+
+          width: {
+            type: String,
+            value: '100%'
+          },
+
+          height: {
+            type: String,
+            value: '100%'
+          },
+
+          _panels: {
+            type: Array,
+            value: [],
+            notify: true,
+            observer: 'panelsObserver'
+          },
+
+          _currentPanel: {
+            type: Object,
+            value: null
+          },
+
+          _right: {
+            type: Object,
+            value: null
+          },
+
+          _bottom: {
+            type: Object,
+            value: null
+          },
+
+          _startX: {
+            type: Number,
+            value: 0
+          },
+
+          _startY: {
+            type: Number,
+            value: 0
+          },
+
+          _maxLayoutWidth: {
+            type: Number,
+            value: 1
+          },
+
+          _maxLayoutHeight: {
+            type: Number,
+            value: 1
+          },
+
+          _startBottomLayout: {
+            type: Number,
+            value: 1
+          },
+
+          _startRightLayout: {
+            type: Number,
+            value: 1
+          },
+
+          _sumWidth: {
+            type: Number,
+            value: 1
+          },
+
+          _sumHeight: {
+            type: Number,
+            value: 1
+          },
+
+          _panelStartWidth: {
+            type: Number,
+            value: 1
+          },
+
+          _panelStartHeight: {
+            type: Number,
+            value: 1
+          },
+
+          _resizing: {
+            type: Boolean,
+            value: false
+          }
+
+        },
+
+        ready: function() {
+          document.body.addEventListener('resize-start', this.onPanelResizeStart.bind(this), false);
+
+          document.body.addEventListener('mouseup', this.onPanelResizeStop.bind(this), false);
+          // document.body.addEventListener('mouseleave', this.onPanelResizeStop.bind(this), false);
+
+          document.body.addEventListener('mousemove', this.onPanelMove.bind(this), false);
+
+          this.$.content.style.width = this.width;
+          this.$.content.style.height = this.height;
+          // var panels = this.$.contentpanel');
+          console.log(this.$.content.style.width, this.$.content.style.height)
+          this._panels = this.queryAllEffectiveChildren('panel-view');
+
+        },
+
+        onPanelResizeStart: function(e) {
+
+          this._resizing = true;
+
+          console.log('resize start')
+          document.body.style.cursor = "se-resize";
+
+          this._currentPanel = e.target;
+
+          this._sumWidth = this._panelStartWidth = this._currentPanel.clientWidth;
+          this._sumHeight = this._panelStartHeight = this._currentPanel.clientHeight;
+
+          this._startX = e.detail.x;
+          this._startY = e.detail.y;
+
+          for(var i = 0; i < this._panels.length; i++) {
+            var panel = this._panels[i];
+
+            if(!this._right) {
+              for(var x = 0; x < panel.right.length; x++) {
+                if(panel.right[x].id == this._currentPanel.id) {
+                  this._maxLayoutWidth = this._currentPanel.layoutwidth + panel.layoutwidth;
+                  this._startRightLayout = panel.layoutwidth;
+                  this._sumWidth = this._currentPanel.clientWidth + panel.clientWidth;
+                  this._right = panel;
+                  break;
+                }
+              }
+            }
+
+            if(!this._bottom) {
+              for(var x = 0; x < panel.bottom.length; x++) {
+                if(panel.bottom[x].id == this._currentPanel.id) {
+                  this._maxLayoutHeight = this._currentPanel.layoutheight + panel.layoutheight;
+                  this._startBottomLayout = panel.layoutheight;
+                  this._sumHeight = this._currentPanel.clientHeight + panel.clientHeight;
+                  this._bottom = panel;
+                  break;
+                }
+              }
+            }
+          }
+        },
+
+        onPanelResizeStop: function(e) {
+
+          this._currentPanel = null;
+          this._bottom = null;
+          this._right = null;
+          this._resizing = false;
+
+          console.log('resize stop')
+          document.body.style.cursor = "auto";
+        },
+
+        onPanelMove: function(e) {
+
+          if(this._resizing && e.which == 1) {
+
+            var minLayout = 0.1;
+
+            if(this._right) {
+
+              var w = this._startX - e.clientX;
+              var modX = (this._panelStartWidth - w) / this._sumWidth;
+
+              // current panel width
+              var newLayout = (this._maxLayoutWidth * modX)
+              if(newLayout > minLayout && newLayout < this._maxLayoutWidth - minLayout) {
+                this._currentPanel.layoutwidth = newLayout;
+              }
+
+              // right
+              var newLayout = this._maxLayoutWidth - this._currentPanel.layoutwidth;
+              if(newLayout > minLayout && newLayout < this._maxLayoutWidth - minLayout) {
+                this._right.layoutwidth = newLayout;
+              }
+            }
+
+            if(this._bottom) {
+
+              var h = this._startY - e.clientY;
+              var modY = (this._panelStartHeight - h) / this._sumHeight;
+
+              // current panel height
+              var newLayout = (this._maxLayoutHeight * modY);
+              if(newLayout > minLayout && newLayout < this._maxLayoutHeight - minLayout) {
+                this._currentPanel.layoutheight = newLayout;
+              }
+
+              // bottom
+              var newLayout = this._maxLayoutHeight - this._currentPanel.layoutheight;
+              if(newLayout > minLayout && newLayout < this._maxLayoutHeight - minLayout)  {
+                this._bottom.layoutheight = newLayout;
+              }
+            }
+
+            // console.log(modX, modY)
+            this.panelsObserver();
+          }
+        },
+
+
+        panelsObserver: function() {
+
+          for(var i = 0; i < this._panels.length; i++) {
+            var panel = this._panels[i];
+
+            panel.right = this.getPanelsRelation('rightto', panel.id);
+            panel.bottom = this.getPanelsRelation('bottomto', panel.id);
+            panel.rightCount = this.getPanelsCount('rightto', panel.id, 'layoutwidth') + panel.layoutwidth;
+            panel.bottomCount = this.getPanelsCount('bottomto', panel.id, 'layoutheight') + panel.layoutheight;
+
+            // console.log(panel.rightCount, panel.bottomCount, panel.id);
+          }
+
+          for(var i = 0; i < this._panels.length; i++) {
+            this.setWidth(this._panels[i]);
+          }
+
+          for(var i = 0; i < this._panels.length; i++) {
+            this.setOffset(this._panels[i]);
+          }
+
+          for(var i = 0; i < this._panels.length; i++) {
+            this.fixOffset(this._panels[i]);
+          }
+
+          this.async(() => this.fire('resize'), 1);
+
+        },
+
+        setWidth: function(panel) {
+          var width = panel.rightCount;
+          for(var x = 0; x < panel.right.length; x++) {
+            if(panel.right[x].rightCount > width) {
+              width = panel.right[x].rightCount;
+            }
+          }
+
+          // console.log(panel.id, width)
+          var height = panel.bottomCount;
+          for(var x = 0; x < panel.bottom.length; x++) {
+            if(panel.bottom[x].bottomCount > height) {
+              height = panel.bottom[x].bottomCount
+            }
+          }
+
+          panel.style.width = 100/width * panel.layoutwidth+ '%';
+          panel.style.height = 100/height * panel.layoutheight + '%';
+
+          // console.log(width, height, panel.id);
+
+        },
+
+        fixWidth: function(panel) {
+
+          var minWidth = 0;
+          for(var x = 0; x < panel.bottom.length; x++) {
+            if(parseFloat(panel.bottom[x].style.width) < parseFloat(panel.bottom[minWidth].style.width)) {
+              minWidth = x;
+            }
+          }
+          if(panel.bottom.length > 0) panel.style.width = panel.bottom[minWidth].style.width;
+
+        },
+
+        setOffset: function(panel) {
+          // offset wdith and height
+          var offsetWidth = 0;
+          for(var x = 0; x < panel.right.length; x++) {
+            offsetWidth = this.getOffset(panel, 'right', 'width');
+          }
+
+          var offsetHeight = 0;
+          for(var x = 0; x < panel.bottom.length; x++) {
+            offsetHeight = this.getOffset(panel, 'bottom', 'height');
+          }
+
+          this.fixWidth(panel)
+
+          panel.style.left = offsetWidth + '%';
+          panel.style.top = offsetHeight + '%';
+
+          // console.log(offsetWidth, offsetHeight, panel.id);
+          // console.log(panel.style.left, panel.style.top, panel.style.width, panel.style.height, panel.id);
+
+        },
+
+        fixOffset: function(panel) {
+          var maxOffsetX = 0;
+          for(var x = 0; x < panel.bottom.length; x++) {
+            if(parseFloat(panel.bottom[x].style.left) > parseFloat(panel.bottom[maxOffsetX].style.left)) {
+              maxOffsetX = x;
+            }
+          }
+          if(panel.bottom.length > 0) panel.style.left = panel.bottom[maxOffsetX].style.left;
+        },
+
+        getOffset: function(panel, type, dir) {
+          var offset = 0;
+          for(var i = 0; i < panel[type].length; i++) {
+            this.fixWidth(panel);
+            this.fixOffset(panel);
+            offset += parseFloat(panel[type][i].style[dir]);
+          }
+          return offset;
+        },
+
+        getPanelsCount: function(type, id, layout) {
+          var count = 0;
+          for(var i = 0; i < this._panels.length; i++) {
+            var panel = this._panels[i];
+            if(panel[type] == id) {
+              count += this.getPanelsCount(type, panel.id, layout) + panel[layout];
+            }
+          }
+          return count;
+        },
+
+        getPanelsRelation: function(type, id) {
+          var relations = [];
+          for(var i = 0; i < this._panels.length; i++) {
+            var panel = this._panels[i];
+            if(panel.id == id && typeof panel[type] !== 'undefined') {
+
+              var r = document.getElementById(panel[type])
+              relations.push(r);
+
+              var rel = this.getPanelsRelation(type, panel[type]);
+              for(var x = 0; x < rel.length; x++) {
+                relations.push(rel[x]);
+              }
+            }
+          }
+          return relations
+        },
+
+
+        /* EVENTS
+
+          resize all
+          add new
+
+        */
+
+
+    });
+
+  </script>
+</dom-module>

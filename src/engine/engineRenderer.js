@@ -6,6 +6,8 @@ window.EngineRenderer = (function() {
       this.size = new Vec2();
       this.type = "engine";
       this._editorName = 'EngineRenderer'
+
+      this.arrows = new SceneArrows();
     };
 
     EngineRenderer.prototype = {
@@ -15,6 +17,7 @@ window.EngineRenderer = (function() {
         var layer = camera.camera.layer;
 
         layer.ctx.save();
+
 
         var x = self.transform.position.x - camera.camera.view.x;
         var y = self.transform.position.y - camera.camera.view.y;
@@ -30,6 +33,10 @@ window.EngineRenderer = (function() {
 
         // rotation in radians
         layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+
+        if(self.selected) {
+          this.arrows.render(self, camera);
+        }
 
         layer.fillStyle('green')
         layer.ctx.beginPath();
@@ -56,17 +63,6 @@ window.EngineRenderer = (function() {
             0,
             -15
           );
-
-          if(self.selected) {
-            layer.strokeStyle(primaryColor)
-            .lineWidth(1)
-            .strokeText(
-              self.name || 'Actor',
-              0,
-              -15
-            );
-
-          }
 
         layer.ctx.restore();
       }

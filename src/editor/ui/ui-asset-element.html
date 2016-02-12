@@ -1,13 +1,21 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../../../bower_components/iron-dropdown/iron-dropdown.html">
+
+<link rel="import" href="../../../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../../../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+
+<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+
 <dom-module id="ui-asset-element">
 
 	<style>
 
   .holder {
-    width: 100px;
-    height: 100px;
-    margin: 10px;
+    width: 75px;
+    height: 75px;
+    margin: 5px;
 
     overflow: hidden;
 
@@ -16,20 +24,29 @@
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
   }
 
+  .holder:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
   .icon {
     width: 100%;
     height: 75%;
-    line-height: 75px;
-    font-size: 50px;
+    line-height: 50px;
+    font-size: 20px;
     text-align: center;
   }
 
   .text {
     display: inline-block;
     text-align: center;
+    font-size: 10px;
     width: 100%;
     height: 75%;
     text-overflow: clip;
+  }
+
+  paper-button {
+    margin-left: 10px;
   }
 
 	</style>
@@ -43,7 +60,38 @@
       <div class="text">
         {{item.name}}
       </div>
+
+      <iron-dropdown id="menu" horizontal-align="right" vertical-align="top" withBackdrop>
+        <div class="menu-container dropdown-content">
+          <div class="list-group">
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
+            <a href="#" class="list-group-item" on-click="delete">Delete</a>
+          </div>
+        </div>
+      </iron-dropdown>
+
+      <paper-dialog id="renameDialog" entry-animation="scale-up-animation">
+        <h2>Enter new {{item.type}} name:</h2>
+        <div>
+          <paper-input id="renameInput" label="{{item.name}}" on-change="renameConfirm"></paper-input>
+        </div>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm on-click="renameConfirm">Accept</paper-button>
+        </div>
+      </paper-dialog>
+
+      <paper-dialog id="deleteDialog" entry-animation="scale-up-animation">
+        <h2>Do you really want to delete {{item.name}}?</h2>
+        <div class="buttons">
+          <paper-button dialog-dismiss>Cancel</paper-button>
+          <paper-button dialog-confirm on-click="confirmDelete">Delete</paper-button>
+        </div>
+      </paper-dialog>
+
     </div>
+
+
 
 	</template>
 
@@ -70,9 +118,68 @@
 
     },
 
+    listeners: {
+      'contextmenu': '_onContextMenu'
+    },
+
+    ready: function() {
+      document.addEventListener('close-context', this.closeContext.bind(this), false);
+    },
+
+    closeContext: function(e){
+      console.log('context')
+      if(e.detail.id != this.item.id) {
+        this.$.menu.close();
+      }
+    },
+
+    confirmDelete: function() {
+      // delete
+      rimraf(this.item.path, this.deleteAsset.bind(this));
+    },
+
+    deleteAsset: function(err) {
+      if(err) throw err;
+      this.$.deleteDialog.close();
+    },
+
+    delete: function() {
+      if(this.item.name != 'assets') {
+        this.$.deleteDialog.open();
+      }
+      this.$.menu.close();
+    },
+
+    // TODO: add auto focus
+    rename: function() {
+      if(this.item.name != 'assets') {
+        this.$.renameDialog.toggle();
+      }
+      this.$.menu.close();
+    },
+
+    renameConfirm: function() {
+
+      this.$.renameDialog.close();
+      var name = this.$.renameInput.value;
+      if(name == 'assets') {
+        console.log("you cannot name folder or asset - 'assets'")
+      } else {
+        var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+        fs.renameSync(path + '/' + this.item.name, path + '/' + name);
+        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+      }
+    },
+
+    _onContextMenu: function(e) {
+      e.stopPropagation();
+      this.$.menu.toggle();
+      this.async(() => this.fire('close-context', { id: this.item.id }), 1);
+    },
+
     _onClick: function(e) {
       if(this._currentType == 'folder' && this.item.children.length > 0) {
-        this.async(() => this.fire('asset-click'), 1);
+        this.async(() => this.fire('asset-click', { assetItem: true }), 1);
       }
     },
 
