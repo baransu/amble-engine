@@ -113,6 +113,11 @@
             value: 1
           },
 
+          _resizing: {
+            type: Boolean,
+            value: false
+          }
+
         },
 
         ready: function() {
@@ -133,8 +138,10 @@
 
         onPanelResizeStart: function(e) {
 
+          this._resizing = true;
+
           console.log('resize start')
-          // document.body.style.cursor = "se-resize";
+          document.body.style.cursor = "se-resize";
 
           this._currentPanel = e.target;
 
@@ -178,16 +185,15 @@
           this._currentPanel = null;
           this._bottom = null;
           this._right = null;
-
-          this.panelsObserver();
+          this._resizing = false;
 
           console.log('resize stop')
-          // document.body.style.cursor = "auto";
+          document.body.style.cursor = "auto";
         },
 
         onPanelMove: function(e) {
 
-          if(this._currentPanel !== null && e.which == 1) {
+          if(this._resizing && e.which == 1) {
 
             var minLayout = 0.1;
 
