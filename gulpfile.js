@@ -207,6 +207,11 @@ gulp.task('editor-elements', function() {
     .pipe(gulp.dest('./build/editor/elements/'))
 });
 
+gulp.task('editor-core', function() {
+  return gulp.src('./src/editor/editor-core/*.html')
+    .pipe(gulp.dest('./build/editor/editor-core/'))
+});
+
 gulp.task('editor-panels', function() {
   return gulp.src('./src/editor/panels/*.html')
     .pipe(gulp.dest('./build/editor/panels/'))
@@ -249,7 +254,7 @@ gulp.task('build-engine', function(cb) {
   gulpSequence([ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ], 'amble-src-browserify', cb);
 });
 gulp.task('build-launcher', [ 'launcher-less', 'launcher-js', 'launcher-html' ]);
-gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-move', 'editor-elements', 'editor-panels', 'editor-ui' ]);
+gulp.task('build-editor', [ 'editor-less', 'editor-js', 'editor-move', 'editor-elements', 'editor-core', 'editor-panels', 'editor-ui' ]);
 gulp.task('build-preview', [ 'preview-less', 'preview-js', 'preview-html' ]);
 gulp.task('build-builder', [ 'builder-less', 'builder-js', 'builder-html' ]);
 gulp.task('build-src', [ 'src-less', 'src-js', 'src-html', 'src-move' ]);

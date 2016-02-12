@@ -165,8 +165,11 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
     require(projectData.scripts[i].path);
   }
 
+  document.querySelector('dynamic-layout').panelsObserver();
+  
   //clear canvas
   document.getElementById('scene-view').innerHTML = "";
+
 
   var app = new Application(application);
 

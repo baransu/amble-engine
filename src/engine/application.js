@@ -24,14 +24,12 @@ window.Application  = (function() {
         var width = $(AMBLE.mainCamera.camera.getContext()).width();
         var height = $(AMBLE.mainCamera.camera.getContext()).height();
 
+        AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
         AMBLE.mainCamera.camera.layer.canvas.width = width;
         AMBLE.mainCamera.camera.layer.canvas.height = height;
-        AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
         // @endif
 
-        // @ifdef GAME
         AMBLE.mainCamera.camera.layer.resize();
-        // @endif
       }
 
     });

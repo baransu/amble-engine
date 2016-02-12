@@ -18,82 +18,111 @@
   </head>
   <body ng-controller="editorController as editor">
 
-    <div class="container-fluid">
+    <dynamic-layout
+      width="100%"
+      height="100%">
 
-        <!-- <div id="tools" class="card">
-            <div class="card-block">
-            </div>
-        </div> -->
+      <panel-view
+        id="first"
+        layoutwidth="1"
+        layoutheight="1">
 
-      <scene-panel id="scene-view" class="card"></scene-panel>
+        <scene-panel id="scene-view" class="card"></scene-panel>
 
-      <bottom-panel id="debug-console" class="card"></bottom-panel>
+      </panel-view>
 
-      <hierarchy-panel id="hierarchy" class="card">
+      <panel-view
+        id="second"
+        layoutwidth="1"
+        layoutheight="1"
+        bottomto="first">
 
-        <div class="card-block">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <div class="input-group-btn">
-                  <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Add
-                  </button>
-                  <div class="dropdown-menu">
-                    <a href="#" ng-repeat="actor in editor.actorsToAdd" class="dropdown-item" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+        <bottom-panel id="debug-console" class="card"></bottom-panel>
+
+      </panel-view>
+
+      <panel-view
+        id="third"
+        layoutwidth="1"
+        layoutheight="1"
+        rightto="first">
+
+        <hierarchy-panel id="hierarchy" class="card">
+
+          <div class="card-block">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group">
+                  <div class="input-group-btn">
+                    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Add
+                    </button>
+                    <div class="dropdown-menu">
+                      <a href="#" ng-repeat="actor in editor.actorsToAdd" class="dropdown-item" ng-click="editor.addActor(actor)">{{actor.name}}</a>
+                    </div>
                   </div>
-                </div>
-                <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="scroll card-block">
-
-          <div class="list-group" >
-            <a href="#" id="id_{{actor.sceneID}}" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search, hideInHierarchy: false} | orderBy:'name'" class="list-group-item list-item" ng-click="editor.actorSelected($event)">{{actor.name}}</a>
-          </div>
-
-        </div>
-
-      </hierarchy-panel>
-
-      <inspector-panel id="inspector-view" class="card">
-
-        <div class="card-block">
-          <div class="row">
-            <div class="col-md-12">
-              <div class="input-group">
-                <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
-                <div class="input-group-btn">
-                  <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Add
-                  </button>
-                  <div class="dropdown-menu dropdown-menu-right" >
-                    <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
-                  </div>
+                  <input class="form-control" type="text" ng-model="editor.hierarchy.search" placeholder="search">
                 </div>
               </div>
             </div>
           </div>
 
-        </div>
+          <div class="scroll card-block">
 
-        <div class="card-block scroll" id="components-view">
+            <div class="list-group" >
+              <a href="#" id="id_{{actor.sceneID}}" ng-repeat="actor in editor.actors | filter: { name: editor.hierarchy.search, hideInHierarchy: false} | orderBy:'name'" class="list-group-item list-item" ng-click="editor.actorSelected($event)">{{actor.name}}</a>
+            </div>
 
-          <transform-component actor="{{ editor.getActor() }}"></transform-component>
-          <camera-component actor="{{editor.actor}}"></camera-component>
-          <renderer-component actor="{{editor.actor}}"></renderer-component>
+          </div>
 
-          <class-element actor="{{editor.actor}}"></class-element>
+        </hierarchy-panel>
 
-          <!--  list of components -->
-        </div>
+      </panel-view>
 
-      </inspector-panel>
+      <panel-view
+        id="fourth"
+        layoutwidth="1"
+        layoutheight="1"
+        rightto="third">
 
-    </div>
+        <inspector-panel id="inspector-view" class="card">
+
+          <div class="card-block">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="input-group">
+                  <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
+                  <div class="input-group-btn">
+                    <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      Add
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" >
+                      <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="card-block scroll" id="components-view">
+
+            <transform-component actor="{{ editor.getActor() }}"></transform-component>
+            <camera-component actor="{{editor.actor}}"></camera-component>
+            <renderer-component actor="{{editor.actor}}"></renderer-component>
+
+            <class-element actor="{{editor.actor}}"></class-element>
+
+            <!--  list of components -->
+          </div>
+
+        </inspector-panel>
+
+
+      </panel-view>
+
+    </dynamic-layout>
 
     <script src="../../node_modules/angular/angular.min.js" charset="utf-8"></script>
 
@@ -113,6 +142,12 @@
     <!-- jstree -->
     <script src="../../bower_components/jstree/dist/jstree.min.js" charset="utf-8"></script>
     <!-- <script src="../../../amble-engine-dependencies/jstree/dist/jstree.min.js" charset="utf-8"></script> -->
+
+    <!-- editr-core -->
+    <link rel="import" href="editor-core/dynamic-layout.html">
+    <link rel="import" href="editor-core/panel-view.html">
+
+    <!-- elements -->
 
     <link rel="import" href="elements/class-element.html">
     <link rel="import" href="elements/transform-component.html">

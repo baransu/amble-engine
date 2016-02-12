@@ -1,0 +1,108 @@
+<link rel="import" href="../../../bower_components/polymer/polymer.html">
+
+<dom-module id="panel-view">
+
+  <style>
+
+  :host {
+    position: absolute;
+
+    /*border: 1px solid black;*/
+    box-sizing: border-box;
+
+    -webkit-user-select: none;
+    padding: 3px
+  }
+
+  .panel {
+    width: 100%;
+    height: 100%;
+    background-color: #3A4750;
+    overflow: hidden;
+  }
+
+  .resizer {
+    position: absolute;;
+    right: 0px;
+    bottom: 3px;
+    background-color: blue;
+    width: 20px;
+    height: 20px;
+  }
+
+  .resizer:hover {
+    background-color: magenta;
+    -webkit-user-select: none;
+    /*cursor: se-resize;*/
+  }
+
+  </style>
+
+  <template>
+    <div class="panel">
+      <content></content>
+      <div class="resizer" on-mousedown="_onClick"></div>
+    </div>
+  </template>
+
+  <script>
+
+    Polymer({
+
+        is: 'panel-view',
+
+        /*
+        layoutWidth: > 0 (default - 1)
+        layoutHeight: > 0 (default - 1)
+        static: Boolean (default - false)
+        resize: Boolean (default - true)
+
+        bottomTo: String (other object id) (default = '')
+        rightTo: String (other object id) (default = '')
+        */
+
+        properties: {
+
+          layoutwidth: {
+            type: Number,
+            value: 1,
+          },
+
+          layoutheight: {
+            type: Number,
+            value: 1,
+          },
+
+          rightto: {
+            type: String
+          },
+
+          bottomto: {
+            type: String
+          },
+
+        },
+
+        ready: function() {
+          if(this.layoutwidth <= 0) this.layoutwidth = 1;
+          if(this.layoutheight <= 0) this.layoutheight = 1;
+
+          console.log(this.id, this.layoutweidth)
+
+          console.log('panel layout:' , this.layoutwidth, this.layoutheight);
+
+        },
+
+        _onClick: function(e) {
+          if(e.which == 1) {
+            this.async(() => this.fire('resize-start', {
+              x: e.clientX,
+              y: e.clientY
+            }), 1);
+          }
+        },
+
+    });
+
+  </script>
+</dom-module>

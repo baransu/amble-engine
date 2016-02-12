@@ -44,7 +44,7 @@ Class({
     if(Input.isMousePressed(1) && this.actorToMove) {
       this.actorToMove.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
       this.actorToMove.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
-      if(this.editor) this.editor.refresh();
+      this.editor.refresh();
     }
   },
 
@@ -80,7 +80,6 @@ Class({
 
     switch(e.which) {
     case 1:
-
       for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
         var obj = AMBLE.scene.children[i];
         if(obj.renderer) {
@@ -102,8 +101,8 @@ Class({
               // location.href = "#id_" + obj.sceneID;
             }
 
-            break;
-          }
+            return;
+        }
         }
       }
 
