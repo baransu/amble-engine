@@ -29,6 +29,11 @@ window.Loader = (function() {
 
       loadAll: function loadAll(callback) {
 
+        // reset
+        this.successCount = 0;
+        this.errorCount = 0;
+        this.cache = [];
+
         if(this.queue.length == 0) callback();
 
         for(var i = 0; i < this.queue.length; i++) {
@@ -36,6 +41,7 @@ window.Loader = (function() {
           var that = this;
 
           switch(this.queue[i].type) {
+
             /* loading image */
             case 'img':
             case 'image':
@@ -47,12 +53,20 @@ window.Loader = (function() {
 
               img.addEventListener('load', function(){
                 that.successCount++;
-                if(that.isDone()) callback();
+
+                if(that.isDone() && callback) {
+                  callback();
+                }
+
               }, false);
 
               img.addEventListener('error', function(){
                 that.errorCount++;
-                if(that.isDone()) callback();
+
+                if(that.isDone() && callback) {
+                  callback();
+                }
+
               }, false);
 
               img.src = imgPath;
@@ -64,6 +78,7 @@ window.Loader = (function() {
               });
 
             break;
+
             /* loading json file */
             case 'json':
               var jsonPath = this.queue[i].path;
@@ -85,7 +100,9 @@ window.Loader = (function() {
 
                   that.successCount++;
 
-                  if(that.isDone()) callback();
+                  if(that.isDone() && callback) {
+                    callback();
+                  }
 
                 } else if(xobj.readyState == 4 && xobj.status == 404){ //err
 
@@ -96,7 +113,9 @@ window.Loader = (function() {
                   });
 
                   that.errorCount++;
-                  if(that.isDone()) callback();
+                  if(that.isDone() && callback) {
+                    callback();
+                  }
 
                 }
               }

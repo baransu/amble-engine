@@ -3,15 +3,15 @@ const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
 
-const low = require('lowdb')
-const storage = require('lowdb/file-sync')
+// const low = require('lowdb')
+// const storage = require('lowdb/file-sync')
 
 const _ = require('lodash');
 // const _ = require('underscore');
 
-var AssetDB = null;
+// var AssetDB = null;
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var watch = require('node-watch');
 
 global.jQuery = $ = require('jquery');
@@ -142,8 +142,8 @@ ipcRenderer.on('game-preview-error', function(event, data) {
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
   console.log('main process loaded respond')
-  AssetDB = low(data.path + '/assetsDB.json', { storage })
-  AssetDB._.mixin(require('underscore-db'));
+  // AssetDB = low(data.path + '/assetsDB.json', { storage })
+  // AssetDB._.mixin(require('underscore-db'));
 
   projectDirectory = data.path;
   console.log(projectData);
@@ -177,6 +177,19 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 var projectView = {
 
   projectStructure: [],
+
+  importAsset: function(targetFolderPath, assetPath, assetName) {
+    console.log(targetFolderPath, assetPath, assetName);
+
+    // copy
+    try {
+      fs.copySync(assetPath, targetFolderPath + '/' + assetName);
+    } catch (err) {
+      console.error('Oh no, there was an error: ' + err.message)
+    }
+
+    // import (add meta and save to engine assets list)
+  },
 
   processDir: function(path) {
 
@@ -285,7 +298,7 @@ var projectView = {
       projectData.imgs = [];
       projectView.projectStructure = projectView.processDir(projectDirectory);
 
-      console.log(AssetDB('images').value());
+      // console.log(AssetDB('images').value());
 
       // that.jstree();
 
@@ -299,32 +312,20 @@ var projectView = {
 
       AMBLE.imgList = projectData.imgs
 
+      // load imgs
+      for (var i = 0; i < projectData.imgs.length; i++) {
+        AMBLE.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
+      }
+
+      AMBLE.loader.loadAll(function() {
+        console.log('additional assets loaded')
+        console.log(AMBLE.loader)
+        document.querySelector('renderer-component').updateSpritesList();
+      });
+
     });
 
   },
-
-  // jstree: function() {
-  //   $('#assets-manager').jstree("destroy").empty();
-  //   $('#assets-manager').jstree({
-  //     'core' : {
-  //       "check_callback" : true,
-  //       'responsive': true,
-  //       'data' : projectView.projectStructure,
-  //     },
-  //     'themes' : {
-  //       'dots' : false // no connecting dots
-  //     },
-  //     'plugins' : [ 'wholerow', 'state', 'sort', 'types'],
-  //     'types' : {
-  //       'folder' : {
-  //         'icon' : 'fa fa-folder'
-  //       },
-  //       'file' : {
-  //         'icon' : 'fa fa-file-text-o'
-  //       }
-  //     },
-  //   });
-  // },
 
   init: function(){
 
@@ -692,6 +693,29 @@ var application = {
 };
 
 var app = new Application({});
+
+/**
+ * Prevent for drag'n'drop default action
+ */
+document.addEventListener('dragover',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+document.addEventListener('drag',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+document.addEventListener('drop',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+document.addEventListener('dragend',function(event){
+  event.preventDefault();
+  return false;
+},false);
 
 /**
  * Removes a module from the cache.

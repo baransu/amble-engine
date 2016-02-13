@@ -22,8 +22,10 @@ window.SpriteRenderer = (function() {
       layer.ctx.save();
 
       if(this._sprite) {
-        if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
+        // console.log(this._sprite.src, this.sprite, AMBLE.loader.isDone())
+        if(this.sprite != '__used' && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
+          this.sprite = "__used";
           if(!this._sprite) return;
         }
 
@@ -63,8 +65,7 @@ window.SpriteRenderer = (function() {
           // @endif
         }
 
-      } else {
-
+      } else if(this.sprite != '__used'){
         this._sprite = AMBLE.loader.getAsset(this.sprite);
       }
 

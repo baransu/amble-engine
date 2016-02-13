@@ -7,7 +7,7 @@ const dialog = electron.dialog;
 
 const DEVELOPMENT = true;
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var mkdirp = require('mkdirp');
 var rmdir = require('rmdir');
 
@@ -478,9 +478,11 @@ var menuFunctions = {
   },
 
   stopPreview: function() {
-    //close preview
-    gamePreviewWindow.close();
-    //send unpause
-    editorWindow.webContents.send('editor-unpause');
+    if(gamePreviewWindow) {
+      //close preview
+      gamePreviewWindow.close();
+      //send unpause
+      editorWindow.webContents.send('editor-unpause');
+    }
   }
 }

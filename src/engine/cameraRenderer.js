@@ -2,7 +2,7 @@
 window.CameraRenderer = (function() {
 
     var CameraRenderer = function CameraRenderer(args) {
-      this.layer = -9999;
+      this.layer = 9999;
       this.size = new Vec2(64, 64);
 
       this.img = new Image(64, 64);

@@ -199,7 +199,7 @@
 
 			if(this.actor) {
 
-				this.actor.prefab.renderer = { name: 'Amble.Graphics.EngineRenderer', args: {}};
+				this.actor.prefab.renderer = { name: 'EngineRenderer', args: {}};
 
 				var sceneID = this.actor.sceneID;
 				var prefab = JSON.parse(JSON.stringify(this.actor.prefab));
@@ -305,15 +305,19 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = AMBLE.scene.getActorByID(sceneID);
 
-				this.sprites = [];
-				for(var i in AMBLE.imgList) {
-					this.push('sprites', AMBLE.imgList[i])
-				}
+				this.updateSpritesList();
 
 				this.spriteUpdate();
 
 				this.valuesChange();
 				this.isRendererPresent();
+			}
+		},
+
+		updateSpritesList: function() {
+			this.sprites = [];
+			for(var i in AMBLE.imgList) {
+				this.push('sprites', AMBLE.imgList[i])
 			}
 		},
 
@@ -328,7 +332,7 @@
 
 				this.actor.prefab.renderer.args.sprite = this.actor.renderer.sprite;
         this.notifyPath('actor.renderer.sprite', this.actor.renderer.sprite);
-      }
+			}
 		},
 
     toggle: function() {

@@ -64,7 +64,8 @@
       <iron-dropdown id="menu" horizontal-align="right" vertical-align="top" withBackdrop>
         <div class="menu-container dropdown-content">
           <div class="list-group">
-            <a href="#" class="list-group-item" on-click="rename">Rename</a>
+						<a href="#" class="list-group-item" on-click="open">Open</a>
+            <!-- <a href="#" class="list-group-item" on-click="rename">Rename</a> -->
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -99,6 +100,8 @@
 
 <script>
 
+	const _open = require('open')
+
 	Polymer({
 
 		is: 'ui-asset-element',
@@ -132,6 +135,11 @@
         this.$.menu.close();
       }
     },
+
+		open: function(e) {
+			_open(this.item.path)
+			this.$.menu.close();
+		},
 
     confirmDelete: function() {
       // delete

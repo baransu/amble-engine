@@ -42,6 +42,7 @@
 
   .currentFolderInfo {
     width: 100%;
+		border-bottom: 1px solid;
   }
 
   .rightContent {
@@ -149,6 +150,7 @@
       if(!this._currentFolder && this._folder.length > 0) {
         this._currentFolder = this._folder[0];
       }
+
       this.notifyPath('_currentFolder', this._currentFolder);
     }
 
