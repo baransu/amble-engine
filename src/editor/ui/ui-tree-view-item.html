@@ -54,7 +54,7 @@
     <li >
 
       <!-- header with name and icon -->
-      <div class="head" class="dropdown-toggle" data-toggle="dropdown">
+      <div class="head" class="dropdown-toggle" data-toggle="dropdown" id="head">
         <span >
           <i class="fa fa-caret-right" id="caret" on-click="toggle"></i>
         </span>
@@ -149,7 +149,7 @@
     },
 
     listeners: {
-      'contextmenu': '_onContextMenu'
+      'contextmenu': '_onContextMenu',
     },
 
     ready: function() {
@@ -158,7 +158,34 @@
       }
 
       document.body.addEventListener('close-context', this.closeContext.bind(this), false);
+
+		  this.$.head.ondragover = function () {
+		    return false;
+		  };
+
+		  this.$.head.ondragleave = this.$.head.ondragend = function () {
+		    return false;
+		  };
+
+		  this.$.head.ondrop = function(e) {
+				console.log(e.dataTransfer)
+				// e.preventDefault();
+				var file = e.dataTransfer.files[0];
+				console.log(file)
+				if(file) console.log('File you dragged here is', file.path);
+				return false;
+			};//this._onDrop.bind(this);
+
     },
+
+		// _onDrop: function(e) {
+		// 	console.log(e.dataTransfer)
+		// 	// e.preventDefault();
+		// 	var file = e.dataTransfer.files[0];
+		// 	console.log(file)
+		// 	if(file) console.log('File you dragged here is', file.path);
+		// 	return false;
+		// },
 
     closeContext: function(e){
       if(e.detail.id != this.item.id) {

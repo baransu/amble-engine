@@ -145,14 +145,6 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   AssetDB = low(data.path + '/assetsDB.json', { storage })
   AssetDB._.mixin(require('underscore-db'));
 
-  // var holder = document.getElementById('assets-manager');
-  // holder.ondrop = function (e) {
-  //   e.preventDefault();
-  //   var file = e.dataTransfer.files[0];
-  //   if(file) console.log('File you dragged here is', file.path);
-  //   return false;
-  // };
-
   projectDirectory = data.path;
   console.log(projectData);
   projectData = data.project;
@@ -166,7 +158,7 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   }
 
   document.querySelector('dynamic-layout').panelsObserver();
-  
+
   //clear canvas
   document.getElementById('scene-view').innerHTML = "";
 
@@ -700,19 +692,6 @@ var application = {
 };
 
 var app = new Application({});
-
-/**
- * Prevent for drag'n'drop default action
- */
-document.addEventListener('dragover',function(event){
-  event.preventDefault();
-  return false;
-},false);
-
-document.addEventListener('drop',function(event){
-  event.preventDefault();
-  return false;
-},false);
 
 /**
  * Removes a module from the cache.

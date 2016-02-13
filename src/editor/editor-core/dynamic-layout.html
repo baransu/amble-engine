@@ -140,7 +140,6 @@
 
           this._resizing = true;
 
-          console.log('resize start')
           document.body.style.cursor = "se-resize";
 
           this._currentPanel = e.target;
@@ -187,7 +186,6 @@
           this._right = null;
           this._resizing = false;
 
-          console.log('resize stop')
           document.body.style.cursor = "auto";
         },
 
@@ -195,7 +193,7 @@
 
           if(this._resizing && e.which == 1) {
 
-            var minLayout = 0.1;
+            var minLayout = 0.5;
 
             if(this._right) {
 
