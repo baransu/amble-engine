@@ -297,6 +297,7 @@ var projectView = {
       EDITOR.updateClass();
 
       // load assets
+      AMBLE.loader = new Loader();
       for (var i = 0; i < projectData.assets.length; i++) {
         var meta = projectData.assets[i];
         if(meta.type == 'sprite') {
