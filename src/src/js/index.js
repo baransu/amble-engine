@@ -15,9 +15,12 @@ window.onload = function() {
 
             document.title = gameTitle || 'untitled';
 
+
+            console.log(imagesList);
             //load images
             for(var i = 0; i < imagesList.length; i++) {
-                this.loader.load('image', './assets/img/' + imagesList[i].name, imagesList[i].name);
+              var meta = imagesList[i];
+              this.loader.load(meta.type, meta.path, meta.name, meta.uuid);
             }
 
             //load scene (json)

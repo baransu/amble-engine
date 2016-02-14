@@ -14,6 +14,8 @@ window.AnimationRenderer = (function() {
     this._frameTimer = 0;
     this.size = new Vec2();
 
+    this.currentSprite = '';
+
     // @ifdef EDITOR
     this.type = "animation";
     this._editorName = "AnimationRenderer"
@@ -28,11 +30,12 @@ window.AnimationRenderer = (function() {
 
       layer.ctx.save();
 
-      if(this._sprite !== null ) {
-
-        if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
-            this._sprite = AMBLE.loader.getAsset(this.sprite);
-            if(!this._sprite) return;
+      if(this._sprite) {
+        // console.log(this._sprite.src, this.sprite, AMBLE.loader.isDone())
+        if(this.sprite != this.currentSprite && AMBLE.loader.isDone()) {
+          this._sprite = AMBLE.loader.getAsset(this.sprite);
+          this.currentSprite = this.sprite;
+          if(!this._sprite) return;
         }
 
         var width = (this._sprite.width/this.frames) | 0;
@@ -85,8 +88,9 @@ window.AnimationRenderer = (function() {
           // @endif
         }
 
-      } else {
+      } else if(this.sprite != this.currentSprite){
         this._sprite = AMBLE.loader.getAsset(this.sprite);
+        this.currentSprite = this.sprite;
       }
 
       layer.ctx.restore();

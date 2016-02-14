@@ -50,8 +50,7 @@ var menuFunctions = {
 
     var data = {
       sceneFile: AMBLE.scene.createSceneFile(),
-      imagesList: projectData.imgs,
-      scriptsList: projectData.scripts
+      assets: AMBLE.assets,
     };
 
     ipcRenderer.send('editor-build-respond', data);
@@ -60,8 +59,7 @@ var menuFunctions = {
   play: function() {
       var data = {
         sceneFile: AMBLE.scene.createSceneFile(),
-        imagesList: projectData.imgs,
-        scriptsList: projectData.scripts
+        assets: AMBLE.assets,
       };
 
       AMBLE.pause();
@@ -153,10 +151,6 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 
   projectView.init();
 
-  for(var i in projectData.scripts) {
-    require(projectData.scripts[i].path);
-  }
-
   document.querySelector('dynamic-layout').panelsObserver();
 
   //clear canvas
@@ -168,7 +162,8 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   EDITOR.update();
   EDITOR.refresh();
 
-  AMBLE.imgList = projectData.imgs
+  AMBLE.assets = projectData.assets;
+
   ipcRenderer.send('editor-project-loaded');
 
 });
@@ -208,84 +203,81 @@ var projectView = {
         id: "id_" + uuid.v1(),
         type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
         path: path + '/' + abc[i],
-        name: abc[i],
+        name: f[0],
         children: [],
+        extension: extension
       }
 
       if(file.type == 'folder') {
         file.children = this.processDir(path + '/' + abc[i]);
-      } else {
-        for(var x in imgExtensionList) {
+      } else if(extension != 'meta'){
 
-          if(extension == imgExtensionList[x]) {
+        var metaFilePath = file.path + '.meta';
+        try {
+          fs.accessSync(metaFilePath, fs.F_OK);
+          // read meta
+          try {
+            var meta = JSON.parse(fs.readFileSync(metaFilePath, 'utf-8'));
+            var metaExist = true;
+          } catch (err) {
+            var meta = this.createMetaInformation(file);
+            var metaExist = false;
+          }
 
-            projectData.imgs.push({
-              path: path + '/' + abc[i],
-              name: abc[i]
-            });
+        } catch (err) {
+          var metaExist = false;
+          console.log('new asset', file.path)
+          var meta = this.createMetaInformation(file);
+        }
 
-            // var _i = AssetDB('images').find({path: path + '/' + abc[i], name: abc[i]});
-            // if(!_i) {
-            //   AssetDB('images').push({
-            //     id: uuid.v1(),
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            // } else {
-            //   var id = _i.id;
-            //   AssetDB('images').replaceById(AssetDB('images'), 1, {
-            //     id: id,
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            //
-            //   // AssetDB('images').save(AssetDB)
-            // }
-            //
-            // console.log(AssetDB('images').value())
+        console.log(meta)
 
+        projectData.assets.push(meta);
 
-            break;
+        // write meta for future
+        if(!metaExist) {
+          try {
+            fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
 
-          } else if(extension == 'js') {
-
-            projectData.scripts.push({
-              path: path + '/' + abc[i],
-              name: abc[i]
-            });
-
-            // // validation?
-            // var _i = AssetDB('scripts').find({path: path + '/' + abc[i], name: abc[i]});
-            // if(!_i) {
-            //   AssetDB('scripts').push({
-            //     id: uuid.v1(),
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            // } else {
-            //   var id = _i.id;
-            //   AssetDB('scripts').replaceById(AssetDB('scripts'), 1, {
-            //     id: id,
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            //
-            //   // AssetDB('scripts').save(AssetDB)
-            // }
-            //
-            // console.log(AssetDB('scripts').value())
-
-            break;
-
+          } catch (e) {
+            throw new Error('Cannot write meta file: ' + metaFilePath);
           }
         }
+
       }
 
-      files.push(file)
+      if(extension != 'meta') {
+        files.push(file)
+      }
     }
 
     return files;
 
+  },
+
+  createMetaInformation: function(file) {
+    // create uuid
+    var meta = {
+      uuid: uuid.v1(),
+      type: '',
+      path: file.path,
+      name: file.name,
+      extension: file.extension
+    }
+    // get type (sprite/ audio/ script)
+    for(var x in imgExtensionList) {
+      if(meta.extension == imgExtensionList[x]) {
+        meta.type = 'sprite'
+        break;
+      } else if(meta.extension == 'js') {
+        meta.type = 'script'
+        break;
+      }
+    }
+
+    // other import settings
+
+    return meta;
   },
 
   watch: function(){
@@ -294,27 +286,25 @@ var projectView = {
 
     watch(projectDirectory + '/assets', function(filename){
 
-      projectData.scripts = [];
-      projectData.imgs = [];
+      projectData.assets = [];
       projectView.projectStructure = projectView.processDir(projectDirectory);
 
-      // console.log(AssetDB('images').value());
-
-      // that.jstree();
+      console.log(projectData.assets);
+      AMBLE.assets = projectData.assets;
 
       document.querySelector('assets-manager-panel').update(projectView.projectStructure);
 
-      for(var i in projectData.scripts) {
-        require.reload(projectData.scripts[i].path);
-      }
-
       EDITOR.updateClass();
 
-      AMBLE.imgList = projectData.imgs
-
-      // load imgs
-      for (var i = 0; i < projectData.imgs.length; i++) {
-        AMBLE.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
+      // load assets
+      for (var i = 0; i < projectData.assets.length; i++) {
+        var meta = projectData.assets[i];
+        if(meta.type == 'sprite') {
+          AMBLE.loader.load('sprite', meta.path, meta.name, meta.uuid);
+        } else if(meta.type == 'script'){
+          // asocioate script with uuid
+          require.reload(meta.path);
+        }
       }
 
       AMBLE.loader.loadAll(function() {
@@ -329,8 +319,7 @@ var projectView = {
 
   init: function(){
 
-    projectData.imgs = [];
-    projectData.scripts = [];
+    projectData.assets = [];
 
     this.projectStructure = this.processDir(projectDirectory);
 
@@ -656,12 +645,16 @@ var application = {
         EDITOR.updateActors();
       }
 
-      // load imgs
-      if(projectData.imgs) {
-        for(var i in projectData.imgs) {
-          this.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
+      for (var i = 0; i < projectData.assets.length; i++) {
+        var meta = projectData.assets[i];
+        if(meta.type == 'sprite') {
+          this.loader.load('sprite', meta.path, meta.name, meta.uuid);
+        } else if(meta.type == 'script'){
+          // asocioate script with uuid
+          require.reload(meta.path);
         }
       }
+
 
     },
 

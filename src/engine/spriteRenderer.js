@@ -7,6 +7,8 @@ window.SpriteRenderer = (function() {
     this._sprite = null
     this.size = new Vec2();
 
+    this.currentSprite = '';
+
     // @ifdef EDITOR
     this.type = "sprite";
     this._editorName = "SpriteRenderer"
@@ -23,9 +25,9 @@ window.SpriteRenderer = (function() {
 
       if(this._sprite) {
         // console.log(this._sprite.src, this.sprite, AMBLE.loader.isDone())
-        if(this.sprite != '__used' && AMBLE.loader.isDone()) {
+        if(this.sprite != this.currentSprite && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
-          this.sprite = "__used";
+          this.currentSprite = this.sprite;
           if(!this._sprite) return;
         }
 
@@ -65,8 +67,9 @@ window.SpriteRenderer = (function() {
           // @endif
         }
 
-      } else if(this.sprite != '__used'){
+      } else if(this.sprite != this.currentSprite){
         this._sprite = AMBLE.loader.getAsset(this.sprite);
+        this.currentSprite = this.sprite;
       }
 
       layer.ctx.restore();

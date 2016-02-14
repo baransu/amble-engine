@@ -7,10 +7,6 @@ window.onload = function() {
 
 ipcRenderer.on('game-preview-start', function(event, data) {
 
-  for(var i = 0; i < data.scriptsList.length; i++) {
-    require(data.scriptsList[i].path);
-  }
-
   var app = new Application({
 
     // resize: true,
@@ -19,9 +15,16 @@ ipcRenderer.on('game-preview-start', function(event, data) {
 
     preload: function(){
 
+      console.log(data.assets);
       //load images
-      for(var i = 0; i < data.imagesList.length; i++) {
-        this.loader.load('image', data.imagesList[i].path,  data.imagesList[i].name);
+      for (var i = 0; i < data.assets.length; i++) {
+        var meta = data.assets[i];
+        if(meta.type == 'sprite') {
+          this.loader.load('sprite', meta.path, meta.name, meta.uuid);
+        } else if(meta.type == 'script'){
+          // asocioate script with uuid
+          require(meta.path);
+        }
       }
 
       //load audio

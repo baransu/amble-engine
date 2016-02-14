@@ -9,11 +9,12 @@ window.Loader = (function() {
 
     Loader.prototype = {
 
-      load: function load(type, path, name) {
+      load: function load(type, path, name, uuid) {
         this.queue.push({
           path: path,
           type: type,
-          name: name
+          name: name,
+          uuid: uuid
         });
       },
 
@@ -21,8 +22,10 @@ window.Loader = (function() {
         return (this.queue.length == this.successCount + this.errorCount);
       },
 
-      getAsset: function getAsset(path) {
-        var asset = this.cache.find(function(a) { return a.path == path });
+      // get asset by uuid no path
+      getAsset: function getAsset(uuid) {
+        var asset = this.cache.find(function(a) { return a.uuid == uuid || a.path == uuid});
+        console.log(this.cache, uuid)
         if(asset) return asset.data;
         else return undefined;
       },
@@ -43,12 +46,11 @@ window.Loader = (function() {
           switch(this.queue[i].type) {
 
             /* loading image */
-            case 'img':
-            case 'image':
+            case 'sprite':
 
               var imgPath = this.queue[i].path;
               var name = this.queue[i].name;
-
+              var uuid = this.queue[i].uuid;
               var img = new Image();
 
               img.addEventListener('load', function(){
@@ -74,7 +76,8 @@ window.Loader = (function() {
               this.cache.push({
                   data: img,
                   type: 'image',
-                  path: name
+                  path: name,
+                  uuid: uuid
               });
 
             break;
@@ -83,6 +86,7 @@ window.Loader = (function() {
             case 'json':
               var jsonPath = this.queue[i].path;
               var name = this.queue[i].name;
+              var uuid = this.queue[i].uuid;
 
               var xobj = new XMLHttpRequest();
               // xobj.overrideMimeType("application/json");
@@ -95,7 +99,8 @@ window.Loader = (function() {
                   that.cache.push({
                     data: xobj.responseText.toString(),
                     type: 'json',
-                    path: name
+                    path: name,
+                    uuid: uuid
                   });
 
                   that.successCount++;
@@ -109,14 +114,14 @@ window.Loader = (function() {
                   that.cache.push({
                     data: xobj.responseText.toString(),
                     type: 'json',
-                    path: name
+                    path: name,
+                    uuid: uuid
                   });
 
                   that.errorCount++;
                   if(that.isDone() && callback) {
                     callback();
                   }
-
                 }
               }
 
