@@ -1,13 +1,71 @@
 <link rel="import" href="../../../bower_components/polymer/polymer.html">
 
+<link rel="import" href="../../../bower_components/iron-input/iron-input.html">
+
 <dom-module id="inspector-panel">
 
 	<style>
 
+	:host {
+		width: 100%;
+		height: 100%;
+	}
+
+
 	</style>
 
 	<template>
-    <content></content>
+		<div class="card-block">
+			<div class="row">
+				<div class="col-md-12">
+
+					<template is="dom-if" if="{{_hasProperty('name', actor)}}">
+
+						<div class="input-group">
+							<input id="actor-name" is="iron-input" class="form-control" type="text" bind-value="{{actor.name}}" placeholder="name">
+							<div class="input-group-btn">
+								<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+									Add
+								</button>
+								<div class="dropdown-menu dropdown-menu-right" >
+						      <template is="dom-repeat" items="{{ _componentsToAdd }}" as="component">
+										<a href="#" class="dropdown-item" on-click="_addComponent" component="{{component}}">{{component.name}}</a>
+									</template>
+								</div>
+							</div>
+						</div>
+
+					</template>
+
+				</div>
+			</div>
+
+		</div>
+
+		<div class="card-block scroll">
+
+			<!-- transform componenet -->
+			<template is="dom-if" if="{{_hasProperty('transform', actor)}}">
+				<transform-component actor="{{ actor }}"></transform-component>
+			</template>
+
+			<!-- renderer componenet -->
+			<template is="dom-if" if="{{_hasProperty('renderer', actor)}}">
+				<renderer-component actor="{{ actor }}"></renderer-component>
+			</template>
+
+			<!-- camera componenet -->
+			<template is="dom-if" if="{{_hasProperty('camera', actor)}}">
+				<camera-component actor="{{ actor }}"></camera-component>
+			</template>
+
+			<!--  list of components element-->
+			<template is="dom-if" if="{{_hasProperty('components', actor)}}">
+				<class-element actor="{{ actor }}"></class-element>
+			</template>
+
+		</div>
+
 	</template>
 
 </dom-module>
@@ -17,7 +75,122 @@
 	Polymer({
 		is: 'inspector-panel',
 
-		properties: { },
+		properties: {
+
+			actor: {
+				type: Object,
+				value: null,
+				notify: true,
+				observer: "_actorObserver"
+			},
+
+			//default components to add
+      _componentsToAdd: {
+				type: Array,
+				value: [
+					{
+	          name: 'SpriteRenderer',
+	          type: 'renderer',
+	          body: { name: 'SpriteRenderer', args: {
+	            sprite: ''
+	          }}
+	        },
+	        {
+	          name: 'RectRenderer',
+	          type: 'renderer',
+	          body: { name: 'RectRenderer', args: {
+	            color: '#1B5E20',
+	            size: { name: "Vec2", args: {x: 100, y:100}},
+	            layer: 0
+	          }}
+	        },
+	        {
+	          name: 'AnimationRenderer',
+	          type: 'renderer',
+	          body: { name: 'AnimationRenderer', args: {
+	            sprite: '',
+	            frames: 1,
+	            updatesPerFrame: 1,
+	            layer: 0
+	          }}
+	        }
+				]
+			}
+
+		},
+
+		isntActor: function() {
+			return !EDITOR.actorSelected;
+		},
+
+		_hasProperty: function(property, obj) {
+			if(obj) {
+				if(property == 'renderer' && obj[property].type == 'engine') return false;
+				return typeof obj[property] != 'undefined';
+			} else {
+				return false;
+			}
+		},
+
+		_actorObserver: function() {
+			if(this.actor && this.actor.selected) {
+				// make actor true binding with AMBLE.scene coresponding actor
+				this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
+
+				// updated componentsToAdd
+        for(var i in CLASSES) {
+
+          var p = CLASSES[i].properties
+
+          var cl = {
+            name: CLASSES[i].name,
+            options: CLASSES[i]._options,
+            type: 'class',
+            body: {
+              type: 'noneditor',
+              name: CLASSES[i].name,
+              properties: p
+            }
+          }
+
+          var c = this._componentsToAdd.find(c => c.name == cl.name)
+
+          if(!c) {
+            this.push('_componentsToAdd', cl);
+          } else {
+            c.body.properties = CLASSES[i].properties
+          }
+        }
+			} else {
+				this.actor = null;
+			}
+		},
+
+		_addComponent: function(e) {
+			var component = e.target.component;
+
+			//add to prefab
+			if(component.type == 'renderer') {
+				this.actor.prefab.renderer = _.cloneDeep(component.body);
+			} else if(component.type == 'class'){
+				var c = _.cloneDeep(component.body)
+				this.actor.prefab.components.push(c);
+			}
+
+			var sceneID = this.actor.sceneID;
+			var prefab = this.actor.prefab;
+
+			// delete and instantiate
+			AMBLE.scene.remove(this.actor);
+			EDITOR.actor = AMBLE.scene.instantiate(prefab);
+
+			EDITOR.actor.selected = true;
+			EDITOR.actor.sceneID = sceneID;
+
+			this.actor = EDITOR.actor;
+
+			this._actorObserver();
+    },
 
 	});
 

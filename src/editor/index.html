@@ -85,40 +85,12 @@
         layoutheight="1"
         rightto="third">
 
-        <inspector-panel id="inspector-view" class="card">
-
-          <div class="card-block">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="input-group">
-                  <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
-                  <div class="input-group-btn">
-                    <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Add
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right" >
-                      <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="card-block scroll" id="components-view">
-
-            <transform-component actor="{{ editor.getActor() }}"></transform-component>
-            <camera-component actor="{{editor.actor}}"></camera-component>
-            <renderer-component actor="{{editor.actor}}"></renderer-component>
-
-            <class-element actor="{{editor.actor}}"></class-element>
-
-            <!--  list of components -->
-          </div>
+        <inspector-panel
+          id="inspector-view"
+          class="card"
+          actor="{{editor.actor}}">
 
         </inspector-panel>
-
 
       </panel-view>
 

@@ -14,7 +14,7 @@
 
 	<template>
 
-    <div class="card" hidden$="{{hideComponent}}">
+    <div class="card">
 
 			<div class="card-header">
 				<div class="row">
@@ -71,18 +71,12 @@
 			actor: {
 				type: Object,
 				value: null,
-				notify: true,
 				observer: 'refreshActor'
 			},
 
-			hideComponent: {
-				type: Boolean,
-				value: true
-			}
 		},
 
 		ready: function(){
-			this.isCameraPresent();
       this.toggle();
 		},
 
@@ -102,27 +96,15 @@
 			}
 		},
 
-		isCameraPresent: function(){
-
-			if(typeof this.actor.camera !== 'undefined') {
-				this.hideComponent = false;
-			} else {
-				this.hideComponent = true;
-			}
-		},
-
 		refreshActor: function() {
 
-			if(this.actor.sceneID && this.actor.camera) {
+			if(this.actor && this.actor.camera) {
 
-				var sceneID = this.actor.sceneID;
-				this.actor = AMBLE.scene.getActorByID(sceneID);
+				// var sceneID = this.actor.sceneID;
+				this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
 
 				this.valuesChange();
 			}
-
-			this.isCameraPresent();
-
     },
 
 		selected: function(item, type){

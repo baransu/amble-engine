@@ -99,7 +99,6 @@
 			actor: {
 				type: Object,
 				value: null,
-				notify: true,
 				observer: 'refreshActor'
 			}
 
@@ -148,7 +147,7 @@
 		},
 
 		refreshActor: function() {
-			if(this.actor.sceneID) {
+			if(this.actor) {
 				var sceneID = this.actor.sceneID;
 				this.actor = AMBLE.scene.getActorByID(sceneID);
 

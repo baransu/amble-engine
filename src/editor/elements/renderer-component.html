@@ -15,7 +15,7 @@
 
 	<template>
 
-    <div class="card" hidden$="{{hideRenderer}}">
+    <div class="card">
 
 			<div class="card-header">
 				<div class="row">
@@ -169,7 +169,6 @@
 			actor: {
 				type: Object,
 				value: null,
-				notify: true,
 				observer: 'refreshActor'
 			},
 
@@ -183,15 +182,9 @@
 				value: [],
 				observer: 'spriteUpdate'
 			},
-
-			hideRenderer: {
-				type: Boolean,
-				value: true
-			}
 		},
 
 		ready: function(){
-			this.isRendererPresent();
       this.toggle();
 		},
 
@@ -210,7 +203,7 @@
 				this.actor.selected = false;
 				this.actor.sceneID = sceneID;
 
-				this.isRendererPresent();
+				// notify inspector panel to refresh
 			}
 		},
 
@@ -245,7 +238,7 @@
 						//play
 						this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
             this.notifyPath('actor.prefab.renderer.args.play', this.actor.prefab.renderer.play);
-            console.log(this.actor.prefab.renderer.args.play, this.actor.renderer.play, this.$.play.checked);
+            // console.log(this.actor.prefab.renderer.args.play, this.actor.renderer.play, this.$.play.checked);
 
 					break;
 					case 'rect':
@@ -281,37 +274,17 @@
 			}
 		},
 
-		isRendererPresent: function(){
-
-			if(this.actor.renderer && this.actor.renderer._editorName != 'EngineRenderer') {
-
-				if(this.lastActorID != this.actor.sceneID)
-					this.hideContent = false;
-
-				this.lastActorID = this.actor.sceneID;
-
-				this.hideRenderer = false;
-
-				this.spriteUpdate();
-
-			} else {
-				this.hideRenderer = true;
-			}
-		},
-
 		refreshActor: function() {
 
-			if(this.actor.sceneID) {
+			if(this.actor) {
 
-				var sceneID = this.actor.sceneID;
-				this.actor = AMBLE.scene.getActorByID(sceneID);
+				this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
 
 				this.updateSpritesList();
 
 				this.spriteUpdate();
 
-				this.valuesChange();
-				this.isRendererPresent();
+				this.valuesChange();;
 			}
 		},
 

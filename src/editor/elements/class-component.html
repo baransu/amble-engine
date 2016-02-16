@@ -47,64 +47,71 @@
   					<template id="class-list" is="dom-repeat" items="{{ component.properties }}" as="p">
 
   						<!-- vector -->
-  						<div class="row" hidden$="{{hideProperty('Vec2', p)}}">
+							<template is="dom-if" if="{{_isTypeOf('Vec2', p)}}">
+	  						<div class="row">
+	  							{{p.name}} (vec2):</br>
+	  							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
+	  								<div class="col-md-6">
+	  									<div class="form-group form-group-sm">
+	  										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
+	  									</div>
+	  								</div>
+	  							</template>
 
-  							{{p.name}} (vec2):</br>
-  							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
-  								<div class="col-md-6">
-  									<div class="form-group form-group-sm">
-  										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
-  									</div>
-  								</div>
-  							</template>
-
-  						</div>
+	  						</div>
+							</template>
 
   						<!-- simple properties -->
-  						<div class="row" hidden$="{{hideProperty('Number', p)}}">
-  							<div class="col-md-12">
-  								<label>{{p.name}} (number)</label>
-  								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
-  							</div>
-  						</div>
+							<template is="dom-if" if="{{_isTypeOf('Number', p)}}">
+	  						<div class="row">
+	  							<div class="col-md-12">
+	  								<label>{{p.name}} (number)</label>
+	  								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
+	  							</div>
+	  						</div>
+							</template>
 
-  						<div class="row" hidden$="{{hideProperty('Boolean', p)}}">
-  							<div class="col-md-12 m-t-1" >
-  								<amble-checkbox checked="{{p.value}}">{{p.name}} (bool)</amble-checkbox>
-  							</div>
-  						</div>
+							<template is="dom-if" if="{{_isTypeOf('Boolean', p)}}">
+	  						<div class="row">
+	  							<div class="col-md-12 m-t-1" >
+	  								<amble-checkbox checked="{{p.value}}">{{p.name}} (bool)</amble-checkbox>
+	  							</div>
+	  						</div>
+							</template>
 
-  						<div class="row" hidden$="{{hideProperty('String', p)}}">
-  							<div class="col-md-12">
-  								<label>{{p.name}} (string)</label>
-  								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
-  							</div>
-  						</div>
+							<template is="dom-if" if="{{_isTypeOf('String', p)}}">
+	  						<div class="row">
+	  							<div class="col-md-12">
+	  								<label>{{p.name}} (string)</label>
+	  								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
+	  							</div>
+	  						</div>
+							</template>
 
   						<!-- array -->
-  						<div hidden$="{{hideProperty('Array', p)}}">
+							<template is="dom-if" if="{{_isTypeOf('Array', p)}}">
   							{{p.name}} (array)</br>
   							<template is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
 
-  								<div class="row" hidden$="{{hideProperty('Number', v)}}">
+  								<div class="row" hidden$="{{_isTypeOf('Number', v)}}">
   									<div class="col-md-12">
   										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
   									</div>
   								</div>
 
-  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
+  								<div class="row" hidden$="{{_isTypeOf('Boolean', v)}}">
   									<div class="col-md-12">
   										<amble-checkbox checked="{{v.value}}"></amble-checkbox>
   									</div>
   								</div>
 
-  								<div class="row" hidden$="{{hideProperty('String', v)}}">
+  								<div class="row" hidden$="{{_isTypeOf('String', v)}}">
   									<div class="col-md-12">
   										<input class="form-control" type="text" is="iron-input" bind-value="{{v.value}}"></br>
   									</div>
   								</div>
 
-  								<div hidden$="{{hideProperty('Vec2', v)}}">
+  								<div hidden$="{{_isTypeOf('Vec2', v)}}">
 
   									<div class="row">
   										<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
@@ -119,35 +126,41 @@
   								</div>
 
   							</template>
-  						</div>
+  						</template>
 
   						<!-- object -->
-  						<div hidden$="{{hideProperty('Object', p)}}">
+							<template is="dom-if" if="{{_isTypeOf('Object', p)}}">
   							<h5 class="m-t-1">{{p.name}} (object):</h5>
   							<template is="dom-repeat" items="{{ toArray(p.value, 'Object') }}" as="v">
 
-  								<div class="row" hidden$="{{hideProperty('Number', v)}}">
-  									<div class="col-md-12">
-  										<label>{{v.name}} (number)</label>
-  										<input class="form-control" type="number" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
-  									</div>
-  								</div>
+									<template is="dom-if" if="{{_isTypeOf('Number', v)}}">
+	  								<div class="row">
+	  									<div class="col-md-12">
+	  										<label>{{v.name}} (number)</label>
+	  										<input class="form-control" type="number" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+	  									</div>
+	  								</div>
+									</template>
 
-  								<div class="row" hidden$="{{hideProperty('Boolean', v)}}">
-  									<div class="col-md-12">
-  										<amble-checkbox on-update="updateComponentsDeep" checked="{{v.value}}" parent="{{p.name}}" name="{{v.name}}">{{v.name}} (bool)</amble-checkbox>
-  									</div>
-  								</div>
+									<template is="dom-if" if="{{_isTypeOf('Boolean', v)}}">
+	  								<div class="row">
+	  									<div class="col-md-12">
+	  										<amble-checkbox on-update="updateComponentsDeep" checked="{{v.value}}" parent="{{p.name}}" name="{{v.name}}">{{v.name}} (bool)</amble-checkbox>
+	  									</div>
+	  								</div>
+									</template>
 
-  								<div class="row" hidden$="{{hideProperty('String', v)}}">
-  									<div class="col-md-12">
-  										<label>{{v.name}} (string)</label>
-  										<input class="form-control" type="text" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
-  									</div>
-  								</div>
+									<template is="dom-if" if="{{_isTypeOf('String', v)}}">
+	  								<div class="row">
+	  									<div class="col-md-12">
+	  										<label>{{v.name}} (string)</label>
+	  										<input class="form-control" type="text" on-change="updateComponentsDeep" parent="{{p.name}}" name="{{v.name}}" is="iron-input" bind-value="{{v.value}}">
+	  									</div>
+	  								</div>
+									</template>
 
   							</template>
-  						</div>
+							</template>
 
   					</template>
   				</div>
@@ -171,21 +184,17 @@
 			actor: {
 				type: Object,
 				value: null,
-				notify: true,
-				reflectToAttribute: true
 			},
 
 			component: {
 				type: Object,
 				value: null,
 				notify: true,
-				reflectToAttribute: true,
 			},
 
 			index: {
 				type: Number,
 				value: -1,
-				notify: true,
 				observer: 'refreshComponent'
 			},
 
@@ -196,37 +205,25 @@
     },
 
 		deleteClass: function(e) {
-			var id = this.actor.sceneID;
-			this.actor = AMBLE.scene.getActorByID(id);
+			this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
 			this.actor.prefab.components.splice(this.index, 1);
-			var a = document.querySelectorAll('class-element');
-			for(var i = 0; i < a.length; i++) {
-				a[i].refreshActor();
-			}
+			document.querySelector('class-element').refreshActor();
 		},
 
 		resetClass: function(e) {
 
+			console.log('reset', this.actor === AMBLE.scene.getActorByID(this.actor.sceneID));
 
-			// var id = this.actor.sceneID;
-			// this.actor = AMBLE.scene.getActorByID(id);
-			// var c = Amble.CLASSES.find(cl => cl.name == this.component.name);
-			// if(c) {
-      //
-			// 	for(var i = 0; i < c.properties.length; i++) {
-			// 		this.actor.prefab.components[this.index].properties[i] = JSON.parse(JSON.stringify(c.properties[i]));
-			// 		// this.notifyPath('component.properties' + [x], this.component.properties[x]);
-			// 	}
-			// 	//
-			// 	// delete this.actor.prefab.components[this.index].$$hashKey;
-			// 	// this.component = this.actor.prefab.components[this.index];
-      //
-			// 	// console.log(this.actor.prefab.components[this.index])
-			// 	var a = document.querySelectorAll('class-element');
-			// 	for(var i = 0; i < a.length; i++) {
-			// 		a[i].refreshActor();
-			// 	}
-			// }
+			var c = CLASSES.find(cl => cl.name == this.component.name);
+			if(c) {
+
+				this.actor.prefab.components[this.index].properties = _.cloneDeep(c.properties)
+				this.notifyPath('componenet', this.componenet);
+
+				document.querySelector('class-element').refreshActor();
+
+			}
+
 		},
 
 		toArray: function(obj, type) {
@@ -245,6 +242,7 @@
         }
 
 				return obj;
+
 			} else if(obj != undefined && obj != null && type == 'Object'){
           var oo = Object.keys(obj).map(function(key) {
             var o = {
@@ -260,11 +258,11 @@
 			}
 		},
 
-		hideProperty: function(type, property) {
+		_isTypeOf: function(type, property) {
 			if(property.type) {
-				return type != property.type;
+				return type == property.type;
 			} else {
-				return typeof property != type.toLowerCase();
+				return typeof property == type.toLowerCase();
 			}
 		},
 
@@ -285,8 +283,6 @@
 		},
 
 		refreshComponent: function() {
-			var id = this.actor.sceneID;
-			this.actor = AMBLE.scene.getActorByID(id);
 			this.component = this.actor.prefab.components[this.index];
 		},
 

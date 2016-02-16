@@ -338,281 +338,202 @@ var projectView = {
 var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
-    var editor = EDITOR = this;
+  var editor = EDITOR = this;
 
-    this.refresh = function() {
-      $scope.$apply();
-    };
+  this.refresh = function() {
+    $scope.$apply();
+  };
 
-    this.updateActors = function() {
-      this.actors = AMBLE.scene.children;
-    };
+  this.updateActors = function() {
+    this.actors = AMBLE.scene.children;
+  };
 
-    editor.update = function() {
+  editor.update = function() {
 
-      this.previousActor = null;
-      this.actors = [];
-      this.actor = null;
+    this.previousActor = null;
+    this.actors = [];
+    this.actor = null;
 
-      //default components to add
-      this.componentsToAdd = [
-        {
-          name: 'SpriteRenderer',
-          type: 'renderer',
-          body: { name: 'SpriteRenderer', args: {
-            sprite: ''
-          }}
-        },
-        {
-          name: 'RectRenderer',
-          type: 'renderer',
-          body: { name: 'RectRenderer', args: {
-            color: '#1B5E20',
-            size: { name: "Vec2", args: {x: 100, y:100}},
-            layer: 0
-          }}
-        },
-        {
-          name: 'AnimationRenderer',
-          type: 'renderer',
-          body: { name: 'AnimationRenderer', args: {
-            sprite: '',
-            frames: 1,
-            updatesPerFrame: 1,
-            layer: 0
-          }}
-        }
-      ];
+    //default actors type to add
+    this.actorsToAdd = [
+      {
+        name: 'MainCamera',
+        tag: 'mainCamera',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: 0, y: 0}},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        camera: { name: "MainCamera", args: {
+          scale: 1,
+          size: { name: 'Vec2', args: {x: 1280, y: 720}},
+          bgColor: '#37474f',
+        }},
+        renderer: { name: 'CameraRenderer', args: {}},
+        components: []
+      },
+      {
+        name: 'Actor',
+        tag: 'actor',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: 0, y: 0}},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        renderer: { name: 'EngineRenderer', args: {}},
+        components: []
+      },
+    ];
 
-      //default actors type to add
-      this.actorsToAdd = [
-        {
-          name: 'MainCamera',
-          tag: 'mainCamera',
-          hideInHierarchy: false,
-          selected: false,
-          transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {x: 0, y: 0}},
-            scale: { name: "Vec2", args: {x: 1, y:1}},
-            rotation: 0
-          }},
-          camera: { name: "MainCamera", args: {
-            scale: 1,
-            size: { name: 'Vec2', args: {x: 1280, y: 720}},
-            bgColor: '#37474f',
-          }},
-          renderer: { name: 'CameraRenderer', args: {}},
-          components: []
-        },
-        {
-          name: 'Actor',
-          tag: 'actor',
-          hideInHierarchy: false,
-          selected: false,
-          transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {x: 0, y: 0}},
-            scale: { name: "Vec2", args: {x: 1, y:1}},
-            rotation: 0
-          }},
-          renderer: { name: 'EngineRenderer', args: {}},
-          components: []
-        },
-      ];
+    var cam = AMBLE.scene.getActorByName('SceneCamera');
+    if(cam) {
+      this.cameraScript = cam.getComponent('Camera');
+      this.cameraScript.editor = this;
+    }
 
-      var cam = AMBLE.scene.getActorByName('SceneCamera');
-      if(cam) {
-        this.cameraScript = cam.getComponent('Camera');
-        this.cameraScript.editor = this;
-      }
+    this.updateActors();
+    this.updateClass();
+  };
 
-      this.updateActors();
-      this.updateClass();
-    };
+  editor.updateClass = function() {
 
-    editor.updateClass = function() {
-
-      for(var i in editor.actors) {
-        var a = editor.actors[i].prefab;
-        for(var j in a.components) {
-          var c = CLASSES.find(c => c.name == a.components[j].name);
-          if(!c) continue;
-          for(var x in c.properties) {
-            var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
-            if(typeof property === 'undefined') {
-              a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
-            }
+    for(var i in editor.actors) {
+      var a = editor.actors[i].prefab;
+      for(var j in a.components) {
+        var c = CLASSES.find(c => c.name == a.components[j].name);
+        if(!c) continue;
+        for(var x in c.properties) {
+          var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
+          if(typeof property === 'undefined') {
+            a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
           }
+        }
 
-          var toDel = [];
-          for(var x in a.components[j].properties) {
-            var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
-            if(!aa) {
-              toDel.push(a.components[j].properties[x].name);
-            }
+        var toDel = [];
+        for(var x in a.components[j].properties) {
+          var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
+          if(!aa) {
+            toDel.push(a.components[j].properties[x].name);
           }
-
-          for(var x in toDel) {
-            var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
-            a.components[j].properties.splice(index, 1);
-          }
-
-        }
-      }
-    };
-
-    editor.update();
-
-    angular.element(window).on('keydown', function(e) {
-        // console.log(e.which);
-        switch(e.which) {
-            case 27: //esc
-
-                editor.refresh();
-
-                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
-                    if(editor.actor && editor.actor.selected) {
-                        editor.actor.selected = false;
-                    }
-
-                    if(editor.previousActor) {
-                        editor.previousActor.className = 'list-group-item';
-                    }
-                } else {
-                    document.activeElement.blur();
-                }
-
-            break;
-            case 46: //del
-
-                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
-
-                    AMBLE.scene.remove(editor.actor)
-
-                    editor.actor = null;
-
-                    editor.refresh();
-                }
-
-            break;
-            case 70: // f
-
-                if(e.shiftKey && !e.ctrlKey && editor.acotr && editor.actor.transform ) {
-                    AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
-                    AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
-                }
-                //
-                // if(e.shiftKey && e.ctrlKey) {
-                //     console.log('resize')
-                //     AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
-                // }
-
-            break;
-
-        }
-    });
-
-    editor.updateComponents = function() {
-        //updated componentsToAdd
-        for(var i in CLASSES) {
-            var p = CLASSES[i].properties
-            // console.log(p);
-            var cl = {
-                name: CLASSES[i].name,
-                options: CLASSES[i]._options,
-                type: 'class',
-                body: {
-                    type: 'noneditor',
-                    name: CLASSES[i].name,
-                    properties: p
-                }
-            }
-            var c = this.componentsToAdd.find(c => c.name == cl.name)
-            if(!c) {
-                this.componentsToAdd.push(cl);
-            } else {
-                c.body.properties = CLASSES[i].properties
-            }
         }
 
-        console.log(this.componentsToAdd);
-
-    };
-
-    editor.addComponent = function(component, $e) {
-      console.log(component);
-
-      if(editor.actor) {
-        //add to prefab
-        if(component.type == 'renderer') {
-          editor.actor.prefab.renderer = component.body;
-        } else if(component.type == 'class'){
-          var c = JSON.parse(JSON.stringify(component.body))
-          editor.actor.prefab.components.push(c);
-
+        for(var x in toDel) {
+          var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
+          a.components[j].properties.splice(index, 1);
         }
 
-        var sceneID = editor.actor.sceneID;
-        var prefab = editor.actor.prefab;
-
-        AMBLE.scene.remove(this.actor);
-        editor.actor = AMBLE.scene.instantiate(prefab);
-
-        editor.actor.selected = true;
-        editor.actor.sceneID = sceneID;
       }
+    }
+  };
 
-    };
+  editor.update();
 
-    editor.addActor = function(actor) {
+  angular.element(window).on('keydown', function(e) {
+    // console.log(e.which);
+    switch(e.which) {
+    case 27: //esc
 
-      var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
-      if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
-      if(_actor) {
+      editor.refresh();
 
-        delete _actor.$$hashKey;
-
-        if(AMBLE.scene.getActorByName(_actor.name)) {
-          _actor.name += this.actors.length;
+      if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
+        if(editor.actor && editor.actor.selected) {
+          editor.actor.selected = false;
         }
 
-        AMBLE.scene.instantiate(_actor);
+        if(editor.previousActor) {
+          editor.previousActor.classList.remove('active');
+        }
+
+        editor.actor == null;
+        document.querySelector('inspector-panel')._actorObserver();
+
+      } else {
+        document.activeElement.blur();
       }
 
-    };
+    break;
+    case 46: //del
 
-    editor.getActor = function() {
-      if(this.actor) {
-        delete this.actor.$$hashKey;
-      }
-      return this.actor;
-    };
+      if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
-    editor.actorSelected = function($e) {
+        AMBLE.scene.remove(editor.actor)
 
-      var sceneID = $e.target.id.replace('id_', '');
+        editor.actor = null;
 
-      if(this.actor) this.actor.selected = false;
-
-      this.actor = AMBLE.scene.getActorByID(sceneID)
-
-      if(this.previousActor) {
-        this.previousActor.classList.remove('active');
+        editor.refresh();
       }
 
-      if($e) {
-        $e.preventDefault();
-        $e.target.classList.add('active');
-        this.previousActor = $e.target;
+    break;
+    case 70: // f
+
+      if(e.shiftKey && !e.ctrlKey && editor.acotr && editor.actor.transform ) {
+        AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
+        AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
+      }
+      //
+      // if(e.shiftKey && e.ctrlKey) {
+      //     console.log('resize')
+      //     AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
+      // }
+
+    break;
+
+    }
+  });
+
+  editor.addActor = function(actor) {
+
+    var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
+    if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
+    if(_actor) {
+
+      delete _actor.$$hashKey;
+
+      if(AMBLE.scene.getActorByName(_actor.name)) {
+        _actor.name += this.actors.length;
       }
 
-      this.actor.selected = !this.actor.selected;
+      AMBLE.scene.instantiate(_actor);
+    }
 
-    };
+  };
+
+  editor.getActor = function() {
+    if(this.actor) {
+      delete this.actor.$$hashKey;
+    }
+    return this.actor;
+  };
+
+  editor.actorSelected = function($e) {
+
+    var sceneID = $e.target.id.replace('id_', '');
+
+    if(this.actor) this.actor.selected = false;
+
+    this.actor = AMBLE.scene.getActorByID(sceneID)
+
+    if(this.previousActor) {
+      this.previousActor.classList.remove('active');
+    }
+
+    if($e) {
+      $e.preventDefault();
+      $e.target.classList.add('active');
+      this.previousActor = $e.target;
+    }
+
+    this.actor.selected = !this.actor.selected;
+
+  };
 }]);
 
 //scane view
 var application = {
-
 
     // resize: true,
     mainCamera: {

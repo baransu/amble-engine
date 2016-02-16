@@ -13,11 +13,11 @@
 
 	<template>
 
-        <template is="dom-repeat" items="{{ _components }}">
+      <template is="dom-repeat" items="{{ _components }}">
 
-            <class-component index="{{index}}" actor="{{actor}}"></class-component>
+        <class-component index="{{ index }}" actor="{{ actor }}"></class-component>
 
-        </template>
+      </template>
 
 	</template>
 
@@ -30,40 +30,39 @@
 
 		properties: {
 
-            actor: {
-                type: Object,
-                notify: true,
-                value: null,
-                observer: 'refreshActor'
-            },
+      actor: {
+        type: Object,
+        value: null,
+        observer: 'refreshActor'
+      },
 
 			_components: {
 				type: Array,
 				value: [],
-				notify: true,
-				reflectToAttribute: true,
+				notify: true
 			},
 
 		},
 
 		ready: function () { },
 
-        refreshActor: function() {
-            if(this.actor) {
-                var id = this.actor.sceneID;
-                this.actor = AMBLE.scene.getActorByID(id);
-                this._components = [];
+    refreshActor: function() {
 
-                for(var i = 0; i < this.actor.prefab.components.length; i++) {
-                    this.push('_components', this.actor.prefab.components[i]);
-                }
+      if(this.actor) {
 
-                var a = document.querySelectorAll('class-component');
-    			for(var i = 0; i < a.length; i++) {
-    				a[i].refreshComponent();
-    			}
-            }
-        }
+        this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
+
+				this._components = [];
+				this.async(() => {
+					if(this.actor) {
+						this._components = [];
+						for(var i = 0; i < this.actor.prefab.components.length; i++) {
+							this.push('_components', this.actor.prefab.components[i]);
+						}
+					}
+				}, 1);
+      }
+    }
 
 	});
 
