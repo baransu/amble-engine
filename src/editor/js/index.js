@@ -448,7 +448,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
           editor.previousActor.classList.remove('active');
         }
 
-        editor.actor == null;
+        editor.actor = null;
+        editor.cameraScript.selectedActor = null;
         document.querySelector('inspector-panel')._actorObserver();
 
       } else {
@@ -460,6 +461,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
       if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
+        editor.cameraScript.selectedActor = null;
         AMBLE.scene.remove(editor.actor)
 
         editor.actor = null;
@@ -516,6 +518,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     if(this.actor) this.actor.selected = false;
 
     this.actor = AMBLE.scene.getActorByID(sceneID)
+    this.cameraScript.selectedActor = this.actor;
 
     if(this.previousActor) {
       this.previousActor.classList.remove('active');

@@ -18,8 +18,16 @@ Class({
     mouse: { type: Vec2 },
     selectedActor: null,
     modifier: { type: Vec2 },
-    actorToMove: null,
+    selectedActor: null,
     editor: null,
+    selectedAxis: {
+      type: String,
+      value: ''
+    },
+    move: {
+      type: Boolean,
+      value: false
+    },
   },
 
   update: function(self) {
@@ -41,9 +49,30 @@ Class({
       this.done = false
     }
 
-    if(Input.isMousePressed(1) && this.actorToMove) {
-      this.actorToMove.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
-      this.actorToMove.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+    if(!this.move && EDITOR.actor && EDITOR.actor.renderer && EDITOR.actor.renderer.arrows) {
+      this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, this.mouse.x, this.mouse.y);
+    }
+
+    console.log(this.selectedAxis);
+
+    if(Input.isMousePressed(1) && this.selectedActor) {
+
+      if(this.selectedActor.renderer && this.selectedActor.renderer.arrows) {
+        this.selectedActor.renderer.arrows.selected = this.selectedAxis;
+      }
+
+      if(this.selectedAxis == 'both') {
+        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.editor.refresh();
+      } else if(this.selectedAxis == 'x') {
+        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.editor.refresh();
+      } else if(this.selectedAxis == 'y') {
+        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.editor.refresh();
+      }
+
       this.editor.refresh();
     }
   },
@@ -80,6 +109,13 @@ Class({
 
     switch(e.which) {
     case 1:
+
+      if(this.selectedActor) {
+        this.move = true;
+        this.modifier.x = this.selectedActor.transform.position.x - this.mouse.x;
+        this.modifier.y = this.selectedActor.transform.position.y - this.mouse.y;
+      }
+
       for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
         var obj = AMBLE.scene.children[i];
         if(obj.renderer) {
@@ -90,10 +126,10 @@ Class({
 
           if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
 
-            this.modifier.x = obj.transform.position.x - this.mouse.x;
-            this.modifier.y = obj.transform.position.y - this.mouse.y;
+            // this.modifier.x = obj.transform.position.x - this.mouse.x;
+            // this.modifier.y = obj.transform.position.y - this.mouse.y;
 
-            this.actorToMove = obj;
+            this.selectedActor = obj;
 
             var a = document.getElementById('id_' + obj.sceneID);
             if(a) {
@@ -102,7 +138,7 @@ Class({
             }
 
             return;
-        }
+          }
         }
       }
 
@@ -111,8 +147,8 @@ Class({
   },
 
   onmouseup: function(self, e) {
-    if(this.actorToMove) {
-      this.actorToMove = null;
+    if(e.which == 1) {
+      this.move = false;
     }
   },
 

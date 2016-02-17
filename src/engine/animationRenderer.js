@@ -19,6 +19,9 @@ window.AnimationRenderer = (function() {
     // @ifdef EDITOR
     this.type = "animation";
     this._editorName = "AnimationRenderer"
+
+    this.arrows = new SceneArrows();
+
     // @endif
   };
 
@@ -72,6 +75,8 @@ window.AnimationRenderer = (function() {
 
           // @ifdef EDITOR
           if(self.selected) {
+
+            this.arrows.render(self, camera);
 
             layer.ctx.save();
             layer.strokeStyle(primaryColor)

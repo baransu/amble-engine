@@ -12,6 +12,9 @@ window.SpriteRenderer = (function() {
     // @ifdef EDITOR
     this.type = "sprite";
     this._editorName = "SpriteRenderer"
+
+    this.arrows = new SceneArrows();
+
     // @endif
   };
 
@@ -50,6 +53,8 @@ window.SpriteRenderer = (function() {
 
           // @ifdef EDITOR
           if(self.selected) {
+
+            this.arrows.render(self, camera);
 
             layer.ctx.save();
 
