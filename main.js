@@ -220,8 +220,8 @@ ipcMain.on('launcher-open-request', function(event, data) {
         icon: __dirname + '/icon.png',
         width: 1280,
         height: 720,
-        'min-width': 960,
-        'min-height': 540,
+        minWidth: 960,
+        minHeight: 540,
         show: false
       });
 
