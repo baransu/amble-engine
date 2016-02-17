@@ -116,28 +116,30 @@ Class({
         this.modifier.y = this.selectedActor.transform.position.y - this.mouse.y;
       }
 
-      for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
-        var obj = AMBLE.scene.children[i];
-        if(obj.renderer) {
-          var width = obj.renderer.size.x;
-          var height = obj.renderer.size.y;
-          var x = obj.transform.position.x;
-          var y = obj.transform.position.y;
+      if(this.selectedAxis == '') {
+        for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
+          var obj = AMBLE.scene.children[i];
+          if(obj.renderer) {
+            var width = obj.renderer.size.x;
+            var height = obj.renderer.size.y;
+            var x = obj.transform.position.x;
+            var y = obj.transform.position.y;
 
-          if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
+            if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
 
-            // this.modifier.x = obj.transform.position.x - this.mouse.x;
-            // this.modifier.y = obj.transform.position.y - this.mouse.y;
+              // this.modifier.x = obj.transform.position.x - this.mouse.x;
+              // this.modifier.y = obj.transform.position.y - this.mouse.y;
 
-            this.selectedActor = obj;
+              this.selectedActor = obj;
 
-            var a = document.getElementById('id_' + obj.sceneID);
-            if(a) {
-              a.click();
-              // location.href = "#id_" + obj.sceneID;
+              var a = document.getElementById('id_' + obj.sceneID);
+              if(a) {
+                a.click();
+                // location.href = "#id_" + obj.sceneID;
+              }
+
+              return;
             }
-
-            return;
           }
         }
       }

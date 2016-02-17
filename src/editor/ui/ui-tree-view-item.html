@@ -174,10 +174,12 @@
 
 			this.$.head.classList.remove('head-hover');
 
-			var file = e.dataTransfer.files[0];
-			var path = this.item.path;
-			if(file && path) {
-				projectView.importAsset(path, file.path, file.name);
+			for(var i = 0; i < e.dataTransfer.files.length; i++) {
+				var file = e.dataTransfer.files[i];
+				var path = this.item.path;
+				if(file && path) {
+					projectView.importAsset(path, file.path, file.name);
+				}
 			}
 
 			return false;

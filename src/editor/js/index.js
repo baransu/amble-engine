@@ -311,7 +311,8 @@ var projectView = {
       AMBLE.loader.loadAll(function() {
         console.log('additional assets loaded')
         console.log(AMBLE.loader)
-        document.querySelector('renderer-component').updateSpritesList();
+        var rendererComponenet = document.querySelector('renderer-component')
+        if(rendererComponenet) rendererComponenet.updateSpritesList();
       });
 
     });
