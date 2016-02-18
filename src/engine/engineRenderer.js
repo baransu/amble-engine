@@ -31,38 +31,16 @@ window.EngineRenderer = (function() {
         //scale
         layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
-        // rotation in radians
-        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
-
         if(self.selected) {
           this.arrows.render(self, camera);
         }
 
-        layer.fillStyle('green')
-        layer.ctx.beginPath();
-        layer.ctx.arc(
-          0,
-          0,
-          5,
-          0,
-          2*Math.PI
-        );
-        layer.ctx.fill();
+        // rotation in radians
+        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         layer.textAlign('center')
-          .fillStyle('transparent')
-          .fillRect(
-            -this.size.x/2,
-            -this.size.y/2,
-            this.size.x,
-            this.size.y
-          )
           .fillStyle('#bcbebf')
-          .fillText(
-            self.name || 'Actor',
-            0,
-            -15
-          );
+          .fillText(self.name || 'Actor', 0, 0);
 
         layer.ctx.restore();
       }

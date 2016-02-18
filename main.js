@@ -7,7 +7,7 @@ const dialog = electron.dialog;
 
 const DEVELOPMENT = true;
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var mkdirp = require('mkdirp');
 var rmdir = require('rmdir');
 
@@ -220,8 +220,8 @@ ipcMain.on('launcher-open-request', function(event, data) {
         icon: __dirname + '/icon.png',
         width: 1280,
         height: 720,
-        'min-width': 960,
-        'min-height': 540,
+        minWidth: 960,
+        minHeight: 540,
         show: false
       });
 
@@ -280,7 +280,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
 
   //builder
   builderWindow = new BrowserWindow({
-    icon: __dirname + '/build/icon/icon.png',
+    icon: __dirname + '/icon.png',
     title: currentName + ' | ' + currentDir + ' | Amble Builder',
     width: 640,
     height: 480,
@@ -379,14 +379,12 @@ ipcMain.on('builder-build-request', function(event, data) {
 
   //process build
   var sceneFile = projectBuildData.sceneFile;
-  var imagesList = projectBuildData.imagesList;
-  var scriptsList = projectBuildData.scriptsList;
+  var imagesList = [];
+  var scriptsList = [];
   var targetDir = buildDir + '/' + data.name;
   var gameTitle = data.name;
 
   builderGulp.projectDirectory = currentDir + '/' + currentName;
-  builderGulp.imagesList = [];
-  builderGulp.scriptsList = [];
   builderGulp.outputDir = targetDir;
 
   builderGulp.projectName = gameTitle;
@@ -397,19 +395,29 @@ ipcMain.on('builder-build-request', function(event, data) {
   builderGulp.projectDescription = data.description;
   builderGulp.projectAuthor = data.author;
 
-  for(var i = 0; i < imagesList.length; i++) {
-    builderGulp.imagesList.push(imagesList[i].path);
+  for(var i = 0; i < projectBuildData.assets.length; i++) {
+    var meta = projectBuildData.assets[i];
+    if(meta.type == 'sprite') {
+      builderGulp.imagesList.push(meta.path);
+      meta.path = '/assets/img/' + meta.name + '.' + meta.extension;
+      imagesList.push(meta)
+      // console.log(meta.path);
+    } else if(meta.type == 'script') {
+      scriptsList.push(meta);
+      builderGulp.scriptsList.push(meta.path);
+    }
   }
 
-  for(var i = 0; i < scriptsList.length; i++) {
-    builderGulp.scriptsList.push(scriptsList[i].path);
-  }
+  console.log(builderGulp.imagesList);
+  console.log(builderGulp.scriptsList)
 
   if(buildDir == 'null' || buildDir == null || buildDir == 'undefined' || buildDir == undefined) {
     response.type = 'error';
     response.message = 'Game build failed - wrong directory';
     builderWindow.send('builder-build-respond', response);
   }
+
+  console.log(JSON.stringify(imagesList));
 
   builderGulp.start('build-move-' + data.targetPlatform, function() {
 
@@ -478,9 +486,21 @@ var menuFunctions = {
   },
 
   stopPreview: function() {
-    //close preview
-    gamePreviewWindow.close();
-    //send unpause
-    editorWindow.webContents.send('editor-unpause');
+    if(gamePreviewWindow) {
+      //close preview
+      gamePreviewWindow.close();
+      //send unpause
+      editorWindow.webContents.send('editor-unpause');
+    }
   }
 }
+
+// Uncaught Exception:
+// Error: Invalid glob argument: [object Object],/home/tomek/Documents/amble-test/New Name/assets/32px.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/ammo_1.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/ammo_2.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/ammo_3.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/bg1_1.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/bg1_2.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/bg1_3.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/boss_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/boss_info.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/boss_walk.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/combat_background.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/comics_end.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/comics_over_boss.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/comics_over_enemies.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/comics_start.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/enemy1_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/enemy2_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/enemy3_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/explosion.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/jezus_head.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/levelup_1.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/levelup_2.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/levelup_3.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl1_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl1_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl2_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl2_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl3_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl3_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl4_anim.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_lvl4_idle.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/player_run.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/scale.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/start_info.png,[object Object],/home/tomek/Documents/amble-test/New Name/assets/start_screen.png
+//     at Gulp.src (/home/tomek/Documents/amble-engine/node_modules/vinyl-fs/lib/src/index.js:20:11)
+//     at Gulp.<anonymous> (/home/tomek/Documents/amble-engine/build/utils/builder.js:46:15)
+//     at module.exports (/home/tomek/Documents/amble-engine/node_modules/orchestrator/lib/runTask.js:34:7)
+//     at Gulp.Orchestrator._runTask (/home/tomek/Documents/amble-engine/node_modules/orchestrator/index.js:273:3)
+//     at Gulp.Orchestrator._runStep (/home/tomek/Documents/amble-engine/node_modules/orchestrator/index.js:214:10)
+//     at Gulp.Orchestrator.start (/home/tomek/Documents/amble-engine/node_modules/orchestrator/index.js:134:8)
+//     at /home/tomek/Documents/amble-engine/node_modules/gulp-sequence/index.js:63:12

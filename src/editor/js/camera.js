@@ -18,8 +18,16 @@ Class({
     mouse: { type: Vec2 },
     selectedActor: null,
     modifier: { type: Vec2 },
-    actorToMove: null,
+    selectedActor: null,
     editor: null,
+    selectedAxis: {
+      type: String,
+      value: ''
+    },
+    move: {
+      type: Boolean,
+      value: false
+    },
   },
 
   update: function(self) {
@@ -28,10 +36,12 @@ Class({
     this.mouse.y = (Input.mousePosition.y/self.camera.scale - this.translate.y) + self.camera.view.y;
 
     if(Input.isMousePressed(3)) {
+
       if(!this.done) {
         this.done = true;
         this.lastMousePos.copy(Input.mousePosition);
       }
+
       var x = (this.lastMousePos.x - Input.mousePosition.x)/self.camera.scale;
       var y = (this.lastMousePos.y - Input.mousePosition.y)/self.camera.scale;
       self.transform.position.add(new Vec2(x, y));
@@ -41,9 +51,28 @@ Class({
       this.done = false
     }
 
-    if(Input.isMousePressed(1) && this.actorToMove) {
-      this.actorToMove.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
-      this.actorToMove.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+    if(!this.move && EDITOR.actor && EDITOR.actor.renderer && EDITOR.actor.renderer.arrows) {
+      this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, self, this.mouse.x, this.mouse.y);
+    }
+
+    if(Input.isMousePressed(1) && this.selectedActor) {
+
+      if(this.selectedActor.renderer && this.selectedActor.renderer.arrows) {
+        this.selectedActor.renderer.arrows.selected = this.selectedAxis;
+      }
+
+      if(this.selectedAxis == 'both') {
+        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.editor.refresh();
+      } else if(this.selectedAxis == 'x') {
+        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.editor.refresh();
+      } else if(this.selectedAxis == 'y') {
+        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.editor.refresh();
+      }
+
       this.editor.refresh();
     }
   },
@@ -80,29 +109,38 @@ Class({
 
     switch(e.which) {
     case 1:
-      for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
-        var obj = AMBLE.scene.children[i];
-        if(obj.renderer) {
-          var width = obj.renderer.size.x;
-          var height = obj.renderer.size.y;
-          var x = obj.transform.position.x;
-          var y = obj.transform.position.y;
 
-          if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
+      if(this.selectedActor) {
+        this.move = true;
+        this.modifier.x = this.selectedActor.transform.position.x - this.mouse.x;
+        this.modifier.y = this.selectedActor.transform.position.y - this.mouse.y;
+      }
 
-            this.modifier.x = obj.transform.position.x - this.mouse.x;
-            this.modifier.y = obj.transform.position.y - this.mouse.y;
+      if(this.selectedAxis == '') {
+        for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
+          var obj = AMBLE.scene.children[i];
+          if(obj.renderer) {
+            var width = obj.renderer.size.x;
+            var height = obj.renderer.size.y;
+            var x = obj.transform.position.x;
+            var y = obj.transform.position.y;
 
-            this.actorToMove = obj;
+            if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
 
-            var a = document.getElementById('id_' + obj.sceneID);
-            if(a) {
-              a.click();
-              // location.href = "#id_" + obj.sceneID;
+              // this.modifier.x = obj.transform.position.x - this.mouse.x;
+              // this.modifier.y = obj.transform.position.y - this.mouse.y;
+
+              this.selectedActor = obj;
+
+              var a = document.getElementById('id_' + obj.sceneID);
+              if(a) {
+                a.click();
+                // location.href = "#id_" + obj.sceneID;
+              }
+
+              return;
             }
-
-            return;
-        }
+          }
         }
       }
 
@@ -111,8 +149,8 @@ Class({
   },
 
   onmouseup: function(self, e) {
-    if(this.actorToMove) {
-      this.actorToMove = null;
+    if(e.which == 1) {
+      this.move = false;
     }
   },
 

@@ -22,32 +22,32 @@
       width="100%"
       height="100%">
 
-      <panel-view
+      <panel-layout
         id="first"
         layoutwidth="4"
         layoutheight="1.75">
 
-        <scene-panel id="scene-view" class="card"></scene-panel>
+        <scene-view id="scene-view" class="card"></scene-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="second"
         layoutwidth="4"
         layoutheight="1"
         bottomto="first">
 
-        <bottom-panel id="debug-console" class="card"></bottom-panel>
+        <bottom-view id="debug-console" class="card"></bottom-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="third"
         layoutwidth="1"
         layoutheight="1"
         rightto="first">
 
-        <hierarchy-panel id="hierarchy" class="card">
+        <hierarchy-view id="hierarchy" class="card">
 
           <div class="card-block">
             <div class="row">
@@ -75,52 +75,24 @@
 
           </div>
 
-        </hierarchy-panel>
+        </hierarchy-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="fourth"
         layoutwidth="2"
         layoutheight="1"
         rightto="third">
 
-        <inspector-panel id="inspector-view" class="card">
+        <inspector-view
+          id="inspector-view"
+          class="card"
+          actor="{{editor.actor}}">
 
-          <div class="card-block">
-            <div class="row">
-              <div class="col-md-12">
-                <div class="input-group">
-                  <input id="actor-name" class="form-control" type="text" ng-model="editor.actor.name" placeholder="name">
-                  <div class="input-group-btn">
-                    <button type="button" class="btn btn-primary dropdown-toggle" ng-click="editor.updateComponents()" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Add
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-right" >
-                      <a href="#" ng-repeat="component in editor.componentsToAdd" class="dropdown-item" ng-click="editor.addComponent(component)">{{component.name}}</a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        </inspector-view>
 
-          </div>
-
-          <div class="card-block scroll" id="components-view">
-
-            <transform-component actor="{{ editor.getActor() }}"></transform-component>
-            <camera-component actor="{{editor.actor}}"></camera-component>
-            <renderer-component actor="{{editor.actor}}"></renderer-component>
-
-            <class-element actor="{{editor.actor}}"></class-element>
-
-            <!--  list of components -->
-          </div>
-
-        </inspector-panel>
-
-
-      </panel-view>
+      </panel-layout>
 
     </dynamic-layout>
 
@@ -145,7 +117,7 @@
 
     <!-- editr-core -->
     <link rel="import" href="editor-core/dynamic-layout.html">
-    <link rel="import" href="editor-core/panel-view.html">
+    <link rel="import" href="editor-core/panel-layout.html">
 
     <!-- elements -->
 
@@ -156,12 +128,12 @@
 
     <!-- panels -->
 
-    <link rel="import" href="panels/bottom-panel.html">
+    <link rel="import" href="panels/bottom-view.html">
 
-    <link rel="import" href="panels/game-panel.html">
-    <link rel="import" href="panels/hierarchy-panel.html">
-    <link rel="import" href="panels/inspector-panel.html">
-    <link rel="import" href="panels/scene-panel.html">
+    <link rel="import" href="panels/game-view.html">
+    <link rel="import" href="panels/hierarchy-view.html">
+    <link rel="import" href="panels/inspector-view.html">
+    <link rel="import" href="panels/scene-view.html">
 
   </body>
 </html>

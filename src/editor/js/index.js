@@ -3,15 +3,15 @@ const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
 
-const low = require('lowdb')
-const storage = require('lowdb/file-sync')
+// const low = require('lowdb')
+// const storage = require('lowdb/file-sync')
 
 const _ = require('lodash');
 // const _ = require('underscore');
 
-var AssetDB = null;
+// var AssetDB = null;
 
-var fs = require('fs');
+var fs = require('fs-extra');
 var watch = require('node-watch');
 
 global.jQuery = $ = require('jquery');
@@ -50,8 +50,7 @@ var menuFunctions = {
 
     var data = {
       sceneFile: AMBLE.scene.createSceneFile(),
-      imagesList: projectData.imgs,
-      scriptsList: projectData.scripts
+      assets: AMBLE.assets,
     };
 
     ipcRenderer.send('editor-build-respond', data);
@@ -60,8 +59,7 @@ var menuFunctions = {
   play: function() {
       var data = {
         sceneFile: AMBLE.scene.createSceneFile(),
-        imagesList: projectData.imgs,
-        scriptsList: projectData.scripts
+        assets: AMBLE.assets,
       };
 
       AMBLE.pause();
@@ -142,16 +140,8 @@ ipcRenderer.on('game-preview-error', function(event, data) {
 
 ipcRenderer.on('editor-load-respond', function(event, data) {
   console.log('main process loaded respond')
-  AssetDB = low(data.path + '/assetsDB.json', { storage })
-  AssetDB._.mixin(require('underscore-db'));
-
-  // var holder = document.getElementById('assets-manager');
-  // holder.ondrop = function (e) {
-  //   e.preventDefault();
-  //   var file = e.dataTransfer.files[0];
-  //   if(file) console.log('File you dragged here is', file.path);
-  //   return false;
-  // };
+  // AssetDB = low(data.path + '/assetsDB.json', { storage })
+  // AssetDB._.mixin(require('underscore-db'));
 
   projectDirectory = data.path;
   console.log(projectData);
@@ -161,12 +151,8 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 
   projectView.init();
 
-  for(var i in projectData.scripts) {
-    require(projectData.scripts[i].path);
-  }
-
   document.querySelector('dynamic-layout').panelsObserver();
-  
+
   //clear canvas
   document.getElementById('scene-view').innerHTML = "";
 
@@ -176,7 +162,8 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   EDITOR.update();
   EDITOR.refresh();
 
-  AMBLE.imgList = projectData.imgs
+  AMBLE.assets = projectData.assets;
+
   ipcRenderer.send('editor-project-loaded');
 
 });
@@ -185,6 +172,19 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 var projectView = {
 
   projectStructure: [],
+
+  importAsset: function(targetFolderPath, assetPath, assetName) {
+    console.log(targetFolderPath, assetPath, assetName);
+
+    // copy
+    try {
+      fs.copySync(assetPath, targetFolderPath + '/' + assetName);
+    } catch (err) {
+      console.error('Oh no, there was an error: ' + err.message)
+    }
+
+    // import (add meta and save to engine assets list)
+  },
 
   processDir: function(path) {
 
@@ -203,84 +203,81 @@ var projectView = {
         id: "id_" + uuid.v1(),
         type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
         path: path + '/' + abc[i],
-        name: abc[i],
+        name: f[0],
         children: [],
+        extension: extension
       }
 
       if(file.type == 'folder') {
         file.children = this.processDir(path + '/' + abc[i]);
-      } else {
-        for(var x in imgExtensionList) {
+      } else if(extension != 'meta'){
 
-          if(extension == imgExtensionList[x]) {
+        var metaFilePath = file.path + '.meta';
+        try {
+          fs.accessSync(metaFilePath, fs.F_OK);
+          // read meta
+          try {
+            var meta = JSON.parse(fs.readFileSync(metaFilePath, 'utf-8'));
+            var metaExist = true;
+          } catch (err) {
+            var meta = this.createMetaInformation(file);
+            var metaExist = false;
+          }
 
-            projectData.imgs.push({
-              path: path + '/' + abc[i],
-              name: abc[i]
-            });
+        } catch (err) {
+          var metaExist = false;
+          console.log('new asset', file.path)
+          var meta = this.createMetaInformation(file);
+        }
 
-            // var _i = AssetDB('images').find({path: path + '/' + abc[i], name: abc[i]});
-            // if(!_i) {
-            //   AssetDB('images').push({
-            //     id: uuid.v1(),
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            // } else {
-            //   var id = _i.id;
-            //   AssetDB('images').replaceById(AssetDB('images'), 1, {
-            //     id: id,
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            //
-            //   // AssetDB('images').save(AssetDB)
-            // }
-            //
-            // console.log(AssetDB('images').value())
+        console.log(meta)
 
+        projectData.assets.push(meta);
 
-            break;
+        // write meta for future
+        if(!metaExist) {
+          try {
+            fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
 
-          } else if(extension == 'js') {
-
-            projectData.scripts.push({
-              path: path + '/' + abc[i],
-              name: abc[i]
-            });
-
-            // // validation?
-            // var _i = AssetDB('scripts').find({path: path + '/' + abc[i], name: abc[i]});
-            // if(!_i) {
-            //   AssetDB('scripts').push({
-            //     id: uuid.v1(),
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            // } else {
-            //   var id = _i.id;
-            //   AssetDB('scripts').replaceById(AssetDB('scripts'), 1, {
-            //     id: id,
-            //     path: path + '/' + abc[i],
-            //     name: abc[i]
-            //   });
-            //
-            //   // AssetDB('scripts').save(AssetDB)
-            // }
-            //
-            // console.log(AssetDB('scripts').value())
-
-            break;
-
+          } catch (e) {
+            throw new Error('Cannot write meta file: ' + metaFilePath);
           }
         }
+
       }
 
-      files.push(file)
+      if(extension != 'meta') {
+        files.push(file)
+      }
     }
 
     return files;
 
+  },
+
+  createMetaInformation: function(file) {
+    // create uuid
+    var meta = {
+      uuid: uuid.v1(),
+      type: '',
+      path: file.path,
+      name: file.name,
+      extension: file.extension
+    }
+    // get type (sprite/ audio/ script)
+    for(var x in imgExtensionList) {
+      if(meta.extension == imgExtensionList[x]) {
+        meta.type = 'sprite'
+        break;
+      } else if(meta.extension == 'js') {
+        meta.type = 'script'
+        break;
+      }
+    }
+
+    // other import settings
+
+    return meta;
   },
 
   watch: function(){
@@ -289,62 +286,49 @@ var projectView = {
 
     watch(projectDirectory + '/assets', function(filename){
 
-      projectData.scripts = [];
-      projectData.imgs = [];
+      projectData.assets = [];
       projectView.projectStructure = projectView.processDir(projectDirectory);
 
-      console.log(AssetDB('images').value());
+      console.log(projectData.assets);
+      AMBLE.assets = projectData.assets;
 
-      // that.jstree();
-
-      document.querySelector('assets-manager-panel').update(projectView.projectStructure);
-
-      for(var i in projectData.scripts) {
-        require.reload(projectData.scripts[i].path);
-      }
+      document.querySelector('assets-manager-view').update(projectView.projectStructure);
 
       EDITOR.updateClass();
 
-      AMBLE.imgList = projectData.imgs
+      // load assets
+      AMBLE.loader = new Loader();
+      for (var i = 0; i < projectData.assets.length; i++) {
+        var meta = projectData.assets[i];
+        if(meta.type == 'sprite') {
+          AMBLE.loader.load('sprite', meta.path, meta.name, meta.uuid);
+        } else if(meta.type == 'script'){
+          // asocioate script with uuid
+          require.reload(meta.path);
+        }
+      }
+
+      AMBLE.loader.loadAll(function() {
+        console.log('additional assets loaded')
+        console.log(AMBLE.loader)
+        var rendererComponenet = document.querySelector('renderer-component')
+        if(rendererComponenet) rendererComponenet.updateSpritesList();
+      });
 
     });
 
   },
 
-  // jstree: function() {
-  //   $('#assets-manager').jstree("destroy").empty();
-  //   $('#assets-manager').jstree({
-  //     'core' : {
-  //       "check_callback" : true,
-  //       'responsive': true,
-  //       'data' : projectView.projectStructure,
-  //     },
-  //     'themes' : {
-  //       'dots' : false // no connecting dots
-  //     },
-  //     'plugins' : [ 'wholerow', 'state', 'sort', 'types'],
-  //     'types' : {
-  //       'folder' : {
-  //         'icon' : 'fa fa-folder'
-  //       },
-  //       'file' : {
-  //         'icon' : 'fa fa-file-text-o'
-  //       }
-  //     },
-  //   });
-  // },
-
   init: function(){
 
-    projectData.imgs = [];
-    projectData.scripts = [];
+    projectData.assets = [];
 
     this.projectStructure = this.processDir(projectDirectory);
 
     console.log(this.projectStructure);
     console.log(projectData);
 
-    document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+    document.querySelector('assets-manager-view').update(projectView.projectStructure);
 
     // this.jstree();
     this.watch();
@@ -355,281 +339,206 @@ var projectView = {
 var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
-    var editor = EDITOR = this;
+  var editor = EDITOR = this;
 
-    this.refresh = function() {
-      $scope.$apply();
-    };
+  this.refresh = function() {
+    $scope.$apply();
+  };
 
-    this.updateActors = function() {
-      this.actors = AMBLE.scene.children;
-    };
+  this.updateActors = function() {
+    this.actors = AMBLE.scene.children;
+  };
 
-    editor.update = function() {
+  editor.update = function() {
 
-      this.previousActor = null;
-      this.actors = [];
-      this.actor = null;
+    this.previousActor = null;
+    this.actors = [];
+    this.actor = null;
 
-      //default components to add
-      this.componentsToAdd = [
-        {
-          name: 'SpriteRenderer',
-          type: 'renderer',
-          body: { name: 'SpriteRenderer', args: {
-            sprite: ''
-          }}
-        },
-        {
-          name: 'RectRenderer',
-          type: 'renderer',
-          body: { name: 'RectRenderer', args: {
-            color: '#1B5E20',
-            size: { name: "Vec2", args: {x: 100, y:100}},
-            layer: 0
-          }}
-        },
-        {
-          name: 'AnimationRenderer',
-          type: 'renderer',
-          body: { name: 'AnimationRenderer', args: {
-            sprite: '',
-            frames: 1,
-            updatesPerFrame: 1,
-            layer: 0
-          }}
-        }
-      ];
+    //default actors type to add
+    this.actorsToAdd = [
+      {
+        name: 'MainCamera',
+        tag: 'mainCamera',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: 0, y: 0}},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        camera: { name: "MainCamera", args: {
+          scale: 1,
+          size: { name: 'Vec2', args: {x: 1280, y: 720}},
+          bgColor: '#37474f',
+        }},
+        renderer: { name: 'CameraRenderer', args: {}},
+        components: []
+      },
+      {
+        name: 'Actor',
+        tag: 'actor',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: 0, y: 0}},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        renderer: { name: 'EngineRenderer', args: {}},
+        components: []
+      },
+    ];
 
-      //default actors type to add
-      this.actorsToAdd = [
-        {
-          name: 'MainCamera',
-          tag: 'mainCamera',
-          hideInHierarchy: false,
-          selected: false,
-          transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {x: 0, y: 0}},
-            scale: { name: "Vec2", args: {x: 1, y:1}},
-            rotation: 0
-          }},
-          camera: { name: "MainCamera", args: {
-            scale: 1,
-            size: { name: 'Vec2', args: {x: 1280, y: 720}},
-            bgColor: '#37474f',
-          }},
-          renderer: { name: 'CameraRenderer', args: {}},
-          components: []
-        },
-        {
-          name: 'Actor',
-          tag: 'actor',
-          hideInHierarchy: false,
-          selected: false,
-          transform: { name: "Transform", args: {
-            position: { name: "Vec2", args: {x: 0, y: 0}},
-            scale: { name: "Vec2", args: {x: 1, y:1}},
-            rotation: 0
-          }},
-          renderer: { name: 'EngineRenderer', args: {}},
-          components: []
-        },
-      ];
+    var cam = AMBLE.scene.getActorByName('SceneCamera');
+    if(cam) {
+      this.cameraScript = cam.getComponent('Camera');
+      this.cameraScript.editor = this;
+    }
 
-      var cam = AMBLE.scene.getActorByName('SceneCamera');
-      if(cam) {
-        this.cameraScript = cam.getComponent('Camera');
-        this.cameraScript.editor = this;
-      }
+    this.updateActors();
+    this.updateClass();
+  };
 
-      this.updateActors();
-      this.updateClass();
-    };
+  editor.updateClass = function() {
 
-    editor.updateClass = function() {
-
-      for(var i in editor.actors) {
-        var a = editor.actors[i].prefab;
-        for(var j in a.components) {
-          var c = CLASSES.find(c => c.name == a.components[j].name);
-          if(!c) continue;
-          for(var x in c.properties) {
-            var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
-            if(typeof property === 'undefined') {
-              a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
-            }
+    for(var i in editor.actors) {
+      var a = editor.actors[i].prefab;
+      for(var j in a.components) {
+        var c = CLASSES.find(c => c.name == a.components[j].name);
+        if(!c) continue;
+        for(var x in c.properties) {
+          var property = a.components[j].properties.find( p => p.name == c.properties[x].name)
+          if(typeof property === 'undefined') {
+            a.components[j].properties.push(JSON.parse(JSON.stringify(c.properties[x])));
           }
+        }
 
-          var toDel = [];
-          for(var x in a.components[j].properties) {
-            var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
-            if(!aa) {
-              toDel.push(a.components[j].properties[x].name);
-            }
+        var toDel = [];
+        for(var x in a.components[j].properties) {
+          var aa = c.properties.find(s => s.name == a.components[j].properties[x].name);
+          if(!aa) {
+            toDel.push(a.components[j].properties[x].name);
           }
-
-          for(var x in toDel) {
-            var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
-            a.components[j].properties.splice(index, 1);
-          }
-
-        }
-      }
-    };
-
-    editor.update();
-
-    angular.element(window).on('keydown', function(e) {
-        // console.log(e.which);
-        switch(e.which) {
-            case 27: //esc
-
-                editor.refresh();
-
-                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
-                    if(editor.actor && editor.actor.selected) {
-                        editor.actor.selected = false;
-                    }
-
-                    if(editor.previousActor) {
-                        editor.previousActor.className = 'list-group-item';
-                    }
-                } else {
-                    document.activeElement.blur();
-                }
-
-            break;
-            case 46: //del
-
-                if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
-
-                    AMBLE.scene.remove(editor.actor)
-
-                    editor.actor = null;
-
-                    editor.refresh();
-                }
-
-            break;
-            case 70: // f
-
-                if(e.shiftKey && !e.ctrlKey && editor.acotr && editor.actor.transform ) {
-                    AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
-                    AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
-                }
-                //
-                // if(e.shiftKey && e.ctrlKey) {
-                //     console.log('resize')
-                //     AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
-                // }
-
-            break;
-
-        }
-    });
-
-    editor.updateComponents = function() {
-        //updated componentsToAdd
-        for(var i in CLASSES) {
-            var p = CLASSES[i].properties
-            // console.log(p);
-            var cl = {
-                name: CLASSES[i].name,
-                options: CLASSES[i]._options,
-                type: 'class',
-                body: {
-                    type: 'noneditor',
-                    name: CLASSES[i].name,
-                    properties: p
-                }
-            }
-            var c = this.componentsToAdd.find(c => c.name == cl.name)
-            if(!c) {
-                this.componentsToAdd.push(cl);
-            } else {
-                c.body.properties = CLASSES[i].properties
-            }
         }
 
-        console.log(this.componentsToAdd);
-
-    };
-
-    editor.addComponent = function(component, $e) {
-      console.log(component);
-
-      if(editor.actor) {
-        //add to prefab
-        if(component.type == 'renderer') {
-          editor.actor.prefab.renderer = component.body;
-        } else if(component.type == 'class'){
-          var c = JSON.parse(JSON.stringify(component.body))
-          editor.actor.prefab.components.push(c);
-
+        for(var x in toDel) {
+          var index = a.components[j].properties.indexOf(a.components[j].properties.find(s => s.name == toDel[x]));
+          a.components[j].properties.splice(index, 1);
         }
 
-        var sceneID = editor.actor.sceneID;
-        var prefab = editor.actor.prefab;
-
-        AMBLE.scene.remove(this.actor);
-        editor.actor = AMBLE.scene.instantiate(prefab);
-
-        editor.actor.selected = true;
-        editor.actor.sceneID = sceneID;
       }
+    }
+  };
 
-    };
+  editor.update();
 
-    editor.addActor = function(actor) {
+  angular.element(window).on('keydown', function(e) {
+    // console.log(e.which);
+    switch(e.which) {
+    case 27: //esc
 
-      var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
-      if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
-      if(_actor) {
+      editor.refresh();
 
-        delete _actor.$$hashKey;
-
-        if(AMBLE.scene.getActorByName(_actor.name)) {
-          _actor.name += this.actors.length;
+      if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID || document.activeElement.nodeName == 'BODY') {
+        if(editor.actor && editor.actor.selected) {
+          editor.actor.selected = false;
         }
 
-        AMBLE.scene.instantiate(_actor);
+        if(editor.previousActor) {
+          editor.previousActor.classList.remove('active');
+        }
+
+        editor.actor = null;
+        editor.cameraScript.selectedActor = null;
+        document.querySelector('inspector-view')._actorObserver();
+
+      } else {
+        document.activeElement.blur();
       }
 
-    };
+    break;
+    case 46: //del
 
-    editor.getActor = function() {
-      if(this.actor) {
-        delete this.actor.$$hashKey;
-      }
-      return this.actor;
-    };
+      if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
-    editor.actorSelected = function($e) {
+        editor.cameraScript.selectedActor = null;
+        AMBLE.scene.remove(editor.actor)
 
-      var sceneID = $e.target.id.replace('id_', '');
+        editor.actor = null;
 
-      if(this.actor) this.actor.selected = false;
-
-      this.actor = AMBLE.scene.getActorByID(sceneID)
-
-      if(this.previousActor) {
-        this.previousActor.classList.remove('active');
+        editor.refresh();
       }
 
-      if($e) {
-        $e.preventDefault();
-        $e.target.classList.add('active');
-        this.previousActor = $e.target;
+    break;
+    case 70: // f
+
+      if(e.shiftKey && !e.ctrlKey && editor.acotr && editor.actor.transform ) {
+        AMBLE.mainCamera.transform.position.x = editor.actor.transform.position.x;
+        AMBLE.mainCamera.transform.position.y = editor.actor.transform.position.y;
+      }
+      //
+      // if(e.shiftKey && e.ctrlKey) {
+      //     console.log('resize')
+      //     AMBLE.mainCamera.getComponent('Camera').onresize(AMBLE.mainCamera);
+      // }
+
+    break;
+
+    }
+  });
+
+  editor.addActor = function(actor) {
+
+    var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
+    if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
+    if(_actor) {
+
+      delete _actor.$$hashKey;
+
+      if(AMBLE.scene.getActorByName(_actor.name)) {
+        _actor.name += this.actors.length;
       }
 
-      this.actor.selected = !this.actor.selected;
+      AMBLE.scene.instantiate(_actor);
+    }
 
-    };
+  };
+
+  editor.getActor = function() {
+    if(this.actor) {
+      delete this.actor.$$hashKey;
+    }
+    return this.actor;
+  };
+
+  editor.actorSelected = function(e) {
+
+    e.preventDefault();
+
+    var sceneID = e.target.id.replace('id_', '');
+
+    if(this.actor) {
+      this.actor.selected = false;
+    }
+
+    this.actor = AMBLE.scene.getActorByID(sceneID)
+    this.cameraScript.selectedActor = this.actor;
+
+    if(this.previousActor && this.previousActor != e.target) {
+      this.previousActor.classList.remove('active');
+    }
+
+    e.target.classList.add('active');
+    this.previousActor = e.target;
+
+    this.actor.selected = true;
+
+  };
 }]);
 
 //scane view
 var application = {
-
 
     // resize: true,
     mainCamera: {
@@ -663,12 +572,16 @@ var application = {
         EDITOR.updateActors();
       }
 
-      // load imgs
-      if(projectData.imgs) {
-        for(var i in projectData.imgs) {
-          this.loader.load('img', projectData.imgs[i].path, projectData.imgs[i].name);
+      for (var i = 0; i < projectData.assets.length; i++) {
+        var meta = projectData.assets[i];
+        if(meta.type == 'sprite') {
+          this.loader.load('sprite', meta.path, meta.name, meta.uuid);
+        } else if(meta.type == 'script'){
+          // asocioate script with uuid
+          require.reload(meta.path);
         }
       }
+
 
     },
 
@@ -709,7 +622,17 @@ document.addEventListener('dragover',function(event){
   return false;
 },false);
 
+document.addEventListener('drag',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
 document.addEventListener('drop',function(event){
+  event.preventDefault();
+  return false;
+},false);
+
+document.addEventListener('dragend',function(event){
   event.preventDefault();
   return false;
 },false);

@@ -7,9 +7,14 @@ window.SpriteRenderer = (function() {
     this._sprite = null
     this.size = new Vec2();
 
+    this.currentSprite = '';
+
     // @ifdef EDITOR
     this.type = "sprite";
     this._editorName = "SpriteRenderer"
+
+    this.arrows = new SceneArrows();
+
     // @endif
   };
 
@@ -22,8 +27,10 @@ window.SpriteRenderer = (function() {
       layer.ctx.save();
 
       if(this._sprite) {
-        if(this._sprite.src != this.sprite && AMBLE.loader.isDone()) {
+        // console.log(this._sprite.src, this.sprite, AMBLE.loader.isDone())
+        if(this.sprite != this.currentSprite && AMBLE.loader.isDone()) {
           this._sprite = AMBLE.loader.getAsset(this.sprite);
+          this.currentSprite = this.sprite;
           if(!this._sprite) return;
         }
 
@@ -34,11 +41,13 @@ window.SpriteRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        if(self.transform.scale.x != 1 || self.transform.scale.y != 1)
+        if(self.transform.scale.x != 1 || self.transform.scale.y != 1) {
           layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        }
 
-        if(self.transform.rotation != 0)
+        if(self.transform.rotation != 0) {
           layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+        }
 
         if(this._sprite.src) {
 
@@ -47,25 +56,29 @@ window.SpriteRenderer = (function() {
           // @ifdef EDITOR
           if(self.selected) {
 
-            layer.ctx.save();
-
             layer.strokeStyle(primaryColor)
-              .lineWidth(3)
-              .strokeRect(
-                -width/2,
-                -height/2,
-                width,
-                height
-              );
+            .lineWidth(3)
+            .strokeRect(
+              -width/2,
+              -height/2,
+              width,
+              height
+            );
+            
+            if(self.transform.rotation != 0) {
+              layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+            }
 
-            layer.ctx.restore();
+            this.arrows.render(self, camera);
+
+
           }
           // @endif
         }
 
-      } else {
-
+      } else if(this.sprite != this.currentSprite){
         this._sprite = AMBLE.loader.getAsset(this.sprite);
+        this.currentSprite = this.sprite;
       }
 
       layer.ctx.restore();

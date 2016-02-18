@@ -4,7 +4,7 @@ window.Application  = (function() {
 
     var that = AMBLE = this;
 
-    this.imgList = [];
+    this.assets = [];
 
     this.antyAliasing = typeof args['antyAliasing'] === 'boolean' ? args['antyAliasing'] : false;
 

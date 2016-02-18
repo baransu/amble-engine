@@ -7,7 +7,7 @@
 <link rel="import" href="../ui/ui-tree-view-item.html">
 <link rel="import" href="../ui/ui-asset-element.html">
 
-<dom-module id="assets-manager-panel">
+<dom-module id="assets-manager-view">
 
 	<style>
 
@@ -42,6 +42,7 @@
 
   .currentFolderInfo {
     width: 100%;
+		border-bottom: 1px solid;
   }
 
   .rightContent {
@@ -56,15 +57,13 @@
 
 	<template>
 
-    <div class="left card-block scroll">
+    <div id="treeView" class="left card-block scroll">
       <ul>
         <template is="dom-repeat" items="{{ _folder }}" as="child" filter="isFolder">
           <ui-tree-view-item id="{{child.id}}" item="{{child}}"></ui-tree-view-item>
         </template>
       </ul>
     </div>
-
-
 
     <div class="right card-block">
       <div class="currentFolderInfo">
@@ -84,7 +83,7 @@
 <script>
 
 	Polymer({
-		is: 'assets-manager-panel',
+		is: 'assets-manager-view',
 
 		properties: {
 
@@ -151,6 +150,7 @@
       if(!this._currentFolder && this._folder.length > 0) {
         this._currentFolder = this._folder[0];
       }
+
       this.notifyPath('_currentFolder', this._currentFolder);
     }
 

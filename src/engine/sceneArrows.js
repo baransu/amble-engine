@@ -3,13 +3,13 @@ window.SceneArrows = (function() {
 
     var SceneArrows = function SceneArrows(args) {
 
-      this.selectedColor = 'yellow';
-      this.xArrowColor = 'red';
-      this.yArrowColor = 'lime';
-
-      this.rootRectColor = 'blue';
-
       this.rectSize = 32;
+
+      this.arrowLength = 100;
+
+      this.arrowSize = 15;
+
+      this.selected = null;
 
     };
 
@@ -22,39 +22,102 @@ window.SceneArrows = (function() {
         layer.ctx.save();
 
         // render both rect stroke with opacity
+        layer.ctx.scale(1/camera.camera.scale, 1/camera.camera.scale);
 
-        // var x = self.transform.position.x - camera.camera.view.x;
-        // var y = self.transform.position.y - camera.camera.view.y;
+        // //scale
+        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
-        // layer.ctx.translate(x, y);
+        var yellow = 'rgb(255, 255, 25)'
+        var xArrowColor = this.selected != 'x' ? 'rgb(255, 25, 25)' : yellow;
+        var yArrowColor = this.selected != 'y' ? 'rgb(25, 255, 25)' : yellow;
 
-        //scale
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        var rootRectColor = 'rgb(25, 25, 255)';
+        var rootSemiTransparentRectColor = this.selected != 'both' ? 'rgba(25, 25, 255, 0.3)' : 'rgba(255, 255, 25, 0.3)';
 
-        // layer.fillStyle('rgb("0, 0, 255, 1")')
-        // layer.fillRect(0, -this.rectSize, this.rectSize, this.rectSize)
-        layer.strokeStyle(this.rootRectColor)
-        layer.strokeRect(0, -this.rectSize, this.rectSize, this.rectSize)
+        layer.fillStyle(rootSemiTransparentRectColor)
 
+        layer.fillRect(0, 0, this.rectSize, this.rectSize)
+        layer.strokeStyle(rootRectColor)
+        layer.strokeRect(0, 0, this.rectSize, this.rectSize)
+
+        // render x arrow
+        layer.strokeStyle(xArrowColor)
+        layer.lineWidth(1);
+        layer.ctx.beginPath();
+        layer.ctx.moveTo(0,0);
+        layer.ctx.lineTo(this.arrowLength, 0);
+        layer.ctx.stroke();
+
+        layer.fillStyle(xArrowColor);
+        layer.ctx.beginPath();
+        layer.ctx.moveTo(this.arrowLength, this.arrowSize/2);
+        layer.ctx.lineTo(this.arrowLength + this.arrowSize, 0);
+        layer.ctx.lineTo(this.arrowLength, -this.arrowSize/2);
+        layer.ctx.fill();
+
+        // render y arrow
+        layer.strokeStyle(yArrowColor)
+        layer.lineWidth(1);
+        layer.ctx.beginPath();
+        layer.ctx.moveTo(0,0);
+        layer.ctx.lineTo(0, this.arrowLength);
+        layer.ctx.stroke();
+
+        layer.fillStyle(yArrowColor)
+        layer.ctx.beginPath();
+        layer.ctx.moveTo(this.arrowSize/2, this.arrowLength);
+        layer.ctx.lineTo(0, this.arrowLength + this.arrowSize);
+        layer.ctx.lineTo(-this.arrowSize/2, this.arrowLength);
+        layer.ctx.fill();
+
+        // origin dot
+        layer.fillStyle(rootRectColor)
+        layer.ctx.beginPath();
+        layer.ctx.arc(
+          0,
+          0,
+          5,
+          0,
+          2*Math.PI
+        );
+        layer.ctx.fill();
 
         layer.ctx.restore();
-        // render x arrow
-        // render y arrow
-
 
       },
 
-      checkClick: function() {
+      checkClick: function(self, camera, mouseX, mouseY) {
 
-        //check x and y arrow and return which arrow is clicked
+        var scale = camera.camera.scale;
 
-        //check both arrows (rect in the root of both arrows)
+        //check x and y arrow and return which arrow is hovered
+        var x = self.transform.position.x;
+        var y = self.transform.position.y;
 
+        var rectSize = this.rectSize/scale;
+        var arrowLength = this.arrowLength/scale;
+        var arrowSize = this.arrowSize/scale;
 
+        // both
+        if(mouseX > x && mouseX < x + rectSize && mouseY > y && mouseY < y + rectSize) {
+          this.selected = 'both';
+          return 'both';
 
+        // x arrow
+        } else if(mouseX > x && mouseX < x + arrowLength + arrowSize && mouseY > y - arrowSize/2 && mouseY < y + arrowSize/2) {
+          this.selected = 'x';
+          return 'x';
+
+          // y arrow
+        } else if(mouseX > x - arrowSize/2 && mouseX < x + arrowSize/2 && mouseY > y && mouseY < y + arrowLength + arrowSize) {
+          this.selected = 'y';
+          return 'y';
+
+        } else {
+          this.selected = '';
+          return '';
+        }
       },
-
-
 
     };
 
