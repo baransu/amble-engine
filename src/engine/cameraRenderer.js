@@ -41,11 +41,15 @@ window.CameraRenderer = (function() {
         layer.ctx.drawImage(this.img, -this.img.width/2, -this.img.height/2, this.img.width, this.img.height)
 
         if(self.selected) {
-          this.arrows.render(self, camera);
 
           layer.strokeStyle(primaryColor)
-            .lineWidth(2)
-            .strokeRect(-width/2, -height/2, width, height);
+          .lineWidth(2)
+          .strokeRect(-width/2, -height/2, width, height);
+
+          // rotate pack
+          layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+          this.arrows.render(self, camera);
+
         }
 
         layer.ctx.restore();

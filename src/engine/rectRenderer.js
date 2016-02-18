@@ -8,6 +8,9 @@ window.RectRenderer = (function() {
     // @ifdef EDITOR
     this.type = "rect";
     this._editorName = "RectRenderer";
+
+    this.arrows = new SceneArrows();
+
     // @endif
   };
 
@@ -40,8 +43,6 @@ window.RectRenderer = (function() {
       // @ifdef EDITOR
       if(self.selected) {
 
-        layer.ctx.save();
-
         layer.strokeStyle(primaryColor)
           .lineWidth(3)
           .strokeRect(
@@ -51,7 +52,11 @@ window.RectRenderer = (function() {
             height
           );
 
-          layer.ctx.restore();
+        // rotate back
+        layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+
+        this.arrows.render(self, camera);
+
       }
       // @endif
 

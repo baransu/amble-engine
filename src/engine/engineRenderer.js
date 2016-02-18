@@ -31,12 +31,12 @@ window.EngineRenderer = (function() {
         //scale
         layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
-        // rotation in radians
-        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
-
         if(self.selected) {
           this.arrows.render(self, camera);
         }
+
+        // rotation in radians
+        layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
         layer.textAlign('center')
           .fillStyle('#bcbebf')
