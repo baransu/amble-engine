@@ -22,14 +22,10 @@ window.SceneArrows = (function() {
         layer.ctx.save();
 
         // render both rect stroke with opacity
+        layer.ctx.scale(1/camera.camera.scale, 1/camera.camera.scale);
 
-        // var x = self.transform.position.x - camera.camera.view.x;
-        // var y = self.transform.position.y - camera.camera.view.y;
-
-        // layer.ctx.translate(x, y);
-
-        //scale
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+        // //scale
+        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
         var yellow = 'rgb(255, 255, 25)'
         var xArrowColor = this.selected != 'x' ? 'rgb(255, 25, 25)' : yellow;
@@ -52,7 +48,7 @@ window.SceneArrows = (function() {
         layer.ctx.lineTo(this.arrowLength, 0);
         layer.ctx.stroke();
 
-        layer.fillStyle(xArrowColor)
+        layer.fillStyle(xArrowColor);
         layer.ctx.beginPath();
         layer.ctx.moveTo(this.arrowLength, this.arrowSize/2);
         layer.ctx.lineTo(this.arrowLength + this.arrowSize, 0);
@@ -90,24 +86,30 @@ window.SceneArrows = (function() {
 
       },
 
-      checkClick: function(self, mouseX, mouseY) {
+      checkClick: function(self, camera, mouseX, mouseY) {
+
+        var scale = camera.camera.scale;
 
         //check x and y arrow and return which arrow is hovered
         var x = self.transform.position.x;
         var y = self.transform.position.y;
 
+        var rectSize = this.rectSize/scale;
+        var arrowLength = this.arrowLength/scale;
+        var arrowSize = this.arrowSize/scale;
+
         // both
-        if(mouseX > x && mouseX < x + this.rectSize && mouseY > y && mouseY < y + this.rectSize) {
+        if(mouseX > x && mouseX < x + rectSize && mouseY > y && mouseY < y + rectSize) {
           this.selected = 'both';
           return 'both';
 
         // x arrow
-        } else if(mouseX > x && mouseX < x + this.arrowLength + this.arrowSize && mouseY > y - this.arrowSize/2 && mouseY < y + this.arrowSize/2) {
+        } else if(mouseX > x && mouseX < x + arrowLength + arrowSize && mouseY > y - arrowSize/2 && mouseY < y + arrowSize/2) {
           this.selected = 'x';
           return 'x';
 
           // y arrow
-        } else if(mouseX > x - this.arrowSize/2 && mouseX < x + this.arrowSize/2 && mouseY > y && mouseY < y + this.arrowLength + this.arrowSize) {
+        } else if(mouseX > x - arrowSize/2 && mouseX < x + arrowSize/2 && mouseY > y && mouseY < y + arrowLength + arrowSize) {
           this.selected = 'y';
           return 'y';
 

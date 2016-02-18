@@ -36,10 +36,12 @@ Class({
     this.mouse.y = (Input.mousePosition.y/self.camera.scale - this.translate.y) + self.camera.view.y;
 
     if(Input.isMousePressed(3)) {
+
       if(!this.done) {
         this.done = true;
         this.lastMousePos.copy(Input.mousePosition);
       }
+
       var x = (this.lastMousePos.x - Input.mousePosition.x)/self.camera.scale;
       var y = (this.lastMousePos.y - Input.mousePosition.y)/self.camera.scale;
       self.transform.position.add(new Vec2(x, y));
@@ -50,10 +52,8 @@ Class({
     }
 
     if(!this.move && EDITOR.actor && EDITOR.actor.renderer && EDITOR.actor.renderer.arrows) {
-      this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, this.mouse.x, this.mouse.y);
+      this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, self, this.mouse.x, this.mouse.y);
     }
-
-    console.log(this.selectedAxis);
 
     if(Input.isMousePressed(1) && this.selectedActor) {
 

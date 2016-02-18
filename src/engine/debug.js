@@ -5,7 +5,7 @@ window.Debug = (function() {
     log: function log(log) {
 
       // @ifdef EDITOR
-      document.querySelector('console-panel').update({
+      document.querySelector('console-view').update({
         type: 'log',
         message: log
       });
@@ -24,7 +24,7 @@ window.Debug = (function() {
     error: function error(error) {
 
       // @ifdef EDITOR
-      document.querySelector('console-panel').update({
+      document.querySelector('console-view').update({
         type: 'error',
         message: error
       });

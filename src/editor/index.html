@@ -22,32 +22,32 @@
       width="100%"
       height="100%">
 
-      <panel-view
+      <panel-layout
         id="first"
         layoutwidth="4"
         layoutheight="1.75">
 
-        <scene-panel id="scene-view" class="card"></scene-panel>
+        <scene-view id="scene-view" class="card"></scene-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="second"
         layoutwidth="4"
         layoutheight="1"
         bottomto="first">
 
-        <bottom-panel id="debug-console" class="card"></bottom-panel>
+        <bottom-view id="debug-console" class="card"></bottom-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="third"
         layoutwidth="1"
         layoutheight="1"
         rightto="first">
 
-        <hierarchy-panel id="hierarchy" class="card">
+        <hierarchy-view id="hierarchy" class="card">
 
           <div class="card-block">
             <div class="row">
@@ -75,24 +75,24 @@
 
           </div>
 
-        </hierarchy-panel>
+        </hierarchy-view>
 
-      </panel-view>
+      </panel-layout>
 
-      <panel-view
+      <panel-layout
         id="fourth"
         layoutwidth="2"
         layoutheight="1"
         rightto="third">
 
-        <inspector-panel
+        <inspector-view
           id="inspector-view"
           class="card"
           actor="{{editor.actor}}">
 
-        </inspector-panel>
+        </inspector-view>
 
-      </panel-view>
+      </panel-layout>
 
     </dynamic-layout>
 
@@ -117,7 +117,7 @@
 
     <!-- editr-core -->
     <link rel="import" href="editor-core/dynamic-layout.html">
-    <link rel="import" href="editor-core/panel-view.html">
+    <link rel="import" href="editor-core/panel-layout.html">
 
     <!-- elements -->
 
@@ -128,12 +128,12 @@
 
     <!-- panels -->
 
-    <link rel="import" href="panels/bottom-panel.html">
+    <link rel="import" href="panels/bottom-view.html">
 
-    <link rel="import" href="panels/game-panel.html">
-    <link rel="import" href="panels/hierarchy-panel.html">
-    <link rel="import" href="panels/inspector-panel.html">
-    <link rel="import" href="panels/scene-panel.html">
+    <link rel="import" href="panels/game-view.html">
+    <link rel="import" href="panels/hierarchy-view.html">
+    <link rel="import" href="panels/inspector-view.html">
+    <link rel="import" href="panels/scene-view.html">
 
   </body>
 </html>

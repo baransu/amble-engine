@@ -2,7 +2,7 @@
 
 <link rel="import" href="../../../bower_components/iron-input/iron-input.html">
 
-<dom-module id="inspector-panel">
+<dom-module id="inspector-view">
 
 	<style>
 
@@ -73,7 +73,7 @@
 <script>
 
 	Polymer({
-		is: 'inspector-panel',
+		is: 'inspector-view',
 
 		properties: {
 
@@ -183,11 +183,12 @@
 			// delete and instantiate
 			AMBLE.scene.remove(this.actor);
 			EDITOR.actor = AMBLE.scene.instantiate(prefab);
-
-			EDITOR.actor.selected = true;
 			EDITOR.actor.sceneID = sceneID;
 
-			this.actor = EDITOR.actor;
+			var a = document.getElementById('id_' + sceneID);
+			if(a) {
+				a.click();		
+			}
 
 			this._actorObserver();
     },

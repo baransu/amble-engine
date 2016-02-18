@@ -292,7 +292,7 @@ var projectView = {
       console.log(projectData.assets);
       AMBLE.assets = projectData.assets;
 
-      document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+      document.querySelector('assets-manager-view').update(projectView.projectStructure);
 
       EDITOR.updateClass();
 
@@ -328,7 +328,7 @@ var projectView = {
     console.log(this.projectStructure);
     console.log(projectData);
 
-    document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+    document.querySelector('assets-manager-view').update(projectView.projectStructure);
 
     // this.jstree();
     this.watch();
@@ -451,7 +451,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
         editor.actor = null;
         editor.cameraScript.selectedActor = null;
-        document.querySelector('inspector-panel')._actorObserver();
+        document.querySelector('inspector-view')._actorObserver();
 
       } else {
         document.activeElement.blur();
@@ -512,26 +512,27 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
     return this.actor;
   };
 
-  editor.actorSelected = function($e) {
+  editor.actorSelected = function(e) {
 
-    var sceneID = $e.target.id.replace('id_', '');
+    e.preventDefault();
 
-    if(this.actor) this.actor.selected = false;
+    var sceneID = e.target.id.replace('id_', '');
+
+    if(this.actor) {
+      this.actor.selected = false;
+    }
 
     this.actor = AMBLE.scene.getActorByID(sceneID)
     this.cameraScript.selectedActor = this.actor;
 
-    if(this.previousActor) {
+    if(this.previousActor && this.previousActor != e.target) {
       this.previousActor.classList.remove('active');
     }
 
-    if($e) {
-      $e.preventDefault();
-      $e.target.classList.add('active');
-      this.previousActor = $e.target;
-    }
+    e.target.classList.add('active');
+    this.previousActor = e.target;
 
-    this.actor.selected = !this.actor.selected;
+    this.actor.selected = true;
 
   };
 }]);
