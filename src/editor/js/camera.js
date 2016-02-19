@@ -28,6 +28,8 @@ Class({
       type: Boolean,
       value: false
     },
+    startRotation: { type: Number },
+    rotationOffset: { type: Number }
   },
 
   update: function(self) {
@@ -71,6 +73,10 @@ Class({
       } else if(this.selectedAxis == 'y') {
         this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
         this.editor.refresh();
+      } else if(this.selectedAxis == 'rot') {
+
+        var angle = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
+        this.selectedActor.transform.rotation = -angle - this.startRotation + this.rotationOffset| 0;
       }
 
       this.editor.refresh();
@@ -109,6 +115,9 @@ Class({
 
     switch(e.which) {
     case 1:
+
+      this.startRotation = self.transform.rotation;
+      this.rotationOffset = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
 
       if(this.selectedActor) {
         this.move = true;
