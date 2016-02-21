@@ -3,13 +3,7 @@ const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
 
-// const low = require('lowdb')
-// const storage = require('lowdb/file-sync')
-
 const _ = require('lodash');
-// const _ = require('underscore');
-
-// var AssetDB = null;
 
 var fs = require('fs-extra');
 var watch = require('node-watch');
@@ -218,31 +212,30 @@ var projectView = {
           // read meta
           try {
             var meta = JSON.parse(fs.readFileSync(metaFilePath, 'utf-8'));
-            var metaExist = true;
           } catch (err) {
             var meta = this.createMetaInformation(file);
-            var metaExist = false;
           }
 
         } catch (err) {
-          var metaExist = false;
           console.log('new asset', file.path)
           var meta = this.createMetaInformation(file);
+        }
+
+        // check if meta path == file.path
+        if(meta.path != file.path) {
+          console.log('path change', meta.path, file.path);
+          meta.path = file.path;
+        }
+
+        try {
+          fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
+        } catch (e) {
+          throw new Error('Cannot write meta file: ' + metaFilePath);
         }
 
         console.log(meta)
 
         projectData.assets.push(meta);
-
-        // write meta for future
-        if(!metaExist) {
-          try {
-            fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
-
-          } catch (e) {
-            throw new Error('Cannot write meta file: ' + metaFilePath);
-          }
-        }
 
       }
 
@@ -284,7 +277,15 @@ var projectView = {
 
     var that = this;
 
-    watch(projectDirectory + '/assets', function(filename){
+    var filter = function(pattern, fn) {
+      return function(filename) {
+        if (!pattern.test(filename)) {
+          fn(filename);
+        }
+      }
+    }
+
+    watch(projectDirectory + '/assets', filter(/\.meta$/, function(filename) {
 
       projectData.assets = [];
       projectView.projectStructure = projectView.processDir(projectDirectory);
@@ -315,7 +316,7 @@ var projectView = {
         if(rendererComponenet) rendererComponenet.updateSpritesList();
       });
 
-    });
+    }));
 
   },
 
@@ -578,7 +579,7 @@ var application = {
           this.loader.load('sprite', meta.path, meta.name, meta.uuid);
         } else if(meta.type == 'script'){
           // asocioate script with uuid
-          require.reload(meta.path);
+          require(meta.path);
         }
       }
 

@@ -114,8 +114,20 @@ ipcMain.on('launcher-other-request', function(event, data) {
       if(path != undefined) {
         path = path[0];
         console.log(path);
+
         var p = JSON.parse(fs.readFileSync(path, 'utf-8'));
-        if(p) var data = { name: p.name, dir: p.dir};
+        if(p) {
+          var _path = path.substring(0, path.lastIndexOf("/"))
+          console.log(_path, p.dir)
+
+          if(_path != p.dir) {
+            p.dir = _path;
+            fs.writeFileSync(path, JSON.stringify(p), 'utf-8')
+          }
+
+          var data = { name: p.name, dir: p.dir};
+        }
+
       } else {
         var data = 'undefined'
       }
@@ -177,6 +189,8 @@ ipcMain.on('launcher-open-request', function(event, data) {
       //update project js
       var projects = JSON.parse(localStorage.getItem('projects'));
 
+      console.log(projects);
+
       if(projects) {
 
         var p = projects.find(pr => pr.name == currentName && pr.dir == currentDir)
@@ -186,8 +200,10 @@ ipcMain.on('launcher-open-request', function(event, data) {
           projects.splice(index, 1);
         }
 
+        localStorage.setItem('projects', JSON.stringify(projects));
         launcherWindow.webContents.send('launcher-projects-respond', projects);
       }
+
 
       var error = { type: 'error', message: err};
       launcherWindow.webContents.send('launcher-error', error);

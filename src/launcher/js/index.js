@@ -55,7 +55,7 @@ launcherApp.controller('launcherController', ['$scope', function($scope) {
 }]);
 
 ipcRenderer.on('launcher-error', function(event, data) {
-  LAUNCHER.errorInfo = "Project doesn't exist in it's direcotry!";
+  LAUNCHER.errorInfo = "Project doesn't exist in given directory!";
   LAUNCHER.refresh();
 });
 
