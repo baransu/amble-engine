@@ -28,7 +28,7 @@
     background-color: rgba(0, 0, 0, 0.25);
   }
 
-  .icon {
+  .asset {
     width: 100%;
     height: 75%;
     line-height: 50px;
@@ -54,8 +54,21 @@
 	<template>
 
     <div class="holder" on-dblclick="_onClick">
-      <div class="icon">
-        <i class="fa fa-folder" id="icon"></i>
+      <div class="asset">
+
+				<template is="dom-if" if="{{_typeOfAsset('sprite', item)}}">
+					<img src="{{item.path}}" alt="" width="100%" height="100%" class="image"/>
+				</template>
+
+				<template is="dom-if" if="{{_typeOfAsset('other', item)}}">
+					<i class="fa fa-folder"></i>
+				</template>
+
+				<template is="dom-if" if="{{_typeOfAsset('script', item)}}">
+					<i class="fa fa-file"></i>
+				</template>
+
+
       </div>
       <div class="text">
         {{item.name}}
@@ -108,15 +121,9 @@
 
 		properties: {
 
-      _currentType: {
-        type: String,
-        value: 'folder'
-      },
-
       item: {
         type: Object,
         value: null,
-        observer: '_itemChange'
       },
 
     },
@@ -135,6 +142,15 @@
         this.$.menu.close();
       }
     },
+
+		_typeOfAsset: function(type, item) {
+			if(item) {
+				console.log(item.assetType)
+				return item.assetType === type;
+			} else {
+				return false;
+			}
+		},
 
 		open: function(e) {
 			_open(this.item.path)
@@ -186,15 +202,9 @@
     },
 
     _onClick: function(e) {
-      if(this._currentType == 'folder' && this.item.children.length > 0) {
+      if(this.item.type == 'folder' && this.item.children.length > 0) {
         this.async(() => this.fire('asset-click', { assetItem: true }), 1);
       }
-    },
-
-    _itemChange: function() {
-      this.$.icon.classList.remove('fa-' + this._currentType);
-      this.$.icon.classList.add('fa-' + this.item.type);
-      this._currentType = this.item.type;
     },
 
 	});

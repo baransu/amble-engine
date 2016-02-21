@@ -199,6 +199,7 @@ var projectView = {
         path: path + '/' + abc[i],
         name: f[0],
         children: [],
+        assetType: 'other',
         extension: extension
       }
 
@@ -216,6 +217,7 @@ var projectView = {
             var meta = this.createMetaInformation(file);
           }
 
+
         } catch (err) {
           console.log('new asset', file.path)
           var meta = this.createMetaInformation(file);
@@ -226,6 +228,8 @@ var projectView = {
           console.log('path change', meta.path, file.path);
           meta.path = file.path;
         }
+
+        file.assetType = meta.type;
 
         try {
           fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
@@ -252,11 +256,12 @@ var projectView = {
     // create uuid
     var meta = {
       uuid: uuid.v1(),
-      type: '',
+      type: 'other',
       path: file.path,
       name: file.name,
       extension: file.extension
     }
+
     // get type (sprite/ audio/ script)
     for(var x in imgExtensionList) {
       if(meta.extension == imgExtensionList[x]) {
