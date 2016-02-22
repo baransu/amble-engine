@@ -53,11 +53,11 @@ window.AnimationRenderer = (function() {
         layer.ctx.translate(x, y);
 
         if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
-            layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
+          layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
         }
 
         if(self.transform.rotation != 0) {
-            layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
+          layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
         }
 
         if(this._sprite.src) {
@@ -76,19 +76,21 @@ window.AnimationRenderer = (function() {
           // @ifdef EDITOR
           if(self.selected) {
 
+            layer.strokeStyle(primaryColor)
+            .lineWidth(3)
+            .strokeRect(
+              -width/2,
+              -height/2,
+              width,
+              height
+            );
+
+            if(self.transform.rotation != 0) {
+              layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+            }
+
             this.arrows.render(self, camera);
 
-            layer.ctx.save();
-            layer.strokeStyle(primaryColor)
-              .lineWidth(3)
-              .strokeRect(
-                -width/2,
-                -height/2,
-                width,
-                height
-              );
-
-              layer.ctx.restore();
           }
           // @endif
         }

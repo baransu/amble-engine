@@ -71,12 +71,14 @@
   						</div>
   					</div>
 
-            <div class="row">
-  						<div class="col-md-12">
-                <label>rotation</label>
-                <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
-  						</div>
-            </div>
+						<template is="dom-if" if="{{_isCamera(actor)}}">
+	            <div class="row">
+	  						<div class="col-md-12">
+	                <label>rotation</label>
+	                <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
+	  						</div>
+	            </div>
+						</template>
 
   				</div>
         </div>
@@ -107,6 +109,14 @@
     ready: function() {
       this.toggle();
     },
+
+		_isCamera: function(actor) {
+			if(actor) {
+				return actor.tag != 'mainCamera';
+			} else {
+				return true;
+			}
+		},
 
 		reset: function() {
 

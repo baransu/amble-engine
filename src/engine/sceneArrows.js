@@ -83,18 +83,20 @@ window.SceneArrows = (function() {
         );
         layer.ctx.fill();
 
-        // rotation arc
-        layer.strokeStyle(rotationArcColor);
-        layer.ctx.beginPath();
-        layer.ctx.arc(
-          0,
-          0,
-          this.arrowLength,
-          0,
-          Math.PI/2,
-          true
-        );
-        layer.ctx.stroke();
+        if(self.tag != 'mainCamera') {
+          // rotation arc
+          layer.strokeStyle(rotationArcColor);
+          layer.ctx.beginPath();
+          layer.ctx.arc(
+            0,
+            0,
+            this.arrowLength,
+            0,
+            Math.PI/2,
+            true
+          );
+          layer.ctx.stroke();
+        }
 
 
         layer.ctx.restore();
@@ -132,7 +134,7 @@ window.SceneArrows = (function() {
           this.selected = 'y';
           return 'y';
 
-        } else if((angle < 0 || angle > 90) && distance2 > Math.pow( arrowLength - rectSize/2 , 2) && distance2 < Math.pow( arrowLength + rectSize/2 , 2)/*angle between mouse and center && distance == radius +- rectSize/2 */) {
+        } else if(self.tag != 'mainCamera' && (angle < 0 || angle > 90) && distance2 > Math.pow( arrowLength - rectSize/2 , 2) && distance2 < Math.pow( arrowLength + rectSize/2 , 2)/*angle between mouse and center && distance == radius +- rectSize/2 */) {
           this.selected = 'rot';
           return 'rot'
 
