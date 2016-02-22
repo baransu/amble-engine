@@ -25,6 +25,11 @@ var EDITOR = null;
 
 var primaryColor = '#e91e63';
 
+var undoArray = [];
+var redoArray = [];
+
+const MAX_UNDO_REDO = 128;
+
 var menuFunctions = {
 
   save: function() {
@@ -61,16 +66,60 @@ var menuFunctions = {
   },
 
   stop: function() {
-    console.log('stop preview - editor')
     ipcRenderer.send('editor-game-preview-stop-request');
-  }
+  },
 
+  undo: function() {
+
+    if(undoArray.length > 1 && !AMBLE.paused) {
+      console.log(undoArray);
+      var children = undoArray.pop();
+      AMBLE.scene.applyUndoRedo(children);
+      if(redoArray.length > MAX_UNDO_REDO) {
+        redoArray.unshift();
+      }
+      redoArray.push(children);
+    }
+
+  },
+
+  redo: function() {
+
+    if(redoArray.length > 0 && !AMBLE.paused) {
+      console.log(redoArray);
+      var children = redoArray.pop();
+      AMBLE.scene.applyUndoRedo(children);
+      if(undoArray.length > MAX_UNDO_REDO) {
+        undoArray.unshift();
+      }
+      undoArray.push(children);
+    }
+
+  },
 }
+
+function prepareUndoRedo() {
+  if(undoArray.length > MAX_UNDO_REDO) {
+    undoArray.unshift();
+  }
+  undoArray.push(_.cloneDeep(AMBLE.scene.createSceneFile(true)));
+  console.log('undoArray', undoArray.length);
+};
 
 var menu = Menu.buildFromTemplate([
   {
     label: 'File',
     submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'Ctrl+Z',
+        click: menuFunctions.undo
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+Ctrl+Z',
+        click: menuFunctions.redo
+      },
       {
         label: 'Save',
         accelerator: 'Ctrl+S',
@@ -119,6 +168,14 @@ ipcRenderer.on('editor-build-request', function() {
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
 
+ipcRenderer.on('editor-undo-request', function(event, data) {
+  menuFunctions.undo();
+});
+
+ipcRenderer.on('editor-redo-request', function(event, data) {
+  menuFunctions.redo();
+});
+
 ipcRenderer.on('editor-unpause', function(event, data) {
   AMBLE.unpause();
 });
@@ -126,7 +183,6 @@ ipcRenderer.on('editor-unpause', function(event, data) {
 ipcRenderer.on('game-preview-log', function(event, data) {
   Debug.log(data);
 });
-
 
 ipcRenderer.on('game-preview-error', function(event, data) {
   Debug.error(data);
@@ -468,6 +524,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
       if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
+        prepareUndoRedo();
+
         editor.cameraScript.selectedActor = null;
         AMBLE.scene.remove(editor.actor)
 
@@ -496,6 +554,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
   editor.addActor = function(actor) {
 
+
     var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
     if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
     if(_actor) {
@@ -505,6 +564,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       if(AMBLE.scene.getActorByName(_actor.name)) {
         _actor.name += this.actors.length;
       }
+
+      prepareUndoRedo();
 
       AMBLE.scene.instantiate(_actor);
     }
@@ -521,6 +582,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
   editor.actorSelected = function(e) {
 
     e.preventDefault();
+
+    prepareUndoRedo();
 
     var sceneID = e.target.id.replace('id_', '');
 
@@ -593,6 +656,7 @@ var application = {
 
     //process scripts int engine and load objects
     loaded: function(){
+      prepareUndoRedo();
       if(projectData.camera) {
         this.mainCamera.transform.position.x = projectData.camera.x;
         this.mainCamera.transform.position.y = projectData.camera.y;

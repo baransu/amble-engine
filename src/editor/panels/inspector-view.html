@@ -22,7 +22,7 @@
 					<template is="dom-if" if="{{_hasProperty('name', actor)}}">
 
 						<div class="input-group">
-							<input id="actor-name" is="iron-input" class="form-control" type="text" bind-value="{{actor.name}}" placeholder="name">
+							<input id="actor-name" is="iron-input" class="form-control" on-change="nameChange" type="text" bind-value="{{actor.name}}" placeholder="name">
 							<div class="input-group-btn">
 								<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									Add
@@ -132,6 +132,15 @@
 			}
 		},
 
+		nameChange: function() {
+			prepareUndoRedo();
+
+			this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
+			this.actor.prefab.name = this.actor.name;
+			EDITOR.refresh();
+
+		},
+
 		_actorObserver: function() {
 			if(this.actor && this.actor.selected) {
 				// make actor true binding with AMBLE.scene coresponding actor
@@ -187,7 +196,7 @@
 
 			var a = document.getElementById('id_' + sceneID);
 			if(a) {
-				a.click();		
+				a.click();
 			}
 
 			this._actorObserver();

@@ -52,7 +52,7 @@ window.AnimationRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        if(self.transform.scale.x != 1 || self.transform.scale.y != 0) {
+        if(self.transform.scale.x != 1 || self.transform.scale.y != 1) {
           layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
         }
 
@@ -87,6 +87,10 @@ window.AnimationRenderer = (function() {
 
             if(self.transform.rotation != 0) {
               layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+            }
+
+            if(self.transform.scale.x != 1 || self.transform.scale.y != 1) {
+              layer.ctx.scale(1/self.transform.scale.x, 1/self.transform.scale.y);
             }
 
             this.arrows.render(self, camera);

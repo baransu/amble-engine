@@ -52,8 +52,13 @@ window.RectRenderer = (function() {
             height
           );
 
-        // rotate back
-        layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+        if(self.transform.rotation != 0) {
+          layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
+        }
+
+        if(self.transform.scale.x != 1 || self.transform.scale.y != 1) {
+          layer.ctx.scale(1/self.transform.scale.x, 1/self.transform.scale.y);
+        }
 
         this.arrows.render(self, camera);
 

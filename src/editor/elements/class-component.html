@@ -53,7 +53,7 @@
 	  							<template id="class-list" is="dom-repeat" items="{{ toArray(p.value) }}" as="v">
 	  								<div class="col-md-6">
 	  									<div class="form-group form-group-sm">
-	  										<input class="form-control" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
+	  										<input class="form-control" on-change="updateComponentsDeep" type="number" is="iron-input" step= "0.1" bind-value="{{v}}">
 	  									</div>
 	  								</div>
 	  							</template>
@@ -66,7 +66,7 @@
 	  						<div class="row">
 	  							<div class="col-md-12">
 	  								<label>{{p.name}} (number)</label>
-	  								<input class="form-control" type="number" is="iron-input" bind-value="{{p.value}}">
+	  								<input class="form-control" on-change="updateComponentsDeep" type="number" is="iron-input" bind-value="{{p.value}}">
 	  							</div>
 	  						</div>
 							</template>
@@ -83,7 +83,7 @@
 	  						<div class="row">
 	  							<div class="col-md-12">
 	  								<label>{{p.name}} (string)</label>
-	  								<input class="form-control" type="text" is="iron-input" bind-value="{{p.value}}">
+	  								<input class="form-control" on-change="updateComponentsDeep" type="text" is="iron-input" bind-value="{{p.value}}">
 	  							</div>
 	  						</div>
 							</template>
@@ -95,7 +95,7 @@
 
   								<div class="row" hidden$="{{_isTypeOf('Number', v)}}">
   									<div class="col-md-12">
-  										<input class="form-control" type="number" is="iron-input" bind-value="{{v.value}}"></br>
+  										<input class="form-control" on-change="updateComponentsDeep" type="number" is="iron-input" bind-value="{{v.value}}"></br>
   									</div>
   								</div>
 
@@ -107,7 +107,7 @@
 
   								<div class="row" hidden$="{{_isTypeOf('String', v)}}">
   									<div class="col-md-12">
-  										<input class="form-control" type="text" is="iron-input" bind-value="{{v.value}}"></br>
+  										<input class="form-control" type="text" on-change="updateComponentsDeep" is="iron-input" bind-value="{{v.value}}"></br>
   									</div>
   								</div>
 
@@ -117,7 +117,7 @@
   										<template is="dom-repeat" items="{{ toArray(v.value) }}" as="vv">
   											<div class="col-md-6">
   												<div class="form-group form-group-sm">
-  													<input class="form-control" type="number" step= "0.1" is="iron-input" bind-value="{{vv}}">
+  													<input class="form-control" type="number" on-change="updateComponentsDeep" step= "0.1" is="iron-input" bind-value="{{vv}}">
   												</div>
   											</div>
   										</template>
@@ -205,12 +205,17 @@
     },
 
 		deleteClass: function(e) {
+
+			prepareUndoRedo();
+
 			this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
 			this.actor.prefab.components.splice(this.index, 1);
 			document.querySelector('class-element').refreshActor();
 		},
 
 		resetClass: function(e) {
+
+			prepareUndoRedo();
 
 			console.log('reset', this.actor === AMBLE.scene.getActorByID(this.actor.sceneID));
 

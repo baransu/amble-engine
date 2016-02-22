@@ -212,6 +212,8 @@
 			//apply object changes to prefab
 			if(this.actor) {
 
+				prepareUndoRedo();
+
 				//layer
 				this.actor.prefab.renderer.args.layer = this.actor.renderer.layer;
         AMBLE.scene.sort();
@@ -260,7 +262,7 @@
 
 		spriteUpdate: function(e) {
 
-			if(this.actor.renderer && (this.actor.renderer.type == 'sprite' || this.actor.renderer.type == 'animation') && !this.actor.renderer.sprite && this.sprites.length > 0) {
+			if(this.actor && this.actor.renderer && (this.actor.renderer.type == 'sprite' || this.actor.renderer.type == 'animation') && !this.actor.renderer.sprite && this.sprites.length > 0) {
 				this.actor.renderer.sprite = this.actor.prefab.renderer.args.sprite = this.sprites[0].uuid;
 			}
 
@@ -284,7 +286,6 @@
 
 				this.spriteUpdate();
 
-				this.valuesChange();;
 			}
 		},
 

@@ -10,7 +10,6 @@
 		width: 100%;
 	}
 
-
 	</style>
 
 	<template>
@@ -136,6 +135,8 @@
 				//rotation
 				this.actor.prefab.transform.args.rotation = this.actor.transform.rotation = 0;
 				this.notifyPath('actor.transform.rotation', this.actor.transform.rotation);
+
+				prepareUndoRedo();
 			}
 
 		},
@@ -143,6 +144,9 @@
 		valuesChange: function() {
 			//apply object changes to prefab
 			if(this.actor) {
+
+				prepareUndoRedo();
+
 				//position
 				this.actor.prefab.transform.args.position.args.x = this.actor.transform.position.x;
 				this.actor.prefab.transform.args.position.args.y = this.actor.transform.position.y;
@@ -161,7 +165,6 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = AMBLE.scene.getActorByID(sceneID);
 
-				this.valuesChange();
 			}
 		},
 

@@ -477,11 +477,18 @@ app.on('browser-window-focus', function(event, bWindow) {
     //build
     shortcuts.open = globalShortcut.register('ctrl+b', menuFunctions.build);
 
-    //play
-    shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.play);
+    //start game preview
+    shortcuts.open = globalShortcut.register('ctrl+p', menuFunctions.startPreview);
 
-    //stop
+    //stop game preview
     shortcuts.open = globalShortcut.register('shift+ctrl+p', menuFunctions.stopPreview);
+
+    //undo
+    shortcuts.open = globalShortcut.register('ctrl+z', menuFunctions.undo);
+
+    //redo
+    shortcuts.open = globalShortcut.register('shift+ctrl+z', menuFunctions.redo);
+
     break;
   }
 
@@ -497,7 +504,7 @@ var menuFunctions = {
     editorWindow.webContents.send('editor-build-request');
   },
 
-  play: function() {
+  startPreview: function() {
     editorWindow.webContents.send('editor-game-preview-request');
   },
 
@@ -508,7 +515,16 @@ var menuFunctions = {
       //send unpause
       editorWindow.webContents.send('editor-unpause');
     }
+  },
+
+  undo: function() {
+    editorWindow.webContents.send('editor-undo-request');
+  },
+
+  redo: function() {
+    editorWindow.webContents.send('editor-redo-request');
   }
+
 }
 
 // Uncaught Exception:

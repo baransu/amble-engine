@@ -1,7 +1,7 @@
 window.Scene = (function() {
 
-  var Scene = function Scene() {
-    this.children = [];
+  var Scene = function Scene(children) {
+    this.children = children || [];
     this.started = false;
     // @ifdef EDITOR
     this.shortArray = [];
@@ -11,18 +11,50 @@ window.Scene = (function() {
   Scene.prototype = {
 
     // @ifdef EDITOR
-    createSceneFile: function createSceneFile(){
+    createSceneFile: function createSceneFile(forUndoRedo){
 
       var data = [];
       for(var i = 1; i < this.children.length; i++) {
-        this.children[i].prefab.name = this.children[i].name;
-        // console.log(this.children[i].name)
+
+        this.children[i].prefab.sceneID = this.children[i].sceneID;
+
+        if(forUndoRedo) {
+          this.children[i].prefab.selected = this.children[i].selected;
+        } else if(this.children[i].prefab.selected) {
+          delete this.children[i].prefab.selected;
+        }
+
         data.push(this.children[i].prefab);
       }
 
       // TODO: cleaning up objects
 
       return data;
+    },
+
+    applyUndoRedo: function(children) {
+      AMBLE.pause();
+
+      setTimeout(function() {
+        var sceneCamera = _.cloneDeep(AMBLE.scene.children[0]);
+
+        AMBLE.scene.children.splice(1, AMBLE.scene.children.length - 1);
+        for(var i = 0; i < children.length; i++) {
+          AMBLE.scene.instantiate(children[i]);
+        }
+
+        console.log(children, AMBLE.scene.children);
+
+        console.log(undoArray);
+        AMBLE.unpause();
+        // EDITOR.updateActors();
+        // EDITOR.refresh();
+        console.log('undoRedoApplied')
+        document.querySelector('inspector-view')._actorObserver();
+
+
+      }, 100);
+
     },
     // @endif
 
@@ -49,14 +81,20 @@ window.Scene = (function() {
 
       actor.prefab = obj;
 
+      // @ifdef EDITOR
+      actor.selected = obj.selected;
+      // @endif
+
       // console.log(actor);
       return this._add(actor);
     },
 
     _add: function _add(object) {
 
-      var sceneID = uuid.v1();
-      object.sceneID = sceneID;
+      if(!object.sceneID) {
+        var sceneID = uuid.v1();
+        object.sceneID = sceneID;
+      }
 
       if(object.components !== undefined) {
         for(var i = 0; i < object.components.length; i++) {

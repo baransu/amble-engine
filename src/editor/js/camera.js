@@ -64,19 +64,19 @@ Class({
       }
 
       if(this.selectedAxis == 'both') {
-        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
-        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.selectedActor.prefab.transform.args.position.args.x = this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.prefab.transform.args.position.args.y = this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
         this.editor.refresh();
       } else if(this.selectedAxis == 'x') {
-        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.prefab.transform.args.position.args.x = this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
         this.editor.refresh();
       } else if(this.selectedAxis == 'y') {
-        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.selectedActor.prefab.transform.args.position.args.y = this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
         this.editor.refresh();
       } else if(this.selectedAxis == 'rot') {
 
         var angle = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
-        this.selectedActor.transform.rotation = -angle - this.startRotation + this.rotationOffset| 0;
+        this.selectedActor.prefab.transform.args.rotation = this.selectedActor.transform.rotation = -angle - this.startRotation + this.rotationOffset| 0;
       }
 
       this.editor.refresh();
@@ -120,6 +120,7 @@ Class({
       this.rotationOffset = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
 
       if(this.selectedActor) {
+        prepareUndoRedo();
         this.move = true;
         this.modifier.x = this.selectedActor.transform.position.x - this.mouse.x;
         this.modifier.y = this.selectedActor.transform.position.y - this.mouse.y;
