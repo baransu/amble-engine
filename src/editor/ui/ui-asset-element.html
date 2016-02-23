@@ -53,11 +53,11 @@
 
 	<template>
 
-    <div class="holder" on-dblclick="_onClick">
+    <div class="holder" on-dblclick="_onClick" on-dragstart="_onDragStart" draggable="true">
       <div class="asset">
 
 				<template is="dom-if" if="{{_typeOfAsset('sprite', item)}}">
-					<img src="{{item.path}}" alt="" width="100%" height="100%" class="image"/>
+					<img src="{{item.path}}" alt="" width="100%" height="100%" class="image" draggable="false"/>
 				</template>
 
 				<template is="dom-if" if="{{_typeOfAsset('other', item)}}">
@@ -105,8 +105,6 @@
 
     </div>
 
-
-
 	</template>
 
 </dom-module>
@@ -130,12 +128,20 @@
     },
 
     listeners: {
-      'contextmenu': '_onContextMenu'
+      'contextmenu': '_onContextMenu',
     },
 
     ready: function() {
       document.addEventListener('close-context', this.closeContext.bind(this), false);
     },
+
+		_onDragStart: function(e) {
+			if(this.item.assetType != 'sprite') e.preventDefault();
+
+			e.dataTransfer.setData("text/plain", this.item.path)
+
+			console.log('drag start')
+		},
 
     closeContext: function(e){
       console.log('context')

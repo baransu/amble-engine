@@ -25,7 +25,6 @@ window.Loader = (function() {
       // get asset by uuid no path
       getAsset: function getAsset(uuid) {
         var asset = this.cache.find(function(a) { return a.uuid == uuid || a.path == uuid});
-        console.log(this.cache, uuid)
         if(asset) return asset.data;
         else return undefined;
       },

@@ -218,6 +218,64 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 
 });
 
+var dragEvents = {
+
+  drop: function(e) {
+
+    var path = e.dataTransfer.getData("text")
+    var asset = projectData.assets.find(a => a.path == path);
+
+    if(asset) {
+
+      var camera = AMBLE.mainCamera.getComponent('Camera');
+
+      var offsetLeft = AMBLE.mainCamera.camera.getContext().offsetLeft;
+      var offsetTop = AMBLE.mainCamera.camera.getContext().offsetTop;
+
+      var x = e.clientX - offsetLeft;
+      var y = e.clientY - offsetTop;
+
+      mouseX = (x/AMBLE.mainCamera.camera.scale - camera.translate.x) + AMBLE.mainCamera.camera.view.x;
+      mouseY = (y/AMBLE.mainCamera.camera.scale - camera.translate.y) + AMBLE.mainCamera.camera.view.y;
+
+      var name = AMBLE.scene.getActorByName(asset.name) ? (asset.name + AMBLE.scene.children.length) : asset.name;
+      console.log(name);
+
+      var prefab = {
+        name: name,
+        tag: 'actor',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: mouseX, y: mouseY }},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        renderer: { name: 'SpriteRenderer', args: {
+          sprite: asset.uuid
+        }},
+        components: []
+      };
+
+      prepareUndoRedo();
+
+      var actor = AMBLE.scene.instantiate(prefab);
+      EDITOR.refresh();
+
+      var sceneID = actor.sceneID;
+
+      var hierarchyItem = document.getElementById('id_' + sceneID);
+      if(hierarchyItem) {
+        hierarchyItem.click();
+      }
+
+    }
+  }
+
+}
+
+document.getElementById('scene-view').addEventListener('drop', dragEvents.drop, false);
+
 //move to angular
 var projectView = {
 
