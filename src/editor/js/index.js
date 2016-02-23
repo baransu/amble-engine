@@ -233,7 +233,6 @@ var projectView = {
       console.error('Oh no, there was an error: ' + err.message)
     }
 
-    // import (add meta and save to engine assets list)
   },
 
   processDir: function(path) {
@@ -281,8 +280,13 @@ var projectView = {
 
         // check if meta path == file.path
         if(meta.path != file.path) {
-          console.log('path change', meta.path, file.path);
+          console.log('meta file path change: ', meta.path, file.path);
           meta.path = file.path;
+        }
+
+        if(meta.name != file.name) {
+          console.log('meta file name change: ', meta.name, file.name);
+          meta.name = file.name;
         }
 
         file.assetType = meta.type;
@@ -290,7 +294,7 @@ var projectView = {
         try {
           fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
         } catch (e) {
-          throw new Error('Cannot write meta file: ' + metaFilePath);
+          throw new Error('Cannot write meta file: ' + metaFilePath, e);
         }
 
         console.log(meta)
@@ -365,7 +369,7 @@ var projectView = {
         if(meta.type == 'sprite') {
           AMBLE.loader.load('sprite', meta.path, meta.name, meta.uuid);
         } else if(meta.type == 'script'){
-          // asocioate script with uuid
+          // connect script with uuid
           require.reload(meta.path);
         }
       }
@@ -375,6 +379,11 @@ var projectView = {
         console.log(AMBLE.loader)
         var rendererComponenet = document.querySelector('renderer-component')
         if(rendererComponenet) rendererComponenet.updateSpritesList();
+
+        // update assets view
+        // document/
+
+
       });
 
     }));

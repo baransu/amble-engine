@@ -78,7 +78,7 @@
         <div class="menu-container dropdown-content">
           <div class="list-group">
 						<a href="#" class="list-group-item" on-click="open">Open</a>
-            <!-- <a href="#" class="list-group-item" on-click="rename">Rename</a> -->
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -124,6 +124,7 @@
       item: {
         type: Object,
         value: null,
+				notify: true
       },
 
     },
@@ -145,7 +146,6 @@
 
 		_typeOfAsset: function(type, item) {
 			if(item) {
-				console.log(item.assetType)
 				return item.assetType === type;
 			} else {
 				return false;
@@ -187,11 +187,16 @@
       this.$.renameDialog.close();
       var name = this.$.renameInput.value;
       if(name == 'assets') {
-        console.log("you cannot name folder or asset - 'assets'")
+				console.log("You cannot name folder or asset - 'assets'")
       } else {
+
         var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
-        fs.renameSync(path + '/' + this.item.name, path + '/' + name);
-        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+
+				// rename meta file
+				fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension + '.meta', path + '/' + name + '.' + this.item.extension + '.meta');
+				// rename file
+        fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension, path + '/' + name + '.' + this.item.extension);
+
       }
     },
 

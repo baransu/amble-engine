@@ -82,7 +82,7 @@
           <div class="list-group">
             <a href="#" class="list-group-item" on-click="createFolder">Create folder</a>
             <a href="#" class="list-group-item" on-click="createScript">Create script</a>
-            <!-- <a href="#" class="list-group-item" on-click="rename">Rename</a> -->
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -137,7 +137,8 @@
 
       item: {
         type: Object,
-        value: null
+        value: null,
+				notify: true,
       },
 
       name: {
@@ -275,9 +276,11 @@
       if(name == 'assets') {
         console.log("you cannot name folder or asset - 'assets'")
       } else {
+
         var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+
         fs.renameSync(path + '/' + this.item.name, path + '/' + name);
-        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+
       }
     },
 

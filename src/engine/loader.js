@@ -35,11 +35,19 @@ window.Loader = (function() {
         // reset
         this.successCount = 0;
         this.errorCount = 0;
-        this.cache = [];
 
         if(this.queue.length == 0) callback();
 
         for(var i = 0; i < this.queue.length; i++) {
+
+          // prevent from loading again the same assets
+          var name = this.queue[i].name;
+          var uuid = this.queue[i].uuid;
+          if(this.cache.find(function(c) { return c.uuid == uuid || c.path == name })) {
+            this.successCount++;
+            if(this.isDone() && callback) callback();
+            continue;
+          }
 
           var that = this;
 

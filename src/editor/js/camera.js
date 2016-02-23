@@ -29,7 +29,11 @@ Class({
       value: false
     },
     startRotation: { type: Number },
-    rotationOffset: { type: Number }
+    rotationOffset: { type: Number },
+    firstPressed: {
+      type: Boolean,
+      value: false
+    }
   },
 
   update: function(self) {
@@ -61,6 +65,11 @@ Class({
 
       if(this.selectedActor.renderer && this.selectedActor.renderer.arrows) {
         this.selectedActor.renderer.arrows.selected = this.selectedAxis;
+      }
+
+      if(!this.firstPressed && (this.selectedAxis == 'x' || this.selectedAxis == 'y' || this.selectedAxis == 'rot')) {
+        prepareUndoRedo();
+        this.firstPressed = true;
       }
 
       if(this.selectedAxis == 'both') {
@@ -120,7 +129,6 @@ Class({
       this.rotationOffset = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
 
       if(this.selectedActor) {
-        prepareUndoRedo();
         this.move = true;
         this.modifier.x = this.selectedActor.transform.position.x - this.mouse.x;
         this.modifier.y = this.selectedActor.transform.position.y - this.mouse.y;
@@ -161,6 +169,7 @@ Class({
   onmouseup: function(self, e) {
     if(e.which == 1) {
       this.move = false;
+      this.firstPressed = false;
     }
   },
 
