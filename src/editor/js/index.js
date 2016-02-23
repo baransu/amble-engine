@@ -247,7 +247,7 @@ var dragEvents = {
         hideInHierarchy: false,
         selected: false,
         transform: { name: "Transform", args: {
-          position: { name: "Vec2", args: {x: mouseX, y: mouseY }},
+          position: { name: "Vec2", args: {x: mouseX | 0, y: mouseY | 0}},
           scale: { name: "Vec2", args: {x: 1, y:1}},
           rotation: 0
         }},
@@ -311,6 +311,7 @@ var projectView = {
         type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
         path: path + '/' + abc[i],
         name: f[0],
+        parentFolder: path,
         children: [],
         assetType: 'other',
         extension: extension
@@ -377,6 +378,7 @@ var projectView = {
       type: 'other',
       path: file.path,
       name: file.name,
+      parentFolder: file.parentFolder,
       extension: file.extension
     }
 

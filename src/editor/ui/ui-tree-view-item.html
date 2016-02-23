@@ -20,13 +20,13 @@
     display: inline;
   }
 
+	.head {
+		width: 1000px;
+	}
+
   .head:hover {
     background-color: rgba(0, 0, 0, 0.5);
   }
-
-	.head-hover {
-		background-color: rgba(0, 0, 0, 0.5);
-	}
 
   a {
     text-decoration: none;
@@ -175,15 +175,34 @@
 
 			this.$.head.classList.remove('head-hover');
 
-			for(var i = 0; i < e.dataTransfer.files.length; i++) {
-				var file = e.dataTransfer.files[i];
-				var path = this.item.path;
-				if(file && path) {
-					projectView.importAsset(path, file.path, file.name);
+			var path = e.dataTransfer.getData("text")
+			// move file to folder
+			if(path) {
+				var asset = AMBLE.assets.find(a => a.path == path);
+				if(!asset) return;
+
+				var newFolderPath = this.item.path;
+				var folderPath = asset.parentFolder;
+				if(folderPath == newFolderPath) return;
+
+				fs.move(folderPath + '/' + asset.name + '.' + asset.extension + '.meta', newFolderPath + '/' + asset.name + '.' + asset.extension + '.meta', function (err) {
+					if (err) throw err;
+					console.log('meta moved')
+					fs.move(folderPath + '/' + asset.name + '.' + asset.extension, newFolderPath + '/' + asset.name + '.' + asset.extension, function (err) {
+						if (err) throw err;
+						console.log('asset moved');
+					});
+				});
+
+			} else { // import file
+				for(var i = 0; i < e.dataTransfer.files.length; i++) {
+					var file = e.dataTransfer.files[i];
+					var path = this.item.path;
+					if(file && path) {
+						projectView.importAsset(path, file.path, file.name);
+					}
 				}
 			}
-
-			return false;
 		},
 
 		_onDropOver: function(e) {

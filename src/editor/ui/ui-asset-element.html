@@ -148,8 +148,6 @@
 		},
 
 		_onDragStart: function(e) {
-			if(this.item.assetType != 'sprite') e.preventDefault();
-
 			e.dataTransfer.setData("text/plain", this.item.path)
 
 			console.log('drag start')
