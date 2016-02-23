@@ -223,7 +223,7 @@ var dragEvents = {
   drop: function(e) {
 
     var path = e.dataTransfer.getData("text")
-    var asset = projectData.assets.find(a => a.path == path);
+    var asset = AMBLE.assets.find(a => a.path == path);
 
     if(asset) {
 
@@ -713,7 +713,6 @@ var application = {
         if(meta.type == 'sprite') {
           this.loader.load('sprite', meta.path, meta.name, meta.uuid);
         } else if(meta.type == 'script'){
-          // asocioate script with uuid
           require(meta.path);
         }
       }

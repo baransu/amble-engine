@@ -79,6 +79,7 @@
           <div class="list-group">
 						<a href="#" class="list-group-item" on-click="open">Open</a>
             <a href="#" class="list-group-item" on-click="rename">Rename</a>
+						<a href="#" class="list-group-item" on-click="duplicate">Duplicate</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -135,6 +136,17 @@
       document.addEventListener('close-context', this.closeContext.bind(this), false);
     },
 
+		duplicate: function() {
+
+			var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+
+			// duplicate file
+			fs.copy(path + '/' + this.item.name + '.' + this.item.extension, path + '/' + this.item.name + '_copy.' + this.item.extension + '');
+
+			this.$.menu.close();
+
+		},
+
 		_onDragStart: function(e) {
 			if(this.item.assetType != 'sprite') e.preventDefault();
 
@@ -144,7 +156,6 @@
 		},
 
     closeContext: function(e){
-      console.log('context')
       if(e.detail.id != this.item.id) {
         this.$.menu.close();
       }
