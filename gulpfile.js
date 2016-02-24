@@ -7,14 +7,13 @@ var jsValidate = require('gulp-jsvalidate');
 var browserify = require('browserify');
 var gulpSequence = require('gulp-sequence');
 var source = require('vinyl-source-stream');
-var install = require('gulp-install');
+var bower = require('gulp-bower');
 
 // var minifyCss = require('gulp-minify-css');
 
 // bower install wrapper
 gulp.task('install', function() {
-  return gulp.src(['./bower.json'])
-    .pipe(install());
+  return bower({ cmd: 'install --config.interactive=false'});
 });
 
 
