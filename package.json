@@ -4,7 +4,7 @@
   "description": "JavaScript game engine for web and mobile",
   "main": "app.js",
   "scripts": {
-    "install": "bower install && gulp",
+    "install": "gulp install && gulp build",
     "start": "electron ."
   },
   "bin": {
@@ -59,6 +59,7 @@
     "vinyl-source-stream": "latest"
   },
   "devDependencies": {
+    "gulp-bower": "0.0.13",
     "gulp-jsvalidate": "^2.1.0",
     "gulp-preprocess": "^2.0.0"
   }

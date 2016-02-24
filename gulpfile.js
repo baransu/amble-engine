@@ -7,8 +7,15 @@ var jsValidate = require('gulp-jsvalidate');
 var browserify = require('browserify');
 var gulpSequence = require('gulp-sequence');
 var source = require('vinyl-source-stream');
+var bower = require('gulp-bower');
 
 // var minifyCss = require('gulp-minify-css');
+
+// bower install wrapper
+gulp.task('install', function() {
+  return bower();
+});
+
 
 //list all engine files and build to amble.js for editor/game preview/core
 
@@ -260,4 +267,4 @@ gulp.task('build-builder', [ 'builder-less', 'builder-js', 'builder-html' ]);
 gulp.task('build-src', [ 'src-less', 'src-js', 'src-html', 'src-move' ]);
 gulp.task('build-utils', [ 'utils-js', 'utils-move' ]);
 
-gulp.task('default', [ 'build-engine', 'build-launcher', 'build-editor', 'build-preview', 'build-builder', 'build-utils', 'build-src' ]);
+gulp.task('build', [ 'build-engine', 'build-launcher', 'build-editor', 'build-preview', 'build-builder', 'build-utils', 'build-src' ]);
