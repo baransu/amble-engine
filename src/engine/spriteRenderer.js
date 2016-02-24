@@ -56,15 +56,6 @@ window.SpriteRenderer = (function() {
           // @ifdef EDITOR
           if(self.selected) {
 
-            layer.strokeStyle(primaryColor)
-            .lineWidth(3)
-            .strokeRect(
-              -width/2,
-              -height/2,
-              width,
-              height
-            );
-
             if(self.transform.rotation != 0) {
               layer.ctx.rotate(self.transform.rotation * Mathf.TO_RADIANS);
             }
@@ -74,6 +65,15 @@ window.SpriteRenderer = (function() {
             }
 
             this.arrows.render(self, camera);
+
+            layer.strokeStyle(primaryColor)
+            .lineWidth(1)
+            .strokeRect(
+              (-width/2)* self.transform.scale.x,
+              (-height/2) * self.transform.scale.y,
+              width * self.transform.scale.x,
+              height * self.transform.scale.y
+            );
 
           }
           // @endif

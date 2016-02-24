@@ -47,11 +47,10 @@ window.Scene = (function() {
 
         console.log(undoArray);
         AMBLE.unpause();
-        // EDITOR.updateActors();
-        // EDITOR.refresh();
         console.log('undoRedoApplied')
         document.querySelector('inspector-view')._actorObserver();
 
+        EDITOR.refresh();
 
       }, 100);
 
