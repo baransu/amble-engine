@@ -1,11 +1,11 @@
 # Amble Engine
-Game engine written in JavaScript on top of [Electron](http://electron.atom.io/) (atom-shell) with visual scripting, for making web and mobile games.
+Game engine written in JavaScript on top of [Electron](http://electron.atom.io/), for making web and mobile games.
 
 ## Prerequisite
 
 - Install [node.js](https://nodejs.org/)
 
-Next install gulp and bower via npm:
+Next install [gulp](https://www.npmjs.com/package/gulp) and [bower](https://www.npmjs.com/package/bower) via npm:
 
 ```bash
 npm install -g bower gulp
@@ -23,6 +23,8 @@ bower install
 ```
 
 ### Building editor
+
+First time, and every other when you enter some changes to source code, you must build editor.
 
 ```bash
 gulp
