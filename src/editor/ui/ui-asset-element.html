@@ -112,8 +112,6 @@
 
 <script>
 
-	const _open = require('open')
-
 	Polymer({
 
 		is: 'ui-asset-element',
@@ -168,7 +166,7 @@
 		},
 
 		open: function(e) {
-			_open(this.item.path)
+			_opener(this.item.path)
 			this.$.menu.close();
 		},
 

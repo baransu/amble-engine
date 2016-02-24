@@ -5,6 +5,8 @@ const ipcRenderer = electron.ipcRenderer;
 
 const _ = require('lodash');
 
+const _opener = require('opener')
+
 var fs = require('fs-extra');
 var watch = require('node-watch');
 

@@ -82,6 +82,7 @@
           <div class="list-group">
             <a href="#" class="list-group-item" on-click="createFolder">Create folder</a>
             <a href="#" class="list-group-item" on-click="createScript">Create script</a>
+						<a href="#" class="list-group-item" on-click="open">Open in explorer</a>
             <a href="#" class="list-group-item" on-click="rename">Rename</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
@@ -168,6 +169,11 @@
 			this.$.head.ondragleave = this.$.head.ondragend = this._onDropEnd.bind(this);
 			this.$.head.ondrop = this._onDrop.bind(this);
 
+		},
+
+		open: function(e) {
+			_opener(this.item.path)
+			this.$.menu.close();
 		},
 
 		_onDrop: function(e) {

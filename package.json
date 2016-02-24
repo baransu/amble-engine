@@ -2,9 +2,12 @@
   "name": "amble-engine",
   "version": "0.1.0-alpha.11",
   "description": "JavaScript game engine for web and mobile",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
     "start": "electron ."
+  },
+  "bin": {
+    "amble-engine": "./bin/amble-engine"
   },
   "repository": {
     "type": "git",
@@ -44,6 +47,7 @@
     "node-localstorage": "^1.1.2",
     "node-watch": "^0.3.4",
     "open": "0.0.5",
+    "opener": "^1.4.1",
     "rimraf": "^2.5.1",
     "rmdir": "^1.2.0",
     "underscore": "^1.8.3",

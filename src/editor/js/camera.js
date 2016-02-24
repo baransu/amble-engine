@@ -33,6 +33,10 @@ Class({
     firstPressed: {
       type: Boolean,
       value: false
+    },
+    recentlySelected: {
+      type: Boolean,
+      value: true
     }
   },
 
@@ -61,7 +65,7 @@ Class({
       this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, self, this.mouse.x, this.mouse.y);
     }
 
-    if(Input.isMousePressed(1) && this.selectedActor) {
+    if(Input.isMousePressed(1) && this.selectedActor && !this.recentlySelected) {
 
       if(this.selectedActor.renderer && this.selectedActor.renderer.arrows) {
         this.selectedActor.renderer.arrows.selected = this.selectedAxis;
@@ -145,9 +149,6 @@ Class({
 
             if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
 
-              // this.modifier.x = obj.transform.position.x - this.mouse.x;
-              // this.modifier.y = obj.transform.position.y - this.mouse.y;
-
               this.selectedActor = obj;
 
               var a = document.getElementById('id_' + obj.sceneID);
@@ -155,6 +156,8 @@ Class({
                 a.click();
                 // location.href = "#id_" + obj.sceneID;
               }
+
+              this.recentlySelected = true;
 
               return;
             }
@@ -170,6 +173,10 @@ Class({
     if(e.which == 1) {
       this.move = false;
       this.firstPressed = false;
+
+      if(this.recentlySelected) this.recentlySelected = false;
+
+
     }
   },
 
