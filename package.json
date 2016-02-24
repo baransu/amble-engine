@@ -60,5 +60,5 @@
     "gulp-bower": "0.0.13",
     "gulp-jsvalidate": "^2.1.0",
     "gulp-preprocess": "^2.0.0"
-  },
+  }
 }
