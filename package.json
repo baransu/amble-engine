@@ -56,11 +56,9 @@
     "underscore-db": "^0.9.1",
     "uuid": "^2.0.1",
     "vinyl-paths": "^2.1.0",
-    "vinyl-source-stream": "latest"
-  },
-  "devDependencies": {
+    "vinyl-source-stream": "latest",
     "gulp-bower": "0.0.13",
     "gulp-jsvalidate": "^2.1.0",
     "gulp-preprocess": "^2.0.0"
-  }
+  },
 }
