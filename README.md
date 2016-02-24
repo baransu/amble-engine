@@ -1,5 +1,5 @@
 # Amble Engine
-Game engine written in JavaScript on top of electron (atom-shell) with visual scripting, for making web and mobile games.
+Game engine written in JavaScript on top of [Electron](http://electron.atom.io/) (atom-shell) with visual scripting, for making web and mobile games.
 
 ## Prerequisite
 
