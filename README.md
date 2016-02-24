@@ -13,26 +13,32 @@ npm install -g bower gulp
 
 ### Install
 
-In cloned project folder, run the following commands to download npm and bower dependencies:
+In cloned project folder, run the following command to download npm dependencies:
 
 ```bash
 npm install
 ```
-```bash
-bower install
-```
 
 ### Building editor
 
-First time, and every other when you enter some changes to source code, you must build editor.
-
+Building editor with dependencies:
 ```bash
-gulp
+gulp build
+```
+
+Building editor without dependencies:
+```bash
+gulp build-code
+```
+
+Building editor to standalone version:
+```bash
+gulp build-standalone
 ```
 
 ### Running editor
 
-To run editor, run the following command in project folder:
+If you built editor, you can run it following command in cloned folder to start editor:
 
 ```bash
 npm start
