@@ -12,10 +12,9 @@ var bower = require('gulp-bower');
 // var minifyCss = require('gulp-minify-css');
 
 // bower install wrapper
-gulp.task('install', function() {
-  return bower({ cmd: 'install --config.interactive=false'});
-});
-
+// gulp.task('install', function() {
+//   return bower({ cmd: 'install --config.interactive=false'});
+// });
 
 //list all engine files and build to amble.js for editor/game preview/core
 

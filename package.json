@@ -4,7 +4,7 @@
   "description": "JavaScript game engine for web and mobile",
   "main": "app.js",
   "scripts": {
-    "install": "gulp install && gulp build",
+    "postinstall": "node node_modules/bower/bin/bower install && gulp build",
     "start": "electron ."
   },
   "bin": {
