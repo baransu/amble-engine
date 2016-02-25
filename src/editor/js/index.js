@@ -228,8 +228,8 @@ var dragEvents = {
 
     var path = e.dataTransfer.getData("text")
     var asset = AMBLE.assets.find(a => a.path == path);
-
-    if(asset) {
+    
+    if(asset && asset.type == 'sprite') {
 
       var camera = AMBLE.mainCamera.getComponent('Camera');
 
@@ -264,15 +264,16 @@ var dragEvents = {
       prepareUndoRedo();
 
       var actor = AMBLE.scene.instantiate(prefab);
-      EDITOR.refresh();
 
       var sceneID = actor.sceneID;
+
+      EDITOR.hierarchy.search = '';
+      EDITOR.refresh();
 
       var hierarchyItem = document.getElementById('id_' + sceneID);
       if(hierarchyItem) {
         hierarchyItem.click();
       }
-
     }
   }
 
@@ -475,6 +476,10 @@ var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
   var editor = EDITOR = this;
+
+  this.hierarchy = {
+    search: ''
+  }
 
   this.refresh = function() {
     $scope.$apply();
@@ -729,10 +734,10 @@ var application = {
     //process scripts int engine and load objects
     loaded: function(){
       prepareUndoRedo();
-      if(projectData.camera) {
-        this.mainCamera.transform.position.x = projectData.camera.x;
-        this.mainCamera.transform.position.y = projectData.camera.y;
-      }
+      // if(projectData.camera) {
+      //   this.mainCamera.transform.position.x = projectData.camera.x;
+      //   this.mainCamera.transform.position.y = projectData.camera.y;
+      // }
 
     },
 

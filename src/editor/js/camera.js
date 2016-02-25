@@ -142,8 +142,8 @@ Class({
         for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
           var obj = AMBLE.scene.children[i];
           if(obj.renderer) {
-            var width = obj.renderer.size.x;
-            var height = obj.renderer.size.y;
+            var width = obj.renderer.size.x * obj.transform.scale.x;
+            var height = obj.renderer.size.y * obj.transform.scale.y;
             var x = obj.transform.position.x;
             var y = obj.transform.position.y;
 
@@ -151,6 +151,8 @@ Class({
 
               this.selectedActor = obj;
 
+              EDITOR.hierarchy.search = '';
+              EDITOR.refresh()
               var a = document.getElementById('id_' + obj.sceneID);
               if(a) {
                 a.click();

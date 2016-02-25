@@ -24,9 +24,6 @@ window.SceneArrows = (function() {
         // render both rect stroke with opacity
         layer.ctx.scale(1/camera.camera.scale, 1/camera.camera.scale);
 
-        // //scale
-        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
         var yellow = 'rgb(255, 255, 25)'
         var xArrowColor = this.selected != 'x' ? 'rgb(255, 25, 25)' : yellow;
         var yArrowColor = this.selected != 'y' ? 'rgb(25, 255, 25)' : yellow;

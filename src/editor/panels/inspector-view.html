@@ -194,6 +194,8 @@
 			EDITOR.actor = AMBLE.scene.instantiate(prefab);
 			EDITOR.actor.sceneID = sceneID;
 
+			EDITOR.hierarchy.search = '';
+			EDITOR.refresh();
 			var a = document.getElementById('id_' + sceneID);
 			if(a) {
 				a.click();

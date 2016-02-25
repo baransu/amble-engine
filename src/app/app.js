@@ -88,7 +88,9 @@ app.on('will-quit', function(event, bWindow){
 ipcMain.on('launcher-projects-request', function(event, data) {
 
   var projects = JSON.parse(localStorage.getItem('projects'));
-  if(projects === null) projects = [];
+  if(!projects) projects = [];
+
+  console.log(projects)
 
   projects.sort((a, b) => b.time - a.time);
 
@@ -232,6 +234,13 @@ ipcMain.on('launcher-open-request', function(event, data) {
       } else {
         var p = projects.find(pr => pr.name == currentName && pr.dir == currentDir)
         if(p) p.time = Date.now();
+        else {
+          projects.push({
+            time: Date.now(),
+            name: currentName,
+            dir: currentDir
+          });
+        }
       }
 
       localStorage.setItem('projects', JSON.stringify(projects));
