@@ -70,6 +70,7 @@ ipcRenderer.on('launcher-dir-respond', function(event, data) {
 });
 
 ipcRenderer.on('launcher-other-respond', function(event, data) {
+  console.log(data)
   if(data.name && data.dir) {
     ipcRenderer.send('launcher-open-request', {
       name: data.name,

@@ -302,7 +302,8 @@
         console.log("you cannot name folder or asset - 'assets'")
       } else {
 
-        var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+				var p = upath.toUnix( this.item.path)
+				var path = p.substring(0, p.lastIndexOf("/"));
 
         fs.renameSync(path + '/' + this.item.name, path + '/' + name);
 

@@ -11,6 +11,8 @@ var fs = require('fs-extra');
 var mkdirp = require('mkdirp');
 var rmdir = require('rmdir');
 
+var upath = require('upath');
+
 var builderGulp = require('./utils/builder.js');
 
 var launcherWindow = null;
@@ -127,8 +129,9 @@ ipcMain.on('launcher-other-request', function(event, data) {
 
         var p = JSON.parse(fs.readFileSync(path, 'utf-8'));
         if(p) {
+          path = upath.toUnix(path)
           var _path = path.substring(0, path.lastIndexOf("/"))
-          console.log(_path, p.dir)
+          console.log("131", _path, p.dir)
 
           if(_path != p.dir) {
             p.dir = _path;

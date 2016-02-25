@@ -7,6 +7,8 @@ const _ = require('lodash');
 
 const _opener = require('opener')
 
+const upath = require('upath');
+
 var fs = require('fs-extra');
 var watch = require('node-watch');
 

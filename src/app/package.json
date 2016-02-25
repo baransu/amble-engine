@@ -40,6 +40,7 @@
     "underscore": "^1.8.3",
     "underscore-db": "^0.9.1",
     "uuid": "^2.0.1",
+    "upath": "^0.1.7",
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "latest"
   }
