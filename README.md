@@ -31,7 +31,7 @@ Building editor without dependencies:
 gulp build-code
 ```
 
-Building editor to standalone version:
+Building editor to standalone version (standalone version only available for Linux and Windows):
 ```bash
 gulp build-standalone
 ```
