@@ -8,9 +8,8 @@ var browserify = require('browserify');
 var gulpSequence = require('gulp-sequence');
 var source = require('vinyl-source-stream');
 var install = require('gulp-install');
-var os = require('os');
 
-var releaseLinux = require('./build.linux');
+var release = require('./build');
 
 const BUILD_DIRECTORY = './amble-builds/app';
 const DISTRIBUTIONS_DIRECOTRY = './amble-builds/dists';
@@ -296,21 +295,9 @@ gulp.task('build-dev', function(cb) {
 });
 
 gulp.task('build-electron', function () {
-  switch (os.platform()) {
-  case 'darwin':
-    console.log('No darwin build avalible')
-
-  break;
-  case 'linux':
-
-    return releaseLinux.build();
-
-  break;
-  case 'win32':
-    console.log('No windows build avalible')
-  }
+  return release.build();
 });
 
 gulp.task('build-standalone', function(cb) {
-  gulpSequence('build-clear', 'build-electron', cb);
+  gulpSequence('build', 'build-electron', cb);
 });

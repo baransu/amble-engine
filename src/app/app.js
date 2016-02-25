@@ -59,15 +59,17 @@ app.on('ready', function() {
 
 });
 
+// Quit when all windows are closed.
+app.on('window-all-closed', function() {
+  globalShortcut.unregisterAll();
+  // On OS X it is common for applications and their menu bar
+  // to stay active until the user quits explicitly with Cmd + Q
+  if (process.platform != 'darwin') {
+    app.quit();
+  }
+});
+
 app.on('browser-window-blur', function(event, bWindow){
-  globalShortcut.unregisterAll();
-});
-
-app.on('window-all-closed', function(event, bWindow){
-  globalShortcut.unregisterAll();
-});
-
-app.on('gpu-process-crashed', function(event, bWindow){
   globalShortcut.unregisterAll();
 });
 
@@ -77,7 +79,7 @@ app.on('will-quit', function(event, bWindow){
   editorWindow = null;
   launcherWindow = null;
   builderWindow = null;
-
+  gamePreviewWindow = null;
 });
 
 //launcher
