@@ -24,15 +24,15 @@ window.SceneArrows = (function() {
         // render both rect stroke with opacity
         layer.ctx.scale(1/camera.camera.scale, 1/camera.camera.scale);
 
-        // //scale
-        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
         var yellow = 'rgb(255, 255, 25)'
         var xArrowColor = this.selected != 'x' ? 'rgb(255, 25, 25)' : yellow;
         var yArrowColor = this.selected != 'y' ? 'rgb(25, 255, 25)' : yellow;
+        var rotationArcColor = this.selected != 'rot' ? 'rgb(25, 25, 255)' : 'yellow';
 
         var rootRectColor = 'rgb(25, 25, 255)';
         var rootSemiTransparentRectColor = this.selected != 'both' ? 'rgba(25, 25, 255, 0.3)' : 'rgba(255, 255, 25, 0.3)';
+
+        layer.lineWidth(1);
 
         layer.fillStyle(rootSemiTransparentRectColor)
 
@@ -42,7 +42,6 @@ window.SceneArrows = (function() {
 
         // render x arrow
         layer.strokeStyle(xArrowColor)
-        layer.lineWidth(1);
         layer.ctx.beginPath();
         layer.ctx.moveTo(0,0);
         layer.ctx.lineTo(this.arrowLength, 0);
@@ -57,7 +56,6 @@ window.SceneArrows = (function() {
 
         // render y arrow
         layer.strokeStyle(yArrowColor)
-        layer.lineWidth(1);
         layer.ctx.beginPath();
         layer.ctx.moveTo(0,0);
         layer.ctx.lineTo(0, this.arrowLength);
@@ -82,21 +80,41 @@ window.SceneArrows = (function() {
         );
         layer.ctx.fill();
 
+        if(self.tag != 'mainCamera') {
+          // rotation arc
+          layer.strokeStyle(rotationArcColor);
+          layer.ctx.beginPath();
+          layer.ctx.arc(
+            0,
+            0,
+            this.arrowLength,
+            0,
+            Math.PI/2,
+            true
+          );
+          layer.ctx.stroke();
+        }
+
+
         layer.ctx.restore();
 
       },
 
+      //check and return which is hovered
       checkClick: function(self, camera, mouseX, mouseY) {
 
         var scale = camera.camera.scale;
 
-        //check x and y arrow and return which arrow is hovered
         var x = self.transform.position.x;
         var y = self.transform.position.y;
 
-        var rectSize = this.rectSize/scale;
-        var arrowLength = this.arrowLength/scale;
-        var arrowSize = this.arrowSize/scale;
+        var rectSize = this.rectSize / scale;
+        var arrowLength = this.arrowLength / scale;
+        var arrowSize = this.arrowSize / scale;
+
+        var angle = Math.atan2(mouseY - y, mouseX - x) / Mathf.TO_RADIANS;
+
+        var distance2 = Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2);
 
         // both
         if(mouseX > x && mouseX < x + rectSize && mouseY > y && mouseY < y + rectSize) {
@@ -112,6 +130,10 @@ window.SceneArrows = (function() {
         } else if(mouseX > x - arrowSize/2 && mouseX < x + arrowSize/2 && mouseY > y && mouseY < y + arrowLength + arrowSize) {
           this.selected = 'y';
           return 'y';
+
+        } else if(self.tag != 'mainCamera' && (angle < 0 || angle > 90) && distance2 > Math.pow( arrowLength - rectSize/2 , 2) && distance2 < Math.pow( arrowLength + rectSize/2 , 2)/*angle between mouse and center && distance == radius +- rectSize/2 */) {
+          this.selected = 'rot';
+          return 'rot'
 
         } else {
           this.selected = '';

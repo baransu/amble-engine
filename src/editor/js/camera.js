@@ -28,6 +28,16 @@ Class({
       type: Boolean,
       value: false
     },
+    startRotation: { type: Number },
+    rotationOffset: { type: Number },
+    firstPressed: {
+      type: Boolean,
+      value: false
+    },
+    recentlySelected: {
+      type: Boolean,
+      value: true
+    }
   },
 
   update: function(self) {
@@ -55,22 +65,31 @@ Class({
       this.selectedAxis = EDITOR.actor.renderer.arrows.checkClick(EDITOR.actor, self, this.mouse.x, this.mouse.y);
     }
 
-    if(Input.isMousePressed(1) && this.selectedActor) {
+    if(Input.isMousePressed(1) && this.selectedActor && !this.recentlySelected) {
 
       if(this.selectedActor.renderer && this.selectedActor.renderer.arrows) {
         this.selectedActor.renderer.arrows.selected = this.selectedAxis;
       }
 
+      if(!this.firstPressed && (this.selectedAxis == 'x' || this.selectedAxis == 'y' || this.selectedAxis == 'rot')) {
+        prepareUndoRedo();
+        this.firstPressed = true;
+      }
+
       if(this.selectedAxis == 'both') {
-        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
-        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.selectedActor.prefab.transform.args.position.args.x = this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.prefab.transform.args.position.args.y = this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
         this.editor.refresh();
       } else if(this.selectedAxis == 'x') {
-        this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
+        this.selectedActor.prefab.transform.args.position.args.x = this.selectedActor.transform.position.x = (this.mouse.x + this.modifier.x) | 0;
         this.editor.refresh();
       } else if(this.selectedAxis == 'y') {
-        this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
+        this.selectedActor.prefab.transform.args.position.args.y = this.selectedActor.transform.position.y = (this.mouse.y + this.modifier.y) | 0;
         this.editor.refresh();
+      } else if(this.selectedAxis == 'rot') {
+
+        var angle = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
+        this.selectedActor.prefab.transform.args.rotation = this.selectedActor.transform.rotation = -angle - this.startRotation + this.rotationOffset| 0;
       }
 
       this.editor.refresh();
@@ -110,6 +129,9 @@ Class({
     switch(e.which) {
     case 1:
 
+      this.startRotation = self.transform.rotation;
+      this.rotationOffset = Math.atan2(this.mouse.y - self.transform.position.y, this.mouse.x - self.transform.position.x) / Mathf.TO_RADIANS;
+
       if(this.selectedActor) {
         this.move = true;
         this.modifier.x = this.selectedActor.transform.position.x - this.mouse.x;
@@ -120,23 +142,24 @@ Class({
         for(var i = AMBLE.scene.children.length - 1; i >= 0; i--) {
           var obj = AMBLE.scene.children[i];
           if(obj.renderer) {
-            var width = obj.renderer.size.x;
-            var height = obj.renderer.size.y;
+            var width = obj.renderer.size.x * obj.transform.scale.x;
+            var height = obj.renderer.size.y * obj.transform.scale.y;
             var x = obj.transform.position.x;
             var y = obj.transform.position.y;
 
             if(this.mouse.x > x - width/2 && this.mouse.x < x + width/2 && this.mouse.y > y - height/2 && this.mouse.y < y + height/2) {
 
-              // this.modifier.x = obj.transform.position.x - this.mouse.x;
-              // this.modifier.y = obj.transform.position.y - this.mouse.y;
-
               this.selectedActor = obj;
 
+              EDITOR.hierarchy.search = '';
+              EDITOR.refresh()
               var a = document.getElementById('id_' + obj.sceneID);
               if(a) {
                 a.click();
                 // location.href = "#id_" + obj.sceneID;
               }
+
+              this.recentlySelected = true;
 
               return;
             }
@@ -151,6 +174,11 @@ Class({
   onmouseup: function(self, e) {
     if(e.which == 1) {
       this.move = false;
+      this.firstPressed = false;
+
+      if(this.recentlySelected) this.recentlySelected = false;
+
+
     }
   },
 

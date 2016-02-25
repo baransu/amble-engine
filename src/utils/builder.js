@@ -16,7 +16,7 @@ var icon = require('gulp-cordova-icon');
 // var minifyCss = require('gulp-minify-css');
 // var less = require('gulp-less');
 
-var core = ['./build/src/**/*'];
+var core = ['./src/**/*'];
 
 gulp.imagesList = [];
 gulp.scriptsList = [];

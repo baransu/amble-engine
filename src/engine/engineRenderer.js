@@ -18,7 +18,6 @@ window.EngineRenderer = (function() {
 
         layer.ctx.save();
 
-
         var x = self.transform.position.x - camera.camera.view.x;
         var y = self.transform.position.y - camera.camera.view.y;
         layer.font('30px Arial');
@@ -28,12 +27,12 @@ window.EngineRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        //scale
-        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
         if(self.selected) {
           this.arrows.render(self, camera);
         }
+
+        //scale
+        layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
 
         // rotation in radians
         layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);

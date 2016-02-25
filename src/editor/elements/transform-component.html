@@ -1,6 +1,6 @@
-<link rel="import" href="../../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../../bower_components/iron-input/iron-input.html">
-<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 
 <dom-module id="transform-component">
 
@@ -9,7 +9,6 @@
 	.head {
 		width: 100%;
 	}
-
 
 	</style>
 
@@ -71,12 +70,14 @@
   						</div>
   					</div>
 
-            <div class="row">
-  						<div class="col-md-12">
-                <label>rotation</label>
-                <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
-  						</div>
-            </div>
+						<template is="dom-if" if="{{_isCamera(actor)}}">
+	            <div class="row">
+	  						<div class="col-md-12">
+	                <label>rotation</label>
+	                <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
+	  						</div>
+	            </div>
+						</template>
 
   				</div>
         </div>
@@ -108,6 +109,14 @@
       this.toggle();
     },
 
+		_isCamera: function(actor) {
+			if(actor) {
+				return actor.tag != 'mainCamera';
+			} else {
+				return true;
+			}
+		},
+
 		reset: function() {
 
 			if(this.actor) {
@@ -126,6 +135,8 @@
 				//rotation
 				this.actor.prefab.transform.args.rotation = this.actor.transform.rotation = 0;
 				this.notifyPath('actor.transform.rotation', this.actor.transform.rotation);
+
+				prepareUndoRedo();
 			}
 
 		},
@@ -133,6 +144,9 @@
 		valuesChange: function() {
 			//apply object changes to prefab
 			if(this.actor) {
+
+				prepareUndoRedo();
+
 				//position
 				this.actor.prefab.transform.args.position.args.x = this.actor.transform.position.x;
 				this.actor.prefab.transform.args.position.args.y = this.actor.transform.position.y;
@@ -151,7 +165,6 @@
 				var sceneID = this.actor.sceneID;
 				this.actor = AMBLE.scene.getActorByID(sceneID);
 
-				this.valuesChange();
 			}
 		},
 

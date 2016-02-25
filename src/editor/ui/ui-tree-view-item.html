@@ -1,14 +1,14 @@
-<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../../../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../../bower_components/iron-collapse/iron-collapse.html">
 
-<link rel="import" href="../../../bower_components/iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 
-<link rel="import" href="../../../bower_components/neon-animation/animations/scale-up-animation.html">
-<link rel="import" href="../../../bower_components/neon-animation/animations/fade-out-animation.html">
-<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
-<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 
 
 <dom-module id="ui-tree-view-item">
@@ -20,13 +20,13 @@
     display: inline;
   }
 
+	.head {
+		width: 1000px;
+	}
+
   .head:hover {
     background-color: rgba(0, 0, 0, 0.5);
   }
-
-	.head-hover {
-		background-color: rgba(0, 0, 0, 0.5);
-	}
 
   a {
     text-decoration: none;
@@ -82,7 +82,8 @@
           <div class="list-group">
             <a href="#" class="list-group-item" on-click="createFolder">Create folder</a>
             <a href="#" class="list-group-item" on-click="createScript">Create script</a>
-            <!-- <a href="#" class="list-group-item" on-click="rename">Rename</a> -->
+						<a href="#" class="list-group-item" on-click="open">Open in explorer</a>
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -137,7 +138,8 @@
 
       item: {
         type: Object,
-        value: null
+        value: null,
+				notify: true,
       },
 
       name: {
@@ -169,20 +171,44 @@
 
 		},
 
+		open: function(e) {
+			_opener(this.item.path)
+			this.$.menu.close();
+		},
+
 		_onDrop: function(e) {
 			e.preventDefault();
 
 			this.$.head.classList.remove('head-hover');
 
-			for(var i = 0; i < e.dataTransfer.files.length; i++) {
-				var file = e.dataTransfer.files[i];
-				var path = this.item.path;
-				if(file && path) {
-					projectView.importAsset(path, file.path, file.name);
+			var path = e.dataTransfer.getData("text")
+			// move file to folder
+			if(path) {
+				var asset = AMBLE.assets.find(a => a.path == path);
+				if(!asset) return;
+
+				var newFolderPath = this.item.path;
+				var folderPath = asset.parentFolder;
+				if(folderPath == newFolderPath) return;
+
+				fs.move(folderPath + '/' + asset.name + '.' + asset.extension + '.meta', newFolderPath + '/' + asset.name + '.' + asset.extension + '.meta', function (err) {
+					if (err) throw err;
+					console.log('meta moved')
+					fs.move(folderPath + '/' + asset.name + '.' + asset.extension, newFolderPath + '/' + asset.name + '.' + asset.extension, function (err) {
+						if (err) throw err;
+						console.log('asset moved');
+					});
+				});
+
+			} else { // import file
+				for(var i = 0; i < e.dataTransfer.files.length; i++) {
+					var file = e.dataTransfer.files[i];
+					var path = this.item.path;
+					if(file && path) {
+						projectView.importAsset(path, file.path, file.name);
+					}
 				}
 			}
-
-			return false;
 		},
 
 		_onDropOver: function(e) {
@@ -275,9 +301,12 @@
       if(name == 'assets') {
         console.log("you cannot name folder or asset - 'assets'")
       } else {
-        var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
+
+				var p = upath.toUnix( this.item.path)
+				var path = p.substring(0, p.lastIndexOf("/"));
+
         fs.renameSync(path + '/' + this.item.name, path + '/' + name);
-        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+
       }
     },
 

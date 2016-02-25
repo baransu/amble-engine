@@ -49,11 +49,11 @@ window.Utils = (function(){
       if(obj.name) {
         var _class =  CLASSES.find(function(c) { return c.name == obj.name});
         if(!_class) {
-          AMBLE.debug.error('Cannot find class');
+          Debug.error('Cannot find class');
           throw new Error('Cannot find class')
         }
       } else {
-        AMBLE.debug.error('Cannot find class');
+        Debug.error('Cannot find class');
         throw new Error('Cannot find class')
       }
 

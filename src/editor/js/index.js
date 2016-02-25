@@ -3,13 +3,11 @@ const remote = electron.remote;
 const Menu = remote.Menu;
 const ipcRenderer = electron.ipcRenderer;
 
-// const low = require('lowdb')
-// const storage = require('lowdb/file-sync')
-
 const _ = require('lodash');
-// const _ = require('underscore');
 
-// var AssetDB = null;
+const _opener = require('opener')
+
+const upath = require('upath');
 
 var fs = require('fs-extra');
 var watch = require('node-watch');
@@ -30,6 +28,11 @@ var projectData = {};
 var EDITOR = null;
 
 var primaryColor = '#e91e63';
+
+var undoArray = [];
+var redoArray = [];
+
+const MAX_UNDO_REDO = 128;
 
 var menuFunctions = {
 
@@ -67,16 +70,60 @@ var menuFunctions = {
   },
 
   stop: function() {
-    console.log('stop preview - editor')
     ipcRenderer.send('editor-game-preview-stop-request');
-  }
+  },
 
+  undo: function() {
+
+    if(undoArray.length > 1 && !AMBLE.paused) {
+      console.log(undoArray);
+      var children = undoArray.pop();
+      AMBLE.scene.applyUndoRedo(children);
+      if(redoArray.length > MAX_UNDO_REDO) {
+        redoArray.unshift();
+      }
+      redoArray.push(children);
+    }
+
+  },
+
+  redo: function() {
+
+    if(redoArray.length > 0 && !AMBLE.paused) {
+      console.log(redoArray);
+      var children = redoArray.pop();
+      AMBLE.scene.applyUndoRedo(children);
+      if(undoArray.length > MAX_UNDO_REDO) {
+        undoArray.unshift();
+      }
+      undoArray.push(children);
+    }
+
+  },
 }
+
+function prepareUndoRedo() {
+  if(undoArray.length > MAX_UNDO_REDO) {
+    undoArray.unshift();
+  }
+  undoArray.push(_.cloneDeep(AMBLE.scene.createSceneFile(true)));
+  console.log('undoArray', undoArray.length);
+};
 
 var menu = Menu.buildFromTemplate([
   {
     label: 'File',
     submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'Ctrl+Z',
+        click: menuFunctions.undo
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+Ctrl+Z',
+        click: menuFunctions.redo
+      },
       {
         label: 'Save',
         accelerator: 'Ctrl+S',
@@ -125,6 +172,14 @@ ipcRenderer.on('editor-build-request', function() {
 
 ipcRenderer.on('editor-save-request', menuFunctions.save );
 
+ipcRenderer.on('editor-undo-request', function(event, data) {
+  menuFunctions.undo();
+});
+
+ipcRenderer.on('editor-redo-request', function(event, data) {
+  menuFunctions.redo();
+});
+
 ipcRenderer.on('editor-unpause', function(event, data) {
   AMBLE.unpause();
 });
@@ -132,7 +187,6 @@ ipcRenderer.on('editor-unpause', function(event, data) {
 ipcRenderer.on('game-preview-log', function(event, data) {
   Debug.log(data);
 });
-
 
 ipcRenderer.on('game-preview-error', function(event, data) {
   Debug.error(data);
@@ -168,6 +222,65 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
 
 });
 
+var dragEvents = {
+
+  drop: function(e) {
+
+    var path = e.dataTransfer.getData("text")
+    var asset = AMBLE.assets.find(a => a.path == path);
+    
+    if(asset && asset.type == 'sprite') {
+
+      var camera = AMBLE.mainCamera.getComponent('Camera');
+
+      var offsetLeft = AMBLE.mainCamera.camera.getContext().offsetLeft;
+      var offsetTop = AMBLE.mainCamera.camera.getContext().offsetTop;
+
+      var x = e.clientX - offsetLeft;
+      var y = e.clientY - offsetTop;
+
+      mouseX = (x/AMBLE.mainCamera.camera.scale - camera.translate.x) + AMBLE.mainCamera.camera.view.x;
+      mouseY = (y/AMBLE.mainCamera.camera.scale - camera.translate.y) + AMBLE.mainCamera.camera.view.y;
+
+      var name = AMBLE.scene.getActorByName(asset.name) ? (asset.name + AMBLE.scene.children.length) : asset.name;
+      console.log(name);
+
+      var prefab = {
+        name: name,
+        tag: 'actor',
+        hideInHierarchy: false,
+        selected: false,
+        transform: { name: "Transform", args: {
+          position: { name: "Vec2", args: {x: mouseX | 0, y: mouseY | 0}},
+          scale: { name: "Vec2", args: {x: 1, y:1}},
+          rotation: 0
+        }},
+        renderer: { name: 'SpriteRenderer', args: {
+          sprite: asset.uuid
+        }},
+        components: []
+      };
+
+      prepareUndoRedo();
+
+      var actor = AMBLE.scene.instantiate(prefab);
+
+      var sceneID = actor.sceneID;
+
+      EDITOR.hierarchy.search = '';
+      EDITOR.refresh();
+
+      var hierarchyItem = document.getElementById('id_' + sceneID);
+      if(hierarchyItem) {
+        hierarchyItem.click();
+      }
+    }
+  }
+
+}
+
+document.getElementById('scene-view').addEventListener('drop', dragEvents.drop, false);
+
 //move to angular
 var projectView = {
 
@@ -183,7 +296,6 @@ var projectView = {
       console.error('Oh no, there was an error: ' + err.message)
     }
 
-    // import (add meta and save to engine assets list)
   },
 
   processDir: function(path) {
@@ -204,7 +316,9 @@ var projectView = {
         type: fs.lstatSync(path + '/' + abc[i]).isDirectory() ? 'folder': 'file',
         path: path + '/' + abc[i],
         name: f[0],
+        parentFolder: path,
         children: [],
+        assetType: 'other',
         extension: extension
       }
 
@@ -218,31 +332,38 @@ var projectView = {
           // read meta
           try {
             var meta = JSON.parse(fs.readFileSync(metaFilePath, 'utf-8'));
-            var metaExist = true;
           } catch (err) {
             var meta = this.createMetaInformation(file);
-            var metaExist = false;
           }
 
+
         } catch (err) {
-          var metaExist = false;
           console.log('new asset', file.path)
           var meta = this.createMetaInformation(file);
+        }
+
+        // check if meta path == file.path
+        if(meta.path != file.path) {
+          console.log('meta file path change: ', meta.path, file.path);
+          meta.path = file.path;
+        }
+
+        if(meta.name != file.name) {
+          console.log('meta file name change: ', meta.name, file.name);
+          meta.name = file.name;
+        }
+
+        file.assetType = meta.type;
+
+        try {
+          fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
+        } catch (e) {
+          throw new Error('Cannot write meta file: ' + metaFilePath, e);
         }
 
         console.log(meta)
 
         projectData.assets.push(meta);
-
-        // write meta for future
-        if(!metaExist) {
-          try {
-            fs.writeFileSync(metaFilePath, JSON.stringify(meta), 'utf-8');
-
-          } catch (e) {
-            throw new Error('Cannot write meta file: ' + metaFilePath);
-          }
-        }
 
       }
 
@@ -259,11 +380,13 @@ var projectView = {
     // create uuid
     var meta = {
       uuid: uuid.v1(),
-      type: '',
+      type: 'other',
       path: file.path,
       name: file.name,
+      parentFolder: file.parentFolder,
       extension: file.extension
     }
+
     // get type (sprite/ audio/ script)
     for(var x in imgExtensionList) {
       if(meta.extension == imgExtensionList[x]) {
@@ -284,7 +407,15 @@ var projectView = {
 
     var that = this;
 
-    watch(projectDirectory + '/assets', function(filename){
+    var filter = function(pattern, fn) {
+      return function(filename) {
+        if (!pattern.test(filename)) {
+          fn(filename);
+        }
+      }
+    }
+
+    watch(projectDirectory + '/assets', filter(/\.meta$/, function(filename) {
 
       projectData.assets = [];
       projectView.projectStructure = projectView.processDir(projectDirectory);
@@ -303,7 +434,7 @@ var projectView = {
         if(meta.type == 'sprite') {
           AMBLE.loader.load('sprite', meta.path, meta.name, meta.uuid);
         } else if(meta.type == 'script'){
-          // asocioate script with uuid
+          // connect script with uuid
           require.reload(meta.path);
         }
       }
@@ -313,9 +444,14 @@ var projectView = {
         console.log(AMBLE.loader)
         var rendererComponenet = document.querySelector('renderer-component')
         if(rendererComponenet) rendererComponenet.updateSpritesList();
+
+        // update assets view
+        // document/
+
+
       });
 
-    });
+    }));
 
   },
 
@@ -340,6 +476,10 @@ var ambleEditor = angular.module('ambleEditor', []);
 ambleEditor.controller('editorController', ['$scope', function($scope) {
 
   var editor = EDITOR = this;
+
+  this.hierarchy = {
+    search: ''
+  }
 
   this.refresh = function() {
     $scope.$apply();
@@ -462,6 +602,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
       if(editor.actor && document.activeElement.id == 'id_' + editor.actor.sceneID) {
 
+        prepareUndoRedo();
+
         editor.cameraScript.selectedActor = null;
         AMBLE.scene.remove(editor.actor)
 
@@ -490,6 +632,7 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
 
   editor.addActor = function(actor) {
 
+
     var _actor = _.cloneDeep(this.actorsToAdd.find(a => a.name == actor.name));
     if(AMBLE.scene.getActorByTag('mainCamera') && actor.tag == 'mainCamera') return;
     if(_actor) {
@@ -499,6 +642,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
       if(AMBLE.scene.getActorByName(_actor.name)) {
         _actor.name += this.actors.length;
       }
+
+      prepareUndoRedo();
 
       AMBLE.scene.instantiate(_actor);
     }
@@ -515,6 +660,8 @@ ambleEditor.controller('editorController', ['$scope', function($scope) {
   editor.actorSelected = function(e) {
 
     e.preventDefault();
+
+    prepareUndoRedo();
 
     var sceneID = e.target.id.replace('id_', '');
 
@@ -577,8 +724,7 @@ var application = {
         if(meta.type == 'sprite') {
           this.loader.load('sprite', meta.path, meta.name, meta.uuid);
         } else if(meta.type == 'script'){
-          // asocioate script with uuid
-          require.reload(meta.path);
+          require(meta.path);
         }
       }
 
@@ -587,10 +733,11 @@ var application = {
 
     //process scripts int engine and load objects
     loaded: function(){
-      if(projectData.camera) {
-        this.mainCamera.transform.position.x = projectData.camera.x;
-        this.mainCamera.transform.position.y = projectData.camera.y;
-      }
+      prepareUndoRedo();
+      // if(projectData.camera) {
+      //   this.mainCamera.transform.position.x = projectData.camera.x;
+      //   this.mainCamera.transform.position.y = projectData.camera.y;
+      // }
 
     },
 

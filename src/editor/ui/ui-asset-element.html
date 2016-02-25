@@ -1,12 +1,12 @@
-<link rel="import" href="../../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/polymer/polymer.html">
 
-<link rel="import" href="../../../bower_components/iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 
-<link rel="import" href="../../../bower_components/neon-animation/animations/scale-up-animation.html">
-<link rel="import" href="../../../bower_components/neon-animation/animations/fade-out-animation.html">
-<link rel="import" href="../../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/scale-up-animation.html">
+<link rel="import" href="../../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 
-<link rel="import" href="../../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 
 <dom-module id="ui-asset-element">
 
@@ -28,7 +28,7 @@
     background-color: rgba(0, 0, 0, 0.25);
   }
 
-  .icon {
+  .asset {
     width: 100%;
     height: 75%;
     line-height: 50px;
@@ -53,9 +53,22 @@
 
 	<template>
 
-    <div class="holder" on-dblclick="_onClick">
-      <div class="icon">
-        <i class="fa fa-folder" id="icon"></i>
+    <div class="holder" on-dblclick="_onClick" on-dragstart="_onDragStart" draggable="true">
+      <div class="asset">
+
+				<template is="dom-if" if="{{_typeOfAsset('sprite', item)}}">
+					<img src="{{item.path}}" alt="" width="100%" height="100%" class="image" draggable="false"/>
+				</template>
+
+				<template is="dom-if" if="{{_typeOfAsset('other', item)}}">
+					<i class="fa fa-folder"></i>
+				</template>
+
+				<template is="dom-if" if="{{_typeOfAsset('script', item)}}">
+					<i class="fa fa-file"></i>
+				</template>
+
+
       </div>
       <div class="text">
         {{item.name}}
@@ -65,7 +78,8 @@
         <div class="menu-container dropdown-content">
           <div class="list-group">
 						<a href="#" class="list-group-item" on-click="open">Open</a>
-            <!-- <a href="#" class="list-group-item" on-click="rename">Rename</a> -->
+            <a href="#" class="list-group-item" on-click="rename">Rename</a>
+						<a href="#" class="list-group-item" on-click="duplicate">Duplicate</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
           </div>
         </div>
@@ -92,15 +106,11 @@
 
     </div>
 
-
-
 	</template>
 
 </dom-module>
 
 <script>
-
-	const _open = require('open')
 
 	Polymer({
 
@@ -108,36 +118,56 @@
 
 		properties: {
 
-      _currentType: {
-        type: String,
-        value: 'folder'
-      },
-
       item: {
         type: Object,
         value: null,
-        observer: '_itemChange'
+				notify: true
       },
 
     },
 
     listeners: {
-      'contextmenu': '_onContextMenu'
+      'contextmenu': '_onContextMenu',
     },
 
     ready: function() {
       document.addEventListener('close-context', this.closeContext.bind(this), false);
     },
 
+		duplicate: function() {
+
+			var p = upath.toUnix( this.item.path)
+			var path = p.substring(0, p.lastIndexOf("/"));
+
+			// duplicate file
+			fs.copy(path + '/' + this.item.name + '.' + this.item.extension, path + '/' + this.item.name + '_copy.' + this.item.extension + '');
+
+			this.$.menu.close();
+
+		},
+
+		_onDragStart: function(e) {
+			e.dataTransfer.setData("text/plain", this.item.path)
+
+			console.log('drag start')
+		},
+
     closeContext: function(e){
-      console.log('context')
       if(e.detail.id != this.item.id) {
         this.$.menu.close();
       }
     },
 
+		_typeOfAsset: function(type, item) {
+			if(item) {
+				return item.assetType === type;
+			} else {
+				return false;
+			}
+		},
+
 		open: function(e) {
-			_open(this.item.path)
+			_opener(this.item.path)
 			this.$.menu.close();
 		},
 
@@ -171,11 +201,17 @@
       this.$.renameDialog.close();
       var name = this.$.renameInput.value;
       if(name == 'assets') {
-        console.log("you cannot name folder or asset - 'assets'")
+				console.log("You cannot name folder or asset - 'assets'")
       } else {
-        var path = this.item.path.substring(0, this.item.path.lastIndexOf("/"));
-        fs.renameSync(path + '/' + this.item.name, path + '/' + name);
-        document.querySelector('assets-manager-panel').update(projectView.projectStructure);
+
+				var p = upath.toUnix( this.item.path)
+				var path = p.substring(0, p.lastIndexOf("/"));
+
+				// rename meta file
+				fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension + '.meta', path + '/' + name + '.' + this.item.extension + '.meta');
+				// rename file
+        fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension, path + '/' + name + '.' + this.item.extension);
+
       }
     },
 
@@ -186,15 +222,9 @@
     },
 
     _onClick: function(e) {
-      if(this._currentType == 'folder' && this.item.children.length > 0) {
+      if(this.item.type == 'folder' && this.item.children.length > 0) {
         this.async(() => this.fire('asset-click', { assetItem: true }), 1);
       }
-    },
-
-    _itemChange: function() {
-      this.$.icon.classList.remove('fa-' + this._currentType);
-      this.$.icon.classList.add('fa-' + this.item.type);
-      this._currentType = this.item.type;
     },
 
 	});

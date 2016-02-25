@@ -31,9 +31,6 @@ window.CameraRenderer = (function() {
 
         layer.ctx.translate(x, y);
 
-        // //scale
-        // layer.ctx.scale(self.transform.scale.x, self.transform.scale.y);
-
         // rotation in radians
         layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 

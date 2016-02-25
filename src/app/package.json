@@ -3,26 +3,13 @@
   "version": "0.1.0-alpha.11",
   "description": "JavaScript game engine for web and mobile",
   "main": "app.js",
-  "scripts": {
-    "start": "electron ./amble-builds/app"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Baransu/amble-engine.git"
-  },
-  "author": "Tomasz Cichocinski",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Baransu/amble-engine/issues"
-  },
-  "homepage": "https://github.com/Baransu/amble-engine#readme",
   "dependencies": {
-    "asar": "^0.10.0",
+    "angular": "^1.4.8",
     "browserify": "^13.0.0",
     "chokidar": "^1.4.2",
     "del": "^2.2.0",
-    "fs-jetpack": "^0.7.1",
-    "gulp": "^3.9.1",
+    "fs-extra": "^0.26.5",
+    "gulp": "^3.9.0",
     "gulp-bower": "0.0.13",
     "gulp-concat": "^2.6.0",
     "gulp-cordova-author": "^1.0.0",
@@ -40,20 +27,21 @@
     "gulp-preprocess": "^2.0.0",
     "gulp-rimraf": "^0.2.0",
     "gulp-sequence": "^0.4.4",
+    "jquery": "^2.2.0",
+    "lodash": "^4.2.1",
     "lowdb": "^0.12.2",
     "mkdirp": "^0.5.1",
     "node-localstorage": "^1.1.2",
     "node-watch": "^0.3.4",
-    "q": "^1.4.1",
-    "rcedit": "^0.4.0",
+    "open": "0.0.5",
+    "opener": "^1.4.1",
     "rimraf": "^2.5.1",
     "rmdir": "^1.2.0",
-    "upath": "^0.1.7",
+    "underscore": "^1.8.3",
+    "underscore-db": "^0.9.1",
     "uuid": "^2.0.1",
+    "upath": "^0.1.7",
     "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "latest"
-  },
-  "devDependencies": {
-    "electron-prebuilt": "^0.35.6"
   }
 }
