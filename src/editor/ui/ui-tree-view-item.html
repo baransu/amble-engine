@@ -263,16 +263,16 @@
       var name = this.$.newInput.value;
 
       switch(this.newType) {
-        case 'folder':
+      case 'folder':
 
-        mkdirp(this.item.path + '/' + name, this.folderCreation.bind(this));
+      	mkdirp(this.item.path + '/' + name, this.folderCreation.bind(this));
 
-        break;
-        case 'script':
+      break;
+      case 'script':
 
-        fs.writeFileSync(this.item.path + '/' + name, ' ', 'utf-8');
+        fs.writeFileSync(this.item.path + '/' + name, '', 'utf-8');
         this.$.newDialog.close();
-        break;
+      break;
       }
 
 			this.$.collapse.show();
@@ -299,7 +299,7 @@
       this.$.renameDialog.close();
       var name = this.$.renameInput.value;
       if(name == 'assets') {
-        console.log("you cannot name folder or asset - 'assets'")
+        console.log("You cannot name folder or asset - 'assets'")
       } else {
 
 				var p = upath.toUnix( this.item.path)

@@ -104,23 +104,6 @@ window.Application  = (function() {
     var loadingTimer = 0;
     var currentLoadingText = 0;
 
-    var colors = [
-        "#8e24aa",
-        "#5e35b1",
-        "#3949ab",
-        "#1e88e5",
-        "#039be5",
-        "#00acc1",
-        "#00897b",
-        "#43a047",
-        "#7cb342",
-        "#c0ca33",
-        "#fbc02d",
-        "#ff6f00",
-        "#e53935",
-        "#e91e63"
-    ];
-
     this.prePreload();
     this.preloader.loadAll(function() {
 
@@ -134,6 +117,24 @@ window.Application  = (function() {
       }
 
       // @endif
+
+      var colors = [
+          "#8e24aa",
+          "#5e35b1",
+          "#3949ab",
+          "#1e88e5",
+          "#039be5",
+          "#00acc1",
+          "#00897b",
+          "#43a047",
+          "#7cb342",
+          "#c0ca33",
+          "#fbc02d",
+          "#ff6f00",
+          "#e53935",
+          "#e91e63"
+      ];
+
       var color = colors[Math.floor(Math.random() * colors.length - 1)];
 
       that.loadingInterval = setInterval(function() {
@@ -150,7 +151,6 @@ window.Application  = (function() {
               "   loading.. ",
               "   loading...",
           ];
-
 
           layer.clear('black')
               .fillStyle(color)
@@ -191,10 +191,10 @@ window.Application  = (function() {
 
         setTimeout(function(){
           clearInterval(that.loadingInterval);
-          Input._setListeners();
 
-          that.scene.start();
           that.loaded();
+          that.scene.start();
+          Input._setListeners();
 
           that.start();
           Time._lastTime = Date.now()

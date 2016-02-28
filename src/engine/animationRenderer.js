@@ -16,6 +16,10 @@ window.AnimationRenderer = (function() {
 
     this.currentSprite = '';
 
+    this.visible = true;
+
+    this.rendererType = "AnimationRenderer";
+
     // @ifdef EDITOR
     this.type = "animation";
     this._editorName = "AnimationRenderer"
@@ -61,17 +65,20 @@ window.AnimationRenderer = (function() {
         }
 
         if(this._sprite.src) {
-          layer.ctx.drawImage(
-            this._sprite,
-            this._currentFrame * width,
-            0,
-            width,
-            height,
-            -width/2 | 0,
-            -height/2 | 0,
-            width,
-            height
-          );
+
+          if(this.visible) {
+            layer.ctx.drawImage(
+              this._sprite,
+              this._currentFrame * width,
+              0,
+              width,
+              height,
+              -width/2 | 0,
+              -height/2 | 0,
+              width,
+              height
+            );
+          }
 
           // @ifdef EDITOR
           if(self.selected) {

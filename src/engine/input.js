@@ -37,6 +37,8 @@ window.Input = (function(){
     },
 
     keyup: function keyup(e) {
+      Input.isShiftPressed = e.shiftKey;
+      Input.isCtrlPressed = e.ctrlKey;
       Input._keyValues[e.which] = false;
 
       AMBLE.scene.onkeyup(e);
@@ -110,11 +112,11 @@ window.Input = (function(){
       element.addEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
       //touch start
-      element.addEventListener("touchstart", Input._eventFunctions.touchstart, false);
+      document.addEventListener("touchstart", Input._eventFunctions.touchstart, false);
       //touch end
-      element.addEventListener("touchend", Input._eventFunctions.touchend, false);
+      document.addEventListener("touchend", Input._eventFunctions.touchend, false);
       //touch move
-      element.addEventListener("touchmove", Input._eventFunctions.touchmove, false);
+      document.addEventListener("touchmove", Input._eventFunctions.touchmove, false);
 
     }
   }
@@ -134,11 +136,11 @@ window.Input = (function(){
         element.removeEventListener("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
-        element.removeEventListener("touchstart", Input._eventFunctions.touchstart, false);
+        document.removeEventListener("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.removeEventListener("touchend", Input._eventFunctions.touchend, false);
+        document.removeEventListener("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.removeEventListener("touchmove", Input._eventFunctions.touchmove, false);
+        document.removeEventListener("touchmove", Input._eventFunctions.touchmove, false);
 
 
       } else if (document.detachEvent) {
@@ -152,11 +154,11 @@ window.Input = (function(){
         element.detachEvent("contextmenu", Input._eventFunctions.contextmenu, false);
 
         //touch start
-        element.detachEvent("touchstart", Input._eventFunctions.touchstart, false);
+        document.detachEvent("touchstart", Input._eventFunctions.touchstart, false);
         //touch end
-        element.detachEvent("touchend", Input._eventFunctions.touchend, false);
+        document.detachEvent("touchend", Input._eventFunctions.touchend, false);
         //touch move
-        element.detachEvent("touchmove", Input._eventFunctions.touchmove, false);
+        document.detachEvent("touchmove", Input._eventFunctions.touchmove, false);
 
       }
     }

@@ -68,6 +68,9 @@
 					<i class="fa fa-file"></i>
 				</template>
 
+				<template is="dom-if" if="{{_typeOfAsset('audio', item)}}">
+					<i class="fa fa-music"></i>
+				</template>
 
       </div>
       <div class="text">
@@ -144,12 +147,12 @@
 
 			this.$.menu.close();
 
+			document.querySelector('assets-manager-view').notifyChange();
+
 		},
 
 		_onDragStart: function(e) {
 			e.dataTransfer.setData("text/plain", this.item.path)
-
-			console.log('drag start')
 		},
 
     closeContext: function(e){
@@ -174,10 +177,26 @@
     confirmDelete: function() {
       // delete
       rimraf(this.item.path, this.deleteAsset.bind(this));
+			rimraf(this.item.path + '.meta', this.deleteAsset.bind(this));
     },
 
     deleteAsset: function(err) {
       if(err) throw err;
+
+			var asset = AMBLE.assets.find(a => a.uudi == this.item.uuid);
+			if(asset) {
+				var index = AMBLE.assets.indexOf(asset);
+				AMBLE.assets.splice(index, 1);
+			}
+
+			var asset = AMBLE.loader.cache.find(a => a.uudi == this.item.uuid);
+			if(asset) {
+				var index = AMBLE.loader.cache.indexOf(asset);
+				AMBLE.loader.cache.splice(index, 1);
+			}
+
+			document.querySelector('assets-manager-view').notifyChange();
+
       this.$.deleteDialog.close();
     },
 
@@ -204,13 +223,15 @@
 				console.log("You cannot name folder or asset - 'assets'")
       } else {
 
-				var p = upath.toUnix( this.item.path)
+				var p = upath.toUnix(this.item.path)
 				var path = p.substring(0, p.lastIndexOf("/"));
 
 				// rename meta file
 				fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension + '.meta', path + '/' + name + '.' + this.item.extension + '.meta');
 				// rename file
         fs.renameSync(path + '/' + this.item.name + '.' + this.item.extension, path + '/' + name + '.' + this.item.extension);
+
+				document.querySelector('assets-manager-view').notifyChange();
 
       }
     },

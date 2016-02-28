@@ -283,7 +283,9 @@
 				var val = e.target.value;
 			}
 
-			property.value[e.target.name] = val;
+			if(property) {
+				property.value[e.target.name] = val;
+			}
 
 		},
 

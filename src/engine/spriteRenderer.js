@@ -9,6 +9,10 @@ window.SpriteRenderer = (function() {
 
     this.currentSprite = '';
 
+    this.visible = true;
+
+    this.rendererType = "SpriteRenderer";
+
     // @ifdef EDITOR
     this.type = "sprite";
     this._editorName = "SpriteRenderer"
@@ -51,7 +55,9 @@ window.SpriteRenderer = (function() {
 
         if(this._sprite.src) {
 
-          layer.ctx.drawImage(this._sprite, -width/2, -height/2);
+          if(this.visible) {
+            layer.ctx.drawImage(this._sprite, -width/2, -height/2);
+          }
 
           // @ifdef EDITOR
           if(self.selected) {

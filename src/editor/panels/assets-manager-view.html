@@ -90,12 +90,19 @@
       _folder: {
         type: Array,
         value: [],
+				notify: true,
       },
 
       _currentFolder: {
         type: Object,
         value: null,
-      }
+				notify: true
+      },
+
+			folderID: {
+				type: String,
+				value: undefined
+			}
 
     },
 
@@ -107,12 +114,13 @@
     deepFind: function(items, id) {
 
       for(var i = 0; i < items.length; i++) {
-        if(items[i].id == id) return items[i];
+        if(items[i].id === id) return items[i];
         else {
           var result = this.deepFind(items[i].children, id);
           if(result) return result;
         }
       }
+
       return null;
     },
 
@@ -124,6 +132,7 @@
       var target = this.deepFind(this._folder, id);
       if(target) {
         this._currentFolder = target;
+				this.folderID = target.id;
         this.notifyPath('_currentFolder', this._currentFolder);
       }
     },
@@ -138,21 +147,42 @@
 
     },
 
+		notifyChange: function() {
+
+			projectView.init();
+
+		},
+
     isFolder: function(item) {
       return item.type == 'folder';
     },
 
     update: function(folderStructure) {
 
-      this._folder = folderStructure;
+			console.log('assets managet update')
+
+      this._folder = _.cloneDeep(folderStructure);
       this.notifyPath('_folder', this._folder);
 
-      if(!this._currentFolder && this._folder.length > 0) {
+      if(!this._currentFolder && this._folder.length > 0 && !this.folderID) {
         this._currentFolder = this._folder[0];
+				this.folderID = this._currentFolder.id;
+				this.notifyPath('_currentFolder', this._currentFolder);
       }
 
-      this.notifyPath('_currentFolder', this._currentFolder);
-    }
+			this.fakeClick();
+		},
+
+		fakeClick: function() {
+
+			var tree = document.querySelectorAll('ui-tree-view-item');
+			console.log(tree);
+			for(var i = 0; i < tree.length; i++) {
+				if(tree[i].id === this.folderID) {
+					tree[i].itemClick();
+				}
+			}
+		}
 
 	});
 

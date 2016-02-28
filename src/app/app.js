@@ -72,6 +72,11 @@ app.on('window-all-closed', function() {
 });
 
 app.on('browser-window-blur', function(event, bWindow){
+
+  if(currentState == 'editor') {
+    editorWindow.webContents.send('editor-pause');
+  }
+
   globalShortcut.unregisterAll();
 });
 
@@ -387,8 +392,14 @@ ipcMain.on('editor-game-preview-stop-request', function(event, data) {
 
 //builder
 ipcMain.on('builder-loaded', function(event, data) {
+
+
   builderWindow.show();
   builderWindow.focus();
+
+  var project = JSON.parse(fs.readFileSync(currentDir + '/' + currentName + '.aproject', 'utf8'));
+  builderWindow.webContents.send('builder-loaded-respond', project.buildData);
+
 });
 
 ipcMain.on('builder-dir-request', function(event, data) {
@@ -411,11 +422,14 @@ ipcMain.on('builder-dir-request', function(event, data) {
 
 ipcMain.on('builder-build-request', function(event, data) {
 
-  console.log(projectBuildData);
+  var project = JSON.parse(fs.readFileSync(currentDir + '/' + currentName + '.aproject', 'utf8'));
+  project.buildData = data;
+  fs.writeFileSync(currentDir + '/' + currentName + '.aproject', JSON.stringify(project), 'utf8')
 
   //process build
   var sceneFile = projectBuildData.sceneFile;
   var imagesList = [];
+  var audioList = [];
   var scriptsList = [];
   var targetDir = buildDir + '/' + data.name;
   var gameTitle = data.name;
@@ -436,11 +450,17 @@ ipcMain.on('builder-build-request', function(event, data) {
     if(meta.type == 'sprite') {
       builderGulp.imagesList.push(meta.path);
       meta.path = '/assets/img/' + meta.name + '.' + meta.extension;
+      delete meta.parentFolder;
       imagesList.push(meta)
       // console.log(meta.path);
     } else if(meta.type == 'script') {
       scriptsList.push(meta);
       builderGulp.scriptsList.push(meta.path);
+    } else if(meta.type == 'audio') {
+      builderGulp.audioList.push(meta.path);
+      meta.path = '/assets/audio/' + meta.name + '.' + meta.extension;
+      delete meta.parentFolder;
+      audioList.push(meta)
     }
   }
 
@@ -459,10 +479,10 @@ ipcMain.on('builder-build-request', function(event, data) {
 
     if(data.targetPlatform == 'android') {
       fs.writeFileSync(targetDir + '/_temp/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-      fs.writeFileSync(targetDir + '/_temp/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+      fs.writeFileSync(targetDir + '/_temp/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList)+"; var audioList = "+ JSON.stringify(audioList), 'utf8');
     } else {
       fs.writeFileSync(targetDir + '/assets/json/scene.json', JSON.stringify(sceneFile), 'utf8');
-      fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList), 'utf8');
+      fs.writeFileSync(targetDir + '/assets/js/assets-list.js', "var gameTitle = "+ JSON.stringify(gameTitle) +"; var imagesList = "+ JSON.stringify(imagesList)+"; var audioList = "+ JSON.stringify(audioList), 'utf8');
     }
 
     builderGulp.start('build-game-' + data.targetPlatform, function(err) {
@@ -491,6 +511,9 @@ app.on('browser-window-focus', function(event, bWindow) {
 
   switch(currentState) {
     case 'editor':
+
+    editorWindow.webContents.send('editor-unpause');
+
     //save
     shortcuts.open = globalShortcut.register('ctrl+s', menuFunctions.save);
 

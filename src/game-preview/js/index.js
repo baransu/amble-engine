@@ -11,7 +11,7 @@ ipcRenderer.on('game-preview-start', function(event, data) {
 
     // resize: true,
     fullscreen: true,
-    antyAliasing: false,
+    antyAliasing: true,
 
     preload: function(){
 
@@ -19,15 +19,13 @@ ipcRenderer.on('game-preview-start', function(event, data) {
       //load images
       for (var i = 0; i < data.assets.length; i++) {
         var meta = data.assets[i];
-        if(meta.type == 'sprite') {
-          this.loader.load('sprite', meta.path, meta.name, meta.uuid);
-        } else if(meta.type == 'script'){
-          // asocioate script with uuid
+        if(meta.type == 'script') {
           require(meta.path);
+          // connect script with uuid
+        } else {
+          this.loader.load(meta.type, meta.path, meta.name, meta.uuid);
         }
       }
-
-      //load audio
 
       //load scene (json)
       // this.loader.load('json', scene file path, 'scene.json');

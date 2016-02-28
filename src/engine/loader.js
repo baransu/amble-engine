@@ -135,6 +135,48 @@ window.Loader = (function() {
               xobj.send(null);
 
             break;
+
+            case "audio":
+
+              var audioPath = this.queue[i].path;
+              var name = this.queue[i].name;
+              var uuid = this.queue[i].uuid;
+              var audio = new Audio();
+
+              audio.src = audioPath;
+              audio.preload = 'auto'
+              // load and add "meta"
+              // append to element
+
+              console.log('audio loading')
+
+              audio.addEventListener('canplaythrough', function(e){
+                that.successCount++;
+                if(that.isDone() && callback) {
+                    callback();
+                }
+              }, false);
+
+              audio.addEventListener('error', function(e){
+                that.errorCount++;
+                if(that.isDone() && callback) {
+                    callback();
+                }
+              }, false);
+
+              var el = document.body.appendChild(audio);
+
+              this.cache.push({
+                data: el,
+                type: 'audio',
+                path: name,
+                uuid: uuid
+              });
+
+            break;
+
+            default:
+
           }
         }
       },

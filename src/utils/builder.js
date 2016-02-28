@@ -16,10 +16,11 @@ var icon = require('gulp-cordova-icon');
 // var minifyCss = require('gulp-minify-css');
 // var less = require('gulp-less');
 
-var core = ['./src/**/*'];
+var core = ['./amble-builds/app/src/**/*'];
 
 gulp.imagesList = [];
 gulp.scriptsList = [];
+gulp.audioList = [];
 gulp.projectDirectory = '';
 gulp.outputDir = '';
 
@@ -45,6 +46,11 @@ gulp.task('build-move-android', function() {
 gulp.task('img-move', function() {
   return gulp.src(gulp.imagesList)
     .pipe(gulp.dest(gulp.outputDir + '/assets/img/'));
+});
+
+gulp.task('audio-move', function() {
+  return gulp.src(gulp.audioList)
+    .pipe(gulp.dest(gulp.outputDir + '/assets/audio/'));
 });
 
 gulp.task('build-user', function() {
@@ -78,14 +84,14 @@ gulp.task('build-game-android', function(callback) {
 
   gulp.originDir = gulp.outputDir;
   gulp.outputDir += '/_temp';
-  gulpSequence(['img-move', 'build-user'], 'cordova-init',
-              //TODO: icon preferences author plugins stuff other etc
-              callback);
+  gulpSequence(['img-move', 'audio-move', 'build-user'], 'cordova-init',
+    //TODO: icon preferences author plugins stuff other etc
+    callback);
 });
 
 gulp.task('build-game-web', function(callback) {
   gulp.originDir = gulp.outputDir;
-  gulpSequence(['img-move', 'build-user'], callback);
+  gulpSequence(['img-move', 'audio-move', 'build-user'], callback);
 });
 
 // plugin add cordova-plugin-crosswalk-webview

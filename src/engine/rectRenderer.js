@@ -5,6 +5,10 @@ window.RectRenderer = (function() {
     this.layer = args.layer || 0;
     this.size = args.size || new Vec2(100, 100);
 
+    this.visible = true;
+
+    this.rendererType = "RectRenderer";
+
     // @ifdef EDITOR
     this.type = "rect";
     this._editorName = "RectRenderer";
@@ -37,8 +41,10 @@ window.RectRenderer = (function() {
       layer.ctx.rotate(-self.transform.rotation * Mathf.TO_RADIANS);
 
       // draw
-      layer.fillStyle(this.color)
+      if(this.visible) {
+        layer.fillStyle(this.color)
         .fillRect(-width/2, -height/2, width, height);
+      }
 
       // @ifdef EDITOR
       if(self.selected) {

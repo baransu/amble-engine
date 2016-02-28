@@ -15,12 +15,19 @@ window.onload = function() {
 
             document.title = gameTitle || 'untitled';
 
-
             console.log(imagesList);
+            var href = location.href.substring(0, location.href.lastIndexOf("/"));
+            console.log(href);
             //load images
             for(var i = 0; i < imagesList.length; i++) {
               var meta = imagesList[i];
-              this.loader.load(meta.type, meta.path, meta.name, meta.uuid);
+              this.loader.load(meta.type, href + meta.path, meta.name, meta.uuid);
+            }
+
+            // load audio
+            for(var i = 0; i < audioList.length; i++) {
+              var meta = audioList[i];
+              this.loader.load(meta.type, href + meta.path, meta.name, meta.uuid);
             }
 
             //load scene (json)

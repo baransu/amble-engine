@@ -10,7 +10,7 @@ var appFileExtension = ''
 var iconFile = 'icon.png';
 
 const BUILD_DIRECTORY = './amble-builds/app/';
-const DISTRIBUTIONS_DIRECOTRY = './amble-builds/dists/';
+const DISTRIBUTION_DIRECTRY = './amble-builds/dists/';
 
 var mainfest;
 
@@ -19,9 +19,9 @@ function build() {
   // application's package.json file
   manifest = fs.readJsonSync(BUILD_DIRECTORY + '/package.json');
 
-  fs.copySync('./node_modules/electron-prebuilt/dist', DISTRIBUTIONS_DIRECOTRY);
+  fs.copySync('./node_modules/electron-prebuilt/dist', DISTRIBUTION_DIRECTRY);
 
-  fs.removeSync(DISTRIBUTIONS_DIRECOTRY + '/resources/default_app');
+  fs.removeSync(DISTRIBUTION_DIRECTRY + '/resources/default_app');
 
   switch (os.platform()) {
   default:
@@ -49,7 +49,7 @@ function build() {
 
 function createAsar() {
   var deferred = Q.defer();
-  asar.createPackage(BUILD_DIRECTORY, DISTRIBUTIONS_DIRECOTRY + '/resources/app.asar', function () {
+  asar.createPackage(BUILD_DIRECTORY, DISTRIBUTION_DIRECTRY + '/resources/app.asar', function () {
     deferred.resolve();
   });
   return deferred.promise;
@@ -58,13 +58,13 @@ function createAsar() {
 function updateResources() {
   var deferred = Q.defer();
 
-  fs.copySync('./src/app/res/' + iconFile, DISTRIBUTIONS_DIRECOTRY + iconFile);
+  fs.copySync('./src/app/res/' + iconFile, DISTRIBUTION_DIRECTRY + iconFile);
 
-  var iconPath = DISTRIBUTIONS_DIRECOTRY + iconFile;
+  var iconPath = DISTRIBUTION_DIRECTRY + iconFile;
   console.log(iconPath)
 
   // Replace Electron icon for your own.
-  rcedit(DISTRIBUTIONS_DIRECOTRY + '/electron' + appFileExtension, {
+  rcedit(DISTRIBUTION_DIRECTRY + '/electron' + appFileExtension, {
     'icon': iconPath,
     'version-string': {
       'ProductName': manifest.name,
@@ -76,9 +76,7 @@ function updateResources() {
     }
   });
 
-
-
-  fs.renameSync(DISTRIBUTIONS_DIRECOTRY + '/electron' + appFileExtension, DISTRIBUTIONS_DIRECOTRY + '/' + manifest.name + appFileExtension);
+  fs.renameSync(DISTRIBUTION_DIRECTRY + '/electron' + appFileExtension, DISTRIBUTION_DIRECTRY + '/' + manifest.name + appFileExtension);
 
   return deferred.promise;
 }

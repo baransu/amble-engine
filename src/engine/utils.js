@@ -78,7 +78,6 @@ window.Utils = (function(){
 
     clone: function clone(obj) {
       var copy = {};
-      console.log(obj.name)
       if (obj instanceof Object || obj instanceof Array) {
         for(var attr in obj) {
 

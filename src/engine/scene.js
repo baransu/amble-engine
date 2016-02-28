@@ -147,7 +147,8 @@ window.Scene = (function() {
     },
 
     start: function start() {
-        for(var i = 0; i < this.children.length; i++) {
+      // console.log('global scene start')
+      for(var i = 0; i < this.children.length; i++) {
         for(var j = 0; j < this.children[i].components.length; j++) {
           var _component = this.children[i].components[j].body;
           if(typeof _component.start == 'function'){

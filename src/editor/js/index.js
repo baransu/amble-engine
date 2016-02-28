@@ -15,10 +15,15 @@ var watch = require('node-watch');
 global.jQuery = $ = require('jquery');
 
 var imgExtensionList = [
-    'png',
-    'jpg',
-    'jpeg',
-    'gif'
+  'png',
+  'jpg',
+  'jpeg',
+  'gif'
+];
+
+var audioExtensionList = [
+  'mp3',
+  'ogg'
 ];
 
 var projectDirectory = null;
@@ -184,6 +189,10 @@ ipcRenderer.on('editor-unpause', function(event, data) {
   AMBLE.unpause();
 });
 
+ipcRenderer.on('editor-pause', function(event, data) {
+  AMBLE.pause();
+});
+
 ipcRenderer.on('game-preview-log', function(event, data) {
   Debug.log(data);
 });
@@ -228,7 +237,7 @@ var dragEvents = {
 
     var path = e.dataTransfer.getData("text")
     var asset = AMBLE.assets.find(a => a.path == path);
-    
+
     if(asset && asset.type == 'sprite') {
 
       var camera = AMBLE.mainCamera.getComponent('Camera');
@@ -322,8 +331,13 @@ var projectView = {
         extension: extension
       }
 
+      file.path = upath.toUnix(file.path)
+
+      var _f = this.projectStructure.find(_file => _file.path === file.path);
+      if(_f) file.id = _f.id;
+
       if(file.type == 'folder') {
-        file.children = this.processDir(path + '/' + abc[i]);
+        file.children = this.processDir(file.path);
       } else if(extension != 'meta'){
 
         var metaFilePath = file.path + '.meta';
@@ -361,7 +375,7 @@ var projectView = {
           throw new Error('Cannot write meta file: ' + metaFilePath, e);
         }
 
-        console.log(meta)
+        // console.log(meta)
 
         projectData.assets.push(meta);
 
@@ -388,19 +402,25 @@ var projectView = {
     }
 
     // get type (sprite/ audio/ script)
-    for(var x in imgExtensionList) {
-      if(meta.extension == imgExtensionList[x]) {
+    for(var i  = 0; i < imgExtensionList.length; i++) {
+      if(meta.extension == imgExtensionList[i]) {
         meta.type = 'sprite'
-        break;
+        return meta;
       } else if(meta.extension == 'js') {
         meta.type = 'script'
-        break;
+        return meta;
       }
     }
 
-    // other import settings
+    for(var i = 0; i < audioExtensionList.length; i++) {
+      if(meta.extension == audioExtensionList[i]) {
+        meta.type = 'audio'
+        return meta;
+      }
+    }
 
-    return meta;
+    return meta
+
   },
 
   watch: function(){
@@ -431,11 +451,11 @@ var projectView = {
       AMBLE.loader = new Loader();
       for (var i = 0; i < projectData.assets.length; i++) {
         var meta = projectData.assets[i];
-        if(meta.type == 'sprite') {
-          AMBLE.loader.load('sprite', meta.path, meta.name, meta.uuid);
-        } else if(meta.type == 'script'){
+        if(meta.type == 'script') {
           // connect script with uuid
           require.reload(meta.path);
+        } else {
+          AMBLE.loader.load(meta.type, meta.path, meta.name, meta.uuid);
         }
       }
 
@@ -446,8 +466,6 @@ var projectView = {
         if(rendererComponenet) rendererComponenet.updateSpritesList();
 
         // update assets view
-        // document/
-
 
       });
 
@@ -460,9 +478,9 @@ var projectView = {
     projectData.assets = [];
 
     this.projectStructure = this.processDir(projectDirectory);
-
-    console.log(this.projectStructure);
-    console.log(projectData);
+    //
+    // console.log(this.projectStructure);
+    // console.log(projectData);
 
     document.querySelector('assets-manager-view').update(projectView.projectStructure);
 
@@ -721,10 +739,11 @@ var application = {
 
       for (var i = 0; i < projectData.assets.length; i++) {
         var meta = projectData.assets[i];
-        if(meta.type == 'sprite') {
-          this.loader.load('sprite', meta.path, meta.name, meta.uuid);
-        } else if(meta.type == 'script'){
+        if(meta.type == 'script') {
           require(meta.path);
+        } else {
+          // console.log(meta.type)
+          this.loader.load(meta.type, meta.path, meta.name, meta.uuid);
         }
       }
 
@@ -743,7 +762,9 @@ var application = {
 
     //actual start function
     start: function(){
-      // console.log(this.mainCamera)
+      // var audio = this.loader.getAsset('tomkowybicik');
+      // audio.loop = true;
+      // audio.play()
     },
 
     preupdate: function(){
