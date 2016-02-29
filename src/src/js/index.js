@@ -63,16 +63,16 @@ window.onload = function() {
 
         postrender: function(){
 
-            var layer = this.mainCamera.camera.layer;
-            layer.ctx.save();
-            layer.textAlign('left');
-            layer.font('30px Arial');
-            layer.fillStyle('white');
-
-            var fps = (Time.deltaTime).toFixed(3);
-
-            layer.fillText(fps || 0, 0,30);
-            layer.ctx.restore();
+          // var layer = this.mainCamera.camera.layer;
+          // layer.ctx.save();
+          // layer.textAlign('left');
+          // layer.font('30px Arial');
+          // layer.fillStyle('white');
+          //
+          // var fps = (Time.deltaTime).toFixed(3);
+          //
+          // layer.fillText(fps || 0, 0,30);
+          // layer.ctx.restore();
 
         }
     });

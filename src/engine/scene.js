@@ -170,6 +170,17 @@ window.Scene = (function() {
       }
     },
 
+    postRender: function postRender() {
+      for(var i = 0; i < this.children.length; i++) {
+        for(var j = 0; j < this.children[i].components.length; j++){
+          var _component = this.children[i].components[j].body;
+          if(typeof _component.postRender == 'function'){
+            _component.postRender(this.children[i]);
+          }
+        }
+      }
+    },
+
     render: function render(camera) {
       for(var i = 0; i < this.children.length; i++){
         if(this.children[i].renderer && typeof this.children[i].renderer.render === 'function') {

@@ -73,14 +73,14 @@
               <div class="col-md-12 ">
                   <select ng-model="builder.targetPlatform" class="form-control">
                     <option value="web" selected>Web</option>
-                    <!-- <option value="android">Android</option> -->
+                    <option value="android">Android</option>
                   </select>
               </div>
           </div>
 
           <div class="row m-b-1">
               <div class="col-md-6">
-                  <button class="btn btn-success" type="button" ng-click="builder.build()">Build</button>
+                  <button id="confirmButton" class="btn btn-success" type="button" ng-click="builder.build()">Build</button>
               </div>
           </div>
 

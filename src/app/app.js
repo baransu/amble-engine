@@ -254,7 +254,6 @@ ipcMain.on('launcher-open-request', function(event, data) {
       launcherWindow.loadURL('file://' + __dirname + '/launcher/loader.html')
       launcherWindow.setMenu(null);
       launcherWindow.focus();
-      launcherWindow.setAlwaysOnTop(true);
 
       //editor
       editorWindow = new BrowserWindow({
@@ -324,11 +323,12 @@ ipcMain.on('editor-build-respond', function(event, data) {
     icon: __dirname + '/res/icon.png',
     title: currentName + ' | ' + currentDir + ' | Amble Builder',
     width: 640,
-    height: 480,
+    height: 640,
     show: false,
-    resizable: false
+    resizable: true
   });
 
+  builderWindow.setMenu(null);
   builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
   if(DEVELOPMENT) builderWindow.toggleDevTools();
@@ -440,6 +440,26 @@ ipcMain.on('builder-build-request', function(event, data) {
   builderGulp.projectName = gameTitle;
   builderGulp.projectID = data.gameID;
 
+  var p = upath.toUnix(__dirname)
+  var f = p.split('/');
+  var extension = f[f.length - 1];
+
+  if(data.targetPlatform == 'android') {
+    var respond = {};
+    respond.type = 'error';
+    respond.message = 'Android build is currently experimental and not available';
+    builderWindow.send('builder-build-respond', respond);
+    return;
+  }
+
+  if(extension == 'app') {
+    builderGulp.srcFolder = p;
+  } else {
+
+
+    builderGulp.srcFolder = p.substring(0, p.lastIndexOf("/"));
+  }
+
   builderGulp.projectVersion = data.version;
 
   builderGulp.projectDescription = data.description;
@@ -472,8 +492,10 @@ ipcMain.on('builder-build-request', function(event, data) {
     response.message = 'Game build failed - wrong directory';
     builderWindow.send('builder-build-respond', response);
   }
+  //
+  // console.log(JSON.stringify(imagesList));
 
-  console.log(JSON.stringify(imagesList));
+  console.log(data.targetPlatform);
 
   builderGulp.start('build-move-' + data.targetPlatform, function() {
 
@@ -491,7 +513,7 @@ ipcMain.on('builder-build-request', function(event, data) {
       if(err) {
         console.log(err)
         respond.type = 'error';
-        respond.message = 'Game build failed - build';
+        respond.message = 'Build failed: ' + err;
         builderWindow.send('builder-build-respond', respond);
         throw err;
       }
@@ -499,7 +521,7 @@ ipcMain.on('builder-build-request', function(event, data) {
       console.log('build-game callback')
 
       respond.type = 'success';
-      respond.message = 'Game build succesful - game build to: ' + targetDir;
+      respond.message = 'Game build successful - game build to: ' + upath.toUnix(targetDir);
 
       builderWindow.send('builder-build-respond', respond)
 

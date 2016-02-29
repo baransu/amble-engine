@@ -1,7 +1,5 @@
 const electron = require('electron');
 const ipcRenderer = electron.ipcRenderer;
-// const remote = electron.remote;
-// const Menu = remote.Menu;
 
 global.jQuery = $ = require('jquery');
 
@@ -51,8 +49,10 @@ builderApp.controller('builderController', ['$scope', function($scope) {
   builder.build = function() {
 
     if(builder.gameTitle && builder.buildDirectory != '' && builder.gameID != '' && builder.projectVersion != '' && builder.projectAuthor != '' && builder.projectDescription != '') {
-      console.log(builder.targetPlatform)
+
+      document.getElementById('confirmButton').disabled = true;
       ipcRenderer.send('builder-build-request', {
+
 
         name: builder.gameTitle,
         gameID: builder.gameID.toLowerCase().trim(),
@@ -70,7 +70,7 @@ builderApp.controller('builderController', ['$scope', function($scope) {
         message: 'Dude, your game must have a cool name!'
       };
 
-    } else if(builder.builDirectory == 'undefined') {
+    } else if(builder.builDirectory == 'undefined' || builder.builDirectory == '') {
 
       builder.errorInfo = {
         type: 'error',
@@ -106,14 +106,14 @@ builderApp.controller('builderController', ['$scope', function($scope) {
 
 ipcRenderer.on('builder-dir-respond', function(event, data) {
 
-    BUILDER.buildDirectory = data;
-    BUILDER.refresh();
+  BUILDER.buildDirectory = data;
+  BUILDER.refresh();
 
 });
 
 ipcRenderer.on('builder-build-respond', function(event, data) {
-
-    BUILDER.errorInfo = data;
-    BUILDER.refresh();
+  document.getElementById('confirmButton').disabled = false;
+  BUILDER.errorInfo = data;
+  BUILDER.refresh();
 
 });

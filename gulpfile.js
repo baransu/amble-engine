@@ -9,6 +9,9 @@ var gulpSequence = require('gulp-sequence');
 var source = require('vinyl-source-stream');
 var install = require('gulp-install');
 
+// var cordovaCreate = require('gulp-cordova-create');
+// var cordovaPlugin = require('gulp-cordova-plugin');
+
 var release = require('./build');
 
 const BUILD_DIRECTORY = './amble-builds/app';
@@ -265,6 +268,14 @@ gulp.task('app-res-move', function() {
   return gulp.src(['./src/app/res/*.*'])
     .pipe(gulp.dest(BUILD_DIRECTORY + '/res'));
 });
+
+// gulp.task('create-cordova', function() {
+//   return gulp.src(BUILD_DIRECTORY + '/src')
+//     .pipe(cordovaCreate({
+//       dir: BUILD_DIRECTORY + '/src-cordova/'
+//     }))
+//     .pipe(cordovaPlugin('cordova-plugin-crosswalk-webview'))
+// });
 
 gulp.task('build-engine', function(cb) {
   gulpSequence([ 'amble-editor-build', 'amble-src-build', 'amble-game-preview-build' ], 'amble-src-browserify', cb);
