@@ -73,7 +73,7 @@ app.on('window-all-closed', function() {
 
 app.on('browser-window-blur', function(event, bWindow){
 
-  if(currentState == 'editor') {
+  if(currentState == 'editor' && editorWindow) {
     editorWindow.webContents.send('editor-pause');
   }
 

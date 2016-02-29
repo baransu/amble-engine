@@ -80,7 +80,9 @@
       <iron-dropdown id="menu" horizontal-align="right" vertical-align="top" withBackdrop>
         <div class="menu-container dropdown-content">
           <div class="list-group">
-						<a href="#" class="list-group-item" on-click="open">Open</a>
+						<template is="dom-if" if="{{!_typeOfAsset('script', item)}}">
+							<a href="#" class="list-group-item" on-click="open">Open</a>
+						</template>
             <a href="#" class="list-group-item" on-click="rename">Rename</a>
 						<a href="#" class="list-group-item" on-click="duplicate">Duplicate</a>
             <a href="#" class="list-group-item" on-click="delete">Delete</a>
