@@ -16,8 +16,6 @@ var icon = require('gulp-cordova-icon');
 // var minifyCss = require('gulp-minify-css');
 // var less = require('gulp-less');
 
-var core = ['./amble-builds/app/src/**/*'];
-
 gulp.imagesList = [];
 gulp.scriptsList = [];
 gulp.audioList = [];
@@ -27,6 +25,8 @@ gulp.outputDir = '';
 gulp.projectName = '';
 gulp.projectID = '';
 
+gulp.srcFolder = '';
+
 gulp.projectVersion = '0.1.0';
 gulp.projectDescription = '';
 gulp.projectAuthor = '';
@@ -34,12 +34,12 @@ gulp.projectAuthor = '';
 gulp.originDir = '';
 
 gulp.task('build-move-web', function() {
-  return gulp.src(core)
+  return gulp.src(gulp.srcFolder + '/src/**/*')
     .pipe(gulp.dest(gulp.outputDir));
 });
 
 gulp.task('build-move-android', function() {
-  return gulp.src(core)
+  return gulp.src(gulp.srcFolder + '/src/**/*')
     .pipe(gulp.dest(gulp.outputDir + '/_temp'));
 });
 
@@ -70,7 +70,7 @@ gulp.task('cordova-init', function () {
     .pipe(description(gulp.projectDescription))
     .pipe(author(gulp.projectAuthor)) //add email and website
     // .pipe(icon(__dirname + '/icon.png'))
-    .pipe(plugin('cordova-plugin-crosswalk-webview'))
+    // .pipe(plugin('cordova-plugin-crosswalk-webview'))
     .pipe(pref({
         Fullscreen: true,
         Orientation: 'landscape',

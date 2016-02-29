@@ -41,6 +41,7 @@ function build() {
   }
 
   return Q()
+    .then(copySrc)
     .then(createAsar)
     .then(updateResources)
     .done();
@@ -51,6 +52,16 @@ function createAsar() {
   var deferred = Q.defer();
   asar.createPackage(BUILD_DIRECTORY, DISTRIBUTION_DIRECTRY + '/resources/app.asar', function () {
     deferred.resolve();
+  });
+  return deferred.promise;
+}
+
+function copySrc() {
+  var deferred = Q.defer();
+  fs.copy(BUILD_DIRECTORY + '/src', DISTRIBUTION_DIRECTRY + '/resources/src', function (err) {
+    if (!err) {
+      deferred.resolve();
+    };
   });
   return deferred.promise;
 }

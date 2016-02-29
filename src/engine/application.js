@@ -95,7 +95,7 @@ window.Application  = (function() {
       // @endif
 
       this.scene.render(this.mainCamera);
-
+      this.scene.postRender();
     };
 
     this.preloader = new Loader();
