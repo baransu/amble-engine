@@ -20,9 +20,7 @@
     display: inline;
   }
 
-	.head {
-		width: 1000px;
-	}
+
 
   .head:hover {
     background-color: rgba(0, 0, 0, 0.5);
@@ -91,7 +89,7 @@
 
     </li>
 
-    <paper-dialog id="renameDialog" entry-animation="scale-up-animation">
+    <paper-dialog id="renameDialog" entry-animation="scale-up-animation" modal>
       <h2>Enter new {{item.type}} name:</h2>
       <div>
         <paper-input id="renameInput" label="{{item.name}}" on-change="renameConfirm"></paper-input>
@@ -102,7 +100,7 @@
       </div>
     </paper-dialog>
 
-    <paper-dialog id="newDialog" entry-animation="scale-up-animation">
+    <paper-dialog id="newDialog" entry-animation="scale-up-animation" modal>
       <h2>Enter {{newType}} name:</h2>
       <div>
         <paper-input id="newInput" label="{{name}}" on-change="confirmCreate"></paper-input>
@@ -113,7 +111,7 @@
       </div>
     </paper-dialog>
 
-    <paper-dialog id="deleteDialog" entry-animation="scale-up-animation">
+    <paper-dialog id="deleteDialog" entry-animation="scale-up-animation" modal>
       <h2>Do you really want to delete {{item.name}}?</h2>
       <div class="buttons">
         <paper-button dialog-dismiss>Cancel</paper-button>
@@ -126,10 +124,6 @@
 </dom-module>
 
 <script>
-
-  var fs = require('fs-extra');
-  var mkdirp = require('mkdirp');
-  var rimraf = require('rimraf');
 
 	Polymer({
 		is: 'ui-tree-view-item',
@@ -243,19 +237,17 @@
       this.$.menu.close();
     },
 
-    deleteAsset: function(err) {
-      if(err) throw err;
-      this.$.deleteDialog.close();
-    },
-
     confirmDelete: function() {
       // delete
-      rimraf(this.item.path, this.deleteAsset.bind(this));
-    },
+			try {
+				fs.removeSync(this.item.path);
+			} catch (err) {
+				throw err;
+			}
 
-    folderCreation: function(err) {
-      if(err) throw err;
-      this.$.newDialog.close();
+			projectView.init();
+
+      this.$.deleteDialog.close();
     },
 
     confirmCreate: function(){
@@ -265,7 +257,8 @@
       switch(this.newType) {
       case 'folder':
 
-      	mkdirp(this.item.path + '/' + name, this.folderCreation.bind(this));
+      	fs.mkdirpSync(this.item.path + '/' + name);
+				this.$.newDialog.close();
 
       break;
       case 'script':

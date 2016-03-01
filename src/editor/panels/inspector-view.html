@@ -28,7 +28,7 @@
 									Add
 								</button>
 								<div class="dropdown-menu dropdown-menu-right" >
-						      <template is="dom-repeat" items="{{ _componentsToAdd }}" as="component">
+						      <template is="dom-repeat" items="{{ _componentsToAdd }}" as="component" filter="isntCamera">
 										<a href="#" class="dropdown-item" on-click="_addComponent" component="{{component}}">{{component.name}}</a>
 									</template>
 								</div>
@@ -123,6 +123,10 @@
 			return !EDITOR.actorSelected;
 		},
 
+		isntCamera: function(item) {
+			return item.name != 'Camera';
+		},
+
 		_hasProperty: function(property, obj) {
 			if(obj) {
 				if(property == 'renderer' && obj[property].type == 'engine') return false;
@@ -133,6 +137,7 @@
 		},
 
 		nameChange: function() {
+			
 			prepareUndoRedo();
 
 			this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
@@ -146,36 +151,44 @@
 				// make actor true binding with AMBLE.scene coresponding actor
 				this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);
 
-				// updated componentsToAdd
-        for(var i in CLASSES) {
+				this._updateComponents();
 
-          var p = CLASSES[i].properties
-
-          var cl = {
-            name: CLASSES[i].name,
-            options: CLASSES[i]._options,
-            type: 'class',
-            body: {
-              type: 'noneditor',
-              name: CLASSES[i].name,
-              properties: p
-            }
-          }
-
-          var c = this._componentsToAdd.find(c => c.name == cl.name)
-
-          if(!c) {
-            this.push('_componentsToAdd', cl);
-          } else {
-            c.body.properties = CLASSES[i].properties
-          }
-        }
 			} else {
 				this.actor = null;
 			}
 		},
 
+		_updateComponents: function() {
+			// updated componentsToAdd
+			for(var i in CLASSES) {
+
+				var p = CLASSES[i].properties
+
+				var cl = {
+					name: CLASSES[i].name,
+					options: CLASSES[i]._options,
+					type: 'class',
+					body: {
+						type: 'noneditor',
+						name: CLASSES[i].name,
+						properties: p
+					}
+				}
+
+				var c = this._componentsToAdd.find(c => c.name == cl.name)
+
+				if(!c) {
+					this.push('_componentsToAdd', cl);
+				} else {
+					c.body.properties = CLASSES[i].properties
+				}
+			}
+		},
+
 		_addComponent: function(e) {
+
+			prepareUndoRedo();
+
 			var component = e.target.component;
 
 			//add to prefab

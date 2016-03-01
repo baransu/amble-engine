@@ -53,7 +53,7 @@ app.on('ready', function() {
 
   launcherWindow.setMenu(null);
   if(DEVELOPMENT) launcherWindow.toggleDevTools();
-  launcherWindow.center();
+  // launcherWindow.center();
 
   launcherWindow.on('closed', function() {
     launcherWindow = null;
@@ -331,7 +331,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
   builderWindow.setMenu(null);
   builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
-  if(DEVELOPMENT) builderWindow.toggleDevTools();
+  // if(DEVELOPMENT) builderWindow.toggleDevTools();
 
   builderWindow.on('closed', function() {
     builderWindow = null;

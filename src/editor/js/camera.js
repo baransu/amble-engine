@@ -71,7 +71,7 @@ Class({
         this.selectedActor.renderer.arrows.selected = this.selectedAxis;
       }
 
-      if(!this.firstPressed && (this.selectedAxis == 'x' || this.selectedAxis == 'y' || this.selectedAxis == 'rot')) {
+      if(!this.firstPressed && (this.selectedAxis == 'x' || this.selectedAxis == 'y' || this.selectedAxis == 'rot' || this.selectedAxis == 'bot')) {
         prepareUndoRedo();
         this.firstPressed = true;
       }

@@ -9,7 +9,7 @@ const _opener = require('opener')
 
 const upath = require('upath');
 
-var fs = require('fs-extra');
+const fs = require('fs-extra');
 var watch = require('node-watch');
 
 global.jQuery = $ = require('jquery');
@@ -120,6 +120,16 @@ var menu = Menu.buildFromTemplate([
     label: 'File',
     submenu: [
       {
+        label: 'Save',
+        accelerator: 'Ctrl+S',
+        click: menuFunctions.save
+      },
+    ]
+  },
+  {
+    label: 'Edit',
+    submenu: [
+      {
         label: 'Undo',
         accelerator: 'Ctrl+Z',
         click: menuFunctions.undo
@@ -129,23 +139,10 @@ var menu = Menu.buildFromTemplate([
         accelerator: 'Shift+Ctrl+Z',
         click: menuFunctions.redo
       },
-      {
-        label: 'Save',
-        accelerator: 'Ctrl+S',
-        click: menuFunctions.save
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Build',
-        accelerator: 'Ctrl+B',
-        click: menuFunctions.build
-      },
     ]
   },
   {
-    label: 'Game',
+    label: 'Project',
     submenu: [
       {
         label: 'Play (preview)',
@@ -156,7 +153,15 @@ var menu = Menu.buildFromTemplate([
         label: 'Stop (preview)',
         accelerator: 'Shift+Ctrl+P',
         click: menuFunctions.stop
-      }
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Build',
+        accelerator: 'Ctrl+B',
+        click: menuFunctions.build
+      },
     ]
   }
 ]);
@@ -465,6 +470,8 @@ var projectView = {
         var rendererComponenet = document.querySelector('renderer-component')
         if(rendererComponenet) rendererComponenet.updateSpritesList();
 
+        var inspectorView = document.querySelector('inspector-view');
+        if(inspectorView) inspectorView._updateComponents();
         // update assets view
 
       });
@@ -483,6 +490,9 @@ var projectView = {
     // console.log(projectData);
 
     document.querySelector('assets-manager-view').update(projectView.projectStructure);
+
+    var inspectorView = document.querySelector('inspector-view');
+    if(inspectorView) inspectorView._updateComponents();
 
     // this.jstree();
     this.watch();
