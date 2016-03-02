@@ -60,7 +60,7 @@
     <div id="treeView" class="left card-block scroll">
       <ul>
         <template is="dom-repeat" items="{{ _folder }}" as="child" filter="isFolder">
-          <ui-tree-view-item id="{{child.id}}" item="{{child}}"></ui-tree-view-item>
+          <ui-tree-view-item id="{{child.id}}" item="{{child}}" data-toggle="tooltip" title="Assets folder contains all user files" data-placement="top"></ui-tree-view-item>
         </template>
       </ul>
     </div>
@@ -158,6 +158,10 @@
     },
 
     update: function(folderStructure) {
+
+			$(document).ready(function(){
+			  $('[data-toggle="tooltip"]').tooltip();
+			});
 
 			console.log('assets managet update')
 

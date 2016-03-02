@@ -43,19 +43,26 @@
         <div class="card-block" hidden$="{{hideContent}}">
   				<div class="container-fluid">
 
+						<div class="row">
+							<div class="col-md-12">
+								<label data-toggle="tooltip" title="Renderer z-index" data-placement="top">z-index</label>
+								<input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}">
+							</div>
+						</div>
+
   					<!-- rect renderer -->
-            <div hidden$="{{typeofRenderer('RectRenderer', actor.renderer)}}">
+						<template is="dom-if" if="{{typeofRenderer('RectRenderer', actor.renderer)}}">
 
   						<div class="row">
   							<div class="col-md-6">
   								<div class="form-group form-group-sm">
-  									<label>size x</label>
+  									<label data-toggle="tooltip" title="Size of RectRenderer in pixels relative to camera resolution" data-placement="top">size x</label>
                     <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.size.x}}">
   								</div>
   							</div>
   							<div class="col-md-6">
   								<div class="form-group form-group-sm">
-  									<label>size y</label>
+  									<label data-toggle="tooltip" title="Size of RectRenderer in pixels relative to camera resolution" data-placement="top">size y</label>
                     <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.size.y}}">
                   </div>
   							</div>
@@ -63,32 +70,19 @@
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>layer</label>
-  								<input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}">
-  							</div>
-  						</div>
-
-  						<div class="row">
-  							<div class="col-md-12">
-  								<label>color</label>
+  								<label data-toggle="tooltip" title="Color of RectRenderer - accepts css color values" data-placement="top">color</label>
   								<input class="form-control" type="text" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.color}}">
   							</div>
   						</div>
-  					</div>
+
+  					</template>
 
   					<!-- sprite renderer -->
-  					<div hidden$="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
+  					<template is="dom-if" if="{{typeofRenderer('SpriteRenderer', actor.renderer)}}">
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>layer</label>
-  								<input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}"></br>
-  							</div>
-  						</div>
-
-  						<div class="row">
-  							<div class="col-md-12">
-  								<label>sprite</label>
+  								<label data-toggle="tooltip" title="Renderer sprite" data-placement="top">sprite</label>
   								<select class="form-control" on-change="spriteChange">
   									<template is="dom-repeat" items="{{ sprites }}" as="sprite">
   										<option value="{{sprite.uuid}}" selected$="{{selected(sprite.uuid, actor.renderer.sprite)}}">
@@ -99,36 +93,27 @@
   							</div>
   						</div>
 
-  					</div>
+  					</template>
 
   					<!-- animation renderer -->
-  					<div hidden$="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
+  					<template is="dom-if" if="{{typeofRenderer('AnimationRenderer', actor.renderer)}}">
 
   						<div class="row">
   							<div class="col-md-12">
-                  <amble-checkbox id="play" checked="{{actor.renderer.play}}" on-click="valuesChange">play</amble-checkbox>
-  								<!-- <label>play</label>
-  								<input id="play" class="checkbox" type="checkbox" on-change="valuesChange"> -->
+                  <amble-checkbox id="play" checked="{{actor.renderer.play}}" on-click="valuesChange" data-toggle="tooltip" title="Play animation">play</amble-checkbox>
   							</div>
   						</div>
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>layer</label>
-                  <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.layer}}">
-  							</div>
-  						</div>
-
-  						<div class="row">
-  							<div class="col-md-12">
-  								<label>frames</label>
+  								<label data-toggle="tooltip" title="Count of animation frames in sprite sheet" data-placement="top">frames</label>
   								<input class="form-control" type="number" step="1" min="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.frames}}">
   							</div>
   						</div>
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>updatesPerFrame</label>
+  								<label data-toggle="tooltip" title="Count of update ticks to wait to change to next animation frame" data-placement="top">updatesPerFrame</label>
   								<input class="form-control" type="number" step="1" min="0" on-change="valuesChange" is="iron-input" bind-value="{{actor.renderer.updatesPerFrame}}">
   							</div>
   						</div>
@@ -136,7 +121,7 @@
 
   						<div class="row">
   							<div class="col-md-12">
-  								<label>sprite</label>
+  								<label data-toggle="tooltip" title="Horizontal animation sprite sheet" data-placement="top">sprite sheet</label>
   								<select class="form-control" on-change="spriteChange">
   									<template is="dom-repeat" items="{{ sprites }}" as="sprite">
   										<option value="{{sprite.uuid}}" selected$="{{selected(sprite.uuid, actor.renderer.sprite)}}">
@@ -147,7 +132,8 @@
   							</div>
   						</div>
 
-  					</div>
+  					</template>
+
           </div>
   			</div>
 
@@ -238,9 +224,13 @@
 						this.actor.prefab.renderer.args.updatesPerFrame = this.actor.renderer.updatesPerFrame;
 
 						//play
-						this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked;
-            this.notifyPath('actor.prefab.renderer.args.play', this.actor.prefab.renderer.play);
-            // console.log(this.actor.prefab.renderer.args.play, this.actor.renderer.play, this.$.play.checked);
+						if(this.$.play) {
+							this.actor.prefab.renderer.args.play = this.actor.renderer.play = this.$.play.checked
+						} else {
+							this.actor.prefab.renderer.args.play = this.actor.renderer.play
+						}
+
+						this.notifyPath('actor.prefab.renderer.args.play', this.actor.prefab.renderer.play);
 
 					break;
 					case 'rect':
@@ -269,11 +259,7 @@
 		},
 
 		typeofRenderer: function(type, current) {
-			if(current._editorName == type) {
-				return false;
-			} else {
-				return true;
-			}
+			return current._editorName == type
 		},
 
 		refreshActor: function() {

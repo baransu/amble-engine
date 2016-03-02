@@ -3,6 +3,10 @@ const ipcRenderer = electron.ipcRenderer;
 
 global.jQuery = $ = require('jquery');
 
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
 var LAUNCHER = null;
 
 var launcherApp = angular.module('launcherApp', []);

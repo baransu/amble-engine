@@ -5,6 +5,10 @@ global.jQuery = $ = require('jquery');
 
 var BUILDER = null;
 
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
 window.onload = function() {
   ipcRenderer.send('builder-loaded');
 };
@@ -67,7 +71,7 @@ builderApp.controller('builderController', ['$scope', function($scope) {
 
       builder.errorInfo = {
         type: 'error',
-        message: 'Dude, your game must have a cool name!'
+        message: 'Your game must have a name!'
       };
 
     } else if(builder.builDirectory == 'undefined' || builder.builDirectory == '') {
@@ -87,17 +91,17 @@ builderApp.controller('builderController', ['$scope', function($scope) {
     } else if(builder.projectVersion == '') {
       builder.errorInfo = {
         type: 'error',
-        message: 'You must specify game version!'
+        message: 'You must have specified game version!'
       };
     } else if(builder.projectAuthor == '') {
       builder.errorInfo = {
         type: 'error',
-        message: 'Your game needs credits!'
+        message: 'Your game must have credits!'
       };
     } else if(builder.projectDescription == '') {
       builder.errorInfo = {
         type: 'error',
-        message: 'Your game needs description!'
+        message: 'Your must have description!'
       };
     }
   };

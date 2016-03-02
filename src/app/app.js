@@ -52,8 +52,8 @@ app.on('ready', function() {
   currentState = 'launcher';
 
   launcherWindow.setMenu(null);
-  if(DEVELOPMENT) launcherWindow.toggleDevTools();
-  launcherWindow.center();
+  // if(DEVELOPMENT) launcherWindow.toggleDevTools();
+  // launcherWindow.center();
 
   launcherWindow.on('closed', function() {
     launcherWindow = null;
@@ -73,7 +73,7 @@ app.on('window-all-closed', function() {
 
 app.on('browser-window-blur', function(event, bWindow){
 
-  if(currentState == 'editor') {
+  if(currentState == 'editor' && editorWindow) {
     editorWindow.webContents.send('editor-pause');
   }
 
@@ -267,7 +267,7 @@ ipcMain.on('launcher-open-request', function(event, data) {
 
       editorWindow.loadURL('file://' + __dirname + '/editor/index.html');
 
-      if(DEVELOPMENT) editorWindow.toggleDevTools();
+      if(DEVELOPMENT) editorWindow.openDevTools();
 
       editorWindow.center();
 
@@ -295,7 +295,9 @@ ipcMain.on('editor-app-loaded', function(event, data) {
   };
 
   editorWindow.webContents.send('editor-load-respond', data);
-  editorWindow.setTitle(currentName + ' - ' + currentDir + ' - Amble Editor')
+
+  var path = upath.toUnix(currentDir);
+  editorWindow.setTitle(currentName + ' - ' + path + ' - Amble Editor')
 
 });
 
@@ -331,7 +333,7 @@ ipcMain.on('editor-build-respond', function(event, data) {
   builderWindow.setMenu(null);
   builderWindow.loadURL('file://' + __dirname + '/builder/index.html');
 
-  if(DEVELOPMENT) builderWindow.toggleDevTools();
+  // if(DEVELOPMENT) builderWindow.openDevTools();
 
   builderWindow.on('closed', function() {
     builderWindow = null;
