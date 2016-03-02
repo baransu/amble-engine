@@ -16,30 +16,30 @@
 
           <!-- game name -->
           <div class="row m-y-2">
-              <div class="col-md-12 ">
-                  <h1 class="text-xs-center">{{builder.gameTitle}}</h1>
-              </div>
+            <div class="col-md-12 ">
+              <h1 class="text-xs-center">{{builder.gameTitle}}</h1>
+            </div>
           </div>
 
           <!-- game name input -->
           <div class="row m-b-1">
-              <div class="col-md-12">
-                  <input class="form-control" type="text" maxlength="50" ng-model="builder.gameTitle" placeholder="Game Title">
-              </div>
+            <div class="col-md-12">
+              <input class="form-control" type="text" maxlength="50" ng-model="builder.gameTitle" placeholder="Game Title">
+            </div>
           </div>
 
           <!-- author  -->
           <div class="row m-b-1">
-              <div class="col-md-12">
-                  <input class="form-control" type="text" ng-model="builder.projectAuthor" placeholder="Game Author">
-              </div>
+            <div class="col-md-12">
+              <input class="form-control" type="text" ng-model="builder.projectAuthor" placeholder="Game Author">
+            </div>
           </div>
 
           <!-- description  -->
           <div class="row m-b-1">
-              <div class="col-md-12">
-                  <input class="form-control" type="text" ng-model="builder.projectDescription" placeholder="Game Description">
-              </div>
+            <div class="col-md-12">
+              <input class="form-control" type="text" ng-model="builder.projectDescription" placeholder="Game Description">
+            </div>
           </div>
 
           <!-- game android id -->
@@ -51,44 +51,44 @@
 
           <!-- project version id -->
           <div class="row m-b-1">
-              <div class="col-md-12">
-                  <input class="form-control" type="text" ng-model="builder.projectVersion" placeholder="project version">
-              </div>
+            <div class="col-md-12">
+              <input class="form-control" type="text" ng-model="builder.projectVersion" placeholder="project version">
+            </div>
           </div>
 
           <!-- build directory -->
           <div class="row m-b-1">
-              <div class="col-md-12 ">
-                  <div class="input-group">
-                      <span class="input-group-btn">
-                          <button class="btn btn-primary" type="button" ng-click="builder.directorySelect()">Build directory</button>
-                      </span>
-                      <input class="form-control" type="text" maxlength="50" ng-model="builder.buildDirectory">
-                  </div>
+            <div class="col-md-12 ">
+              <div class="input-group">
+                <span class="input-group-btn">
+                  <button class="btn btn-primary" type="button" ng-click="builder.directorySelect()" data-toggle="tooltip" title="Build parent directory" data-placement="right">Build directory</button>
+                </span>
+                <input class="form-control" type="text" maxlength="50" ng-model="builder.buildDirectory">
               </div>
+            </div>
           </div>
 
           <!-- target platform -->
           <div class="row m-b-1">
-              <div class="col-md-12 ">
-                  <select ng-model="builder.targetPlatform" class="form-control">
-                    <option value="web" selected>Web</option>
-                    <option value="android">Android</option>
-                  </select>
-              </div>
+            <div class="col-md-12 ">
+              <select ng-model="builder.targetPlatform" class="form-control">
+                <option value="web" selected>Web</option>
+                <option value="android">Android</option>
+              </select>
+            </div>
           </div>
 
           <div class="row m-b-1">
-              <div class="col-md-6">
-                  <button id="confirmButton" class="btn btn-success" type="button" ng-click="builder.build()">Build</button>
-              </div>
+            <div class="col-md-6">
+              <button id="confirmButton" class="btn btn-success" type="button" ng-click="builder.build()"  data-toggle="tooltip" title="Build game to game name folder in selected parent directory" data-placement="right">Build</button>
+            </div>
           </div>
 
           <div class="row m-b-1">
-              <div class="col-md-12">
-                  <h3 class="text-xs-center text-danger" ng-if="builder.errorInfo.type == 'error'">{{builder.errorInfo.message}}</h3>
-                  <h3 class="text-xs-center text-success" ng-if="builder.errorInfo.type == 'success'">{{builder.errorInfo.message}}</h3>
-              </div>
+            <div class="col-md-12">
+              <h3 class="text-xs-center text-danger" ng-if="builder.errorInfo.type == 'error'">{{builder.errorInfo.message}}</h3>
+              <h3 class="text-xs-center text-success" ng-if="builder.errorInfo.type == 'success'">{{builder.errorInfo.message}}</h3>
+            </div>
           </div>
 
           <!-- platform selection -->

@@ -5,6 +5,10 @@ global.jQuery = $ = require('jquery');
 
 var BUILDER = null;
 
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
 window.onload = function() {
   ipcRenderer.send('builder-loaded');
 };

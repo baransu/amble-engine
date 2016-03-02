@@ -211,6 +211,10 @@ ipcRenderer.on('editor-load-respond', function(event, data) {
   // AssetDB = low(data.path + '/assetsDB.json', { storage })
   // AssetDB._.mixin(require('underscore-db'));
 
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+
   projectDirectory = data.path;
   console.log(projectData);
   projectData = data.project;

@@ -242,7 +242,7 @@
 			try {
 				fs.removeSync(this.item.path);
 			} catch (err) {
-				throw err;
+				console.log(err);
 			}
 
 			projectView.init();

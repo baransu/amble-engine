@@ -24,7 +24,7 @@
 						<div class="input-group">
 							<input id="actor-name" is="iron-input" class="form-control" on-change="nameChange" type="text" bind-value="{{actor.name}}" placeholder="name">
 							<div class="input-group-btn">
-								<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-toggle="tooltip" title="Select component to add" data-placement="top">
 									Add
 								</button>
 								<div class="dropdown-menu dropdown-menu-right" >
@@ -137,7 +137,7 @@
 		},
 
 		nameChange: function() {
-			
+
 			prepareUndoRedo();
 
 			this.actor = AMBLE.scene.getActorByID(this.actor.sceneID);

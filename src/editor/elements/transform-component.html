@@ -44,13 +44,13 @@
   					<div class="row">
   						<div class="col-md-6">
   							<div class="form-group form-group-sm">
-  								<label>position.x</label>
+  								<label data-toggle="tooltip" title="Actor position in x axis (in pixels, relative to camera resolution)" data-placement="top">position x</label>
   								<input id="posx" class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.position.x}}">
   							</div>
   						</div>
   						<div class="col-md-6">
   							<div class="form-group form-group-sm">
-  								<label>position.y</label>
+  								<label data-toggle="tooltip" title="Actor position in y axis (in pixels, relative to camera resolution)" data-placement="top">position y</label>
   								<input id="posy" class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.position.y}}">
   							</div>
   						</div>
@@ -58,13 +58,13 @@
   					<div class="row">
   						<div class="col-md-6">
   							<div class="form-group form-group-sm">
-  								<label>scale.x</label>
+  								<label data-toggle="tooltip" title="Actor scale in x axis" data-placement="top">scale x</label>
   								<input id="scalex" class="form-control" type="number" step="0.01" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.scale.x}}">
   							</div>
   						</div>
   						<div class="col-md-6">
   							<div class="form-group form-group-sm">
-  								<label>scale.y</label>
+  								<label data-toggle="tooltip" title="Actor scale in y asix" data-placement="top">scale y</label>
   								<input id="scaley" class="form-control" type="number" step="0.01" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.scale.y}}">
   							</div>
   						</div>
@@ -73,7 +73,7 @@
 						<template is="dom-if" if="{{_isCamera(actor)}}">
 	            <div class="row">
 	  						<div class="col-md-12">
-	                <label>rotation</label>
+	                <label data-toggle="tooltip" title="Actor rotation" data-placement="top">rotation</label>
 	                <input id="rot" class="form-control"type="number" step="0.1" on-change="valuesChange" is="iron-input" bind-value="{{actor.transform.rotation}}">
 	  						</div>
 	            </div>

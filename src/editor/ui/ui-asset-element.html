@@ -178,8 +178,12 @@
 
     confirmDelete: function() {
       // delete
-      rimraf(this.item.path, this.deleteAsset.bind(this));
-			rimraf(this.item.path + '.meta', this.deleteAsset.bind(this));
+			try {
+				fs.removeSync(this.item.path, this.deleteAsset.bind(this));
+				fs.removeSync(this.item.path + '.meta', this.deleteAsset.bind(this));
+			} catch (err) {
+				console.log(err);
+			}
     },
 
     deleteAsset: function(err) {

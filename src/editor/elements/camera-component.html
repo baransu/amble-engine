@@ -31,13 +31,13 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group form-group-sm">
-                  <label>size x</label>
+                  <label data-toggle="tooltip" title="Target screen resolution. If screen will be smaller/bigger than resolution, it will be scaled up or down" data-placement="top">size x</label>
                   <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.size.x}}">
                 </div>
               </div>
               <div class="col-md-6">
                 <div class="form-group form-group-sm">
-                  <label>size y</label>
+                  <label data-toggle="tooltip" title="Target screen resolution. If screen will be smaller/bigger than resolution, it will be scaled up or down" data-placement="top">size y</label>
                   <input class="form-control" type="number" step="1" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.size.y}}">
                 </div>
               </div>
@@ -45,7 +45,7 @@
 
             <div class="row">
               <div class="col-md-12">
-                <label>bgColor</label>
+                <label data-toggle="tooltip" title="Camera background color" data-placement="top">background color</label>
                 <input class="form-control" type="text" on-change="valuesChange" is="iron-input" bind-value="{{actor.camera.bgColor}}">
               </div>
             </div>
